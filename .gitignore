@@ -1,0 +1,22 @@
+# Local credentials
+.env
+.env.local
+*.api_key
+
+# Backup files
+prod_disabled_kits.json
+*.backup
+
+# Logs
+logs/
+*.log
+*.tmp
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
