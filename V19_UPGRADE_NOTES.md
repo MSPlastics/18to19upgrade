@@ -130,6 +130,7 @@ Idempotent — safe to re-run. Designed for both staging iteration and prod cuto
 | **2** | Strip removed-in-v19 fields from Studio compute `depends` |
 | **3** | Strip broken `related` settings on manual Studio fields (idempotent) |
 | **3b** | Restore `related='product_id.packaging_ids.qty'` on `x_studio_qtypkg` + `x_studio_finished_qtyplt` (only after `msp_packaging` is installed). This is what makes Studio fields auto-populate from packagings exactly like v18. |
+| **3c** | Patch Studio server actions that reference v18 `lot_producing_id` (Many2one, removed in v19) to use `lot_producing_ids` (Many2many). Without this, *any* write to a tracked-by-lot MO triggers `AttributeError`, including recompute cascades from product/packaging writes. Currently patches actions 880 ("Backorder Lot") + 891 ("Force Backorder LOT to MO Name"). |
 | **4** | Recreate MO + BOM + product Studio form views from saved arch |
 | **4b** | (`--copy-packagings`) Port `product.packaging` records from prod |
 | **5** | (`--copy-data`) Copy historical `x_studio_qtypkg`/`finished_qtyplt` values from prod |

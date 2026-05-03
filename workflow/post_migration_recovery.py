@@ -283,6 +283,62 @@ def step_restore_packaging_related(call, commit):
 
 
 # --------------------------------------------------------------------------
+# Step 3c: Patch Studio server actions that reference v18 'lot_producing_id'
+# (renamed to lot_producing_ids Many2many in v19). Without this, ANY write to
+# a tracked-by-lot mrp.production triggers AttributeError — and recompute
+# cascades from product/packaging changes can hit it too.
+# --------------------------------------------------------------------------
+
+def step_patch_lot_producing_actions(call, commit):
+    print("\n=== Step 3c: Patch Studio server actions for lot_producing_ids (v19) ===")
+    acts = call("ir.actions.server", "search_read",
+                [[("model_name", "=", "mrp.production"), ("state", "=", "code"),
+                  ("code", "ilike", "lot_producing_id")]],
+                {"fields": ["id", "name", "code"]})
+    if not acts:
+        print("  no actions referencing lot_producing_id; skip")
+        return
+    for a in acts:
+        old = a["code"] or ""
+        # Skip if already patched (no bare lot_producing_id remains).
+        if not re.search(r"\blot_producing_id\b(?!s)", old):
+            print(f"  id={a['id']} {a['name']!r}: already patched")
+            continue
+        new = old
+        # Pattern 1: read .lot_producing_id.<x> -> use first of Many2many.
+        # `record.lot_producing_id.name` -> `(record.lot_producing_ids[:1].name or False)`
+        new = re.sub(
+            r"record\.lot_producing_id\.name",
+            "(record.lot_producing_ids[:1].name or False)",
+            new,
+        )
+        # Pattern 2: write({'lot_producing_id': X}) -> Many2many replace command.
+        new = re.sub(
+            r"\{(\s*)'lot_producing_id'\s*:\s*([^}]+?)\}",
+            r"{\1'lot_producing_ids': [(6, 0, [\2])]}",
+            new,
+        )
+        new = re.sub(
+            r'\{(\s*)"lot_producing_id"\s*:\s*([^}]+?)\}',
+            r'{\1"lot_producing_ids": [(6, 0, [\2])]}',
+            new,
+        )
+        # Catch any remaining bare references (defensive).
+        new = re.sub(r"\blot_producing_id\b(?!s)", "lot_producing_ids", new)
+        if new == old:
+            print(f"  id={a['id']} {a['name']!r}: pattern not matched; manual fix needed")
+            continue
+        if not commit:
+            print(f"  id={a['id']} {a['name']!r}: would patch")
+            continue
+        try:
+            call("ir.actions.server", "write", [[a["id"]], {"code": new}])
+            print(f"  id={a['id']} {a['name']!r}: patched")
+        except Exception as e:
+            print(f"  id={a['id']} {a['name']!r}: write FAILED: {str(e)[:200]}")
+
+
+# --------------------------------------------------------------------------
 # Step 4: Recreate Studio form views from saved arch + v19 patches
 # --------------------------------------------------------------------------
 
@@ -600,6 +656,7 @@ def main():
     step_fix_qr_depends(call, args.commit)
     step_strip_broken_related(call, args.commit)
     step_restore_packaging_related(call, args.commit)
+    step_patch_lot_producing_actions(call, args.commit)
     step_recreate_views(call, args.commit)
     if args.copy_packagings:
         step_copy_packagings_from_prod(call, args.commit)
