@@ -30,6 +30,7 @@ The arch files for the Studio form views are bundled alongside in
 studio_arch/.
 """
 import argparse
+import json
 import os
 import re
 import ssl
@@ -508,11 +509,17 @@ def step_recreate_views(call, commit):
 # exist (matched by product + name).
 # --------------------------------------------------------------------------
 
-def step_copy_packagings_from_prod(call, commit):
+def _load_snapshot(snapshot_path):
+    p = Path(snapshot_path)
+    if not p.is_absolute():
+        p = Path(__file__).parent / snapshot_path
+    if not p.exists():
+        sys.exit(f"snapshot file not found: {p}")
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+def step_copy_packagings_from_prod(call, commit, snapshot_data=None):
     print("\n=== Step 4b: Copy product.packaging records from prod ===")
-    if not all(os.environ.get(f"ODOO_PROD_{k}") for k in ["URL", "DB", "USER", "API_KEY"]):
-        print("  ODOO_PROD_* env vars not set; skipping packaging migration")
-        return
 
     # Verify msp_packaging is installed (model product.packaging must exist)
     pp_model = call("ir.model", "search", [[("model", "=", "product.packaging")]])
@@ -521,31 +528,46 @@ def step_copy_packagings_from_prod(call, commit):
         print("  Skipping (push the module first, then re-run).")
         return
 
-    prod_call = connect("prod")
-    prod_pkgs = prod_call("product.packaging", "search_read", [[]],
-                          {"fields": ["id", "name", "product_id", "qty", "barcode", "sequence"]})
-    print(f"  {len(prod_pkgs)} product.packaging records on prod")
+    # Source: snapshot file (if present) or live prod XML-RPC (legacy path).
+    if snapshot_data is not None:
+        rows = snapshot_data["product_packagings"]
+        # Normalize to the shape the loop expects.
+        prod_pkgs = [{
+            "id": r["id"], "name": r["name"],
+            "product_id": [r["product_id"], ""] if r.get("product_id") else None,
+            "qty": r["qty"], "barcode": r.get("barcode"),
+            "sequence": r.get("sequence") or 1,
+        } for r in rows]
+        prod_pp_by_id = {r["product_id"]: {"id": r["product_id"],
+                                            "default_code": r.get("product_default_code"),
+                                            "name": r.get("product_display_name")}
+                         for r in rows if r.get("product_id")}
+        print(f"  {len(prod_pkgs)} product.packaging records from snapshot "
+              f"(captured {snapshot_data.get('snapshot_at', 'unknown')})")
+    else:
+        if not all(os.environ.get(f"ODOO_PROD_{k}") for k in ["URL", "DB", "USER", "API_KEY"]):
+            print("  ODOO_PROD_* env vars not set and no --from-snapshot; skipping packaging migration")
+            return
+        prod_call = connect("prod")
+        prod_pkgs = prod_call("product.packaging", "search_read", [[]],
+                              {"fields": ["id", "name", "product_id", "qty", "barcode", "sequence"]})
+        print(f"  {len(prod_pkgs)} product.packaging records on prod")
+        prod_product_ids = list({p["product_id"][0] for p in prod_pkgs if p.get("product_id")})
+        prod_products = prod_call("product.product", "read", [prod_product_ids],
+                                  {"fields": ["id", "default_code", "name"]})
+        prod_pp_by_id = {p["id"]: p for p in prod_products}
 
-    # Build a fast lookup of prod product.product id -> default_code/name
-    prod_product_ids = list({p["product_id"][0] for p in prod_pkgs if p.get("product_id")})
-    prod_products = prod_call("product.product", "read", [prod_product_ids],
-                              {"fields": ["id", "default_code", "name"]})
-    prod_pp_by_id = {p["id"]: p for p in prod_products}
+    # On the target, find the equivalent product.product by id. Fallback to default_code.
+    prod_product_ids = list(prod_pp_by_id.keys())
+    target_pps = call("product.product", "read", [prod_product_ids], {"fields": ["id"]}) or []
+    target_pp_ids = {p["id"] for p in target_pps}
 
-    # On staging, find the equivalent product.product by id (IDs are usually
-    # preserved across the migration). Fallback to default_code match.
-    staging_pps = call("product.product", "read", [prod_product_ids],
-                       {"fields": ["id"]})
-    staging_pp_ids = {p["id"] for p in staging_pps}
-
-    # For each prod packaging, find/create the equivalent on staging.
     created = skipped = failed = 0
     for pkg in prod_pkgs:
         if not pkg.get("product_id"):
             continue
         prod_pid = pkg["product_id"][0]
-        if prod_pid not in staging_pp_ids:
-            # Try by default_code as fallback
+        if prod_pid not in target_pp_ids:
             pp = prod_pp_by_id.get(prod_pid, {})
             code = pp.get("default_code")
             if code:
@@ -562,7 +584,6 @@ def step_copy_packagings_from_prod(call, commit):
         else:
             target_pid = prod_pid
 
-        # Skip if already exists (matched by product + name)
         existing = call("product.packaging", "search",
                         [[("product_id", "=", target_pid), ("name", "=", pkg["name"])]])
         if existing:
@@ -597,17 +618,22 @@ def step_copy_packagings_from_prod(call, commit):
 # Step 5: Optionally copy historical data from prod for the lost fields
 # --------------------------------------------------------------------------
 
-def step_copy_data_from_prod(call, commit):
+def step_copy_data_from_prod(call, commit, snapshot_data=None):
     print("\n=== Step 5: Copy historical x_studio_qtypkg/finished_qtyplt from prod ===")
-    if not all(os.environ.get(f"ODOO_PROD_{k}") for k in ["URL", "DB", "USER", "API_KEY"]):
-        print("  ODOO_PROD_* env vars not set; skipping data copy")
-        return
-    prod_call = connect("prod")
-    prod_mos = prod_call("mrp.production", "search_read",
-                         [["|", ("x_studio_qtypkg", "!=", 0),
-                           ("x_studio_finished_qtyplt", "!=", 0)]],
-                         {"fields": ["id", "name", "x_studio_qtypkg", "x_studio_finished_qtyplt"]})
-    print(f"  {len(prod_mos)} prod MOs with data to copy")
+    if snapshot_data is not None:
+        prod_mos = snapshot_data["mrp_production_studio_qtys"]
+        print(f"  {len(prod_mos)} MO Studio qty records from snapshot "
+              f"(captured {snapshot_data.get('snapshot_at', 'unknown')})")
+    else:
+        if not all(os.environ.get(f"ODOO_PROD_{k}") for k in ["URL", "DB", "USER", "API_KEY"]):
+            print("  ODOO_PROD_* env vars not set and no --from-snapshot; skipping data copy")
+            return
+        prod_call = connect("prod")
+        prod_mos = prod_call("mrp.production", "search_read",
+                             [["|", ("x_studio_qtypkg", "!=", 0),
+                               ("x_studio_finished_qtyplt", "!=", 0)]],
+                             {"fields": ["id", "name", "x_studio_qtypkg", "x_studio_finished_qtyplt"]})
+        print(f"  {len(prod_mos)} prod MOs with data to copy")
     by_name = {mo["name"]: mo for mo in prod_mos}
     if not by_name:
         return
@@ -643,12 +669,30 @@ def main():
     parser.add_argument("--commit", action="store_true",
                         help="actually apply changes (default: dry-run)")
     parser.add_argument("--copy-data", action="store_true",
-                        help="also copy x_studio_qtypkg/finished_qtyplt historical values from prod (requires ODOO_PROD_* env vars)")
+                        help="copy x_studio_qtypkg/finished_qtyplt historical values from snapshot (or live prod if --from-snapshot omitted)")
     parser.add_argument("--copy-packagings", action="store_true",
-                        help="also recreate product.packaging records on target from prod (requires msp_packaging module + ODOO_PROD_* env vars)")
+                        help="recreate product.packaging records on target from snapshot (or live prod if --from-snapshot omitted)")
+    parser.add_argument("--from-snapshot", default=None,
+                        help="path to snapshot JSON (default: snapshots/v18_prod_snapshot.json if it exists). "
+                             "Required for prod cutover since live v18 is gone after upgrade.")
     args = parser.parse_args()
 
     print(f"Target: {args.target}, mode: {'COMMIT' if args.commit else 'dry-run'}")
+
+    # Auto-detect default snapshot location if --from-snapshot not given.
+    snapshot_data = None
+    snap_path = args.from_snapshot
+    if snap_path is None:
+        default_snap = Path(__file__).parent / "snapshots" / "v18_prod_snapshot.json"
+        if default_snap.exists() and (args.copy_packagings or args.copy_data):
+            snap_path = str(default_snap)
+            print(f"Auto-detected snapshot: {default_snap}")
+    if snap_path:
+        snapshot_data = _load_snapshot(snap_path)
+        print(f"Loaded snapshot from {snap_path} "
+              f"(captured {snapshot_data.get('snapshot_at', 'unknown')}, "
+              f"source {snapshot_data.get('source_url', 'unknown')})")
+
     call = connect(args.target)
 
     step_install_new_modules(call, args.commit)
@@ -659,9 +703,9 @@ def main():
     step_patch_lot_producing_actions(call, args.commit)
     step_recreate_views(call, args.commit)
     if args.copy_packagings:
-        step_copy_packagings_from_prod(call, args.commit)
+        step_copy_packagings_from_prod(call, args.commit, snapshot_data)
     if args.copy_data:
-        step_copy_data_from_prod(call, args.commit)
+        step_copy_data_from_prod(call, args.commit, snapshot_data)
 
 
 if __name__ == "__main__":

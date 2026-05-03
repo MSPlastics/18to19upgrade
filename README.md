@@ -34,6 +34,11 @@ This repo does **not** contain Odoo module code — only the operational scripts
 ```bash
 # Set env vars first (cp .env.example .env, fill in)
 cd workflow
+
+# BEFORE clicking the upgrade button — snapshot v18 prod data:
+python snapshot_v18_data.py
+
+# AFTER migration finishes — run recovery (snapshot auto-detected):
 python post_migration_recovery.py --target prod --commit \
        --copy-data --copy-packagings
 python prod_disable_kits.py --restore

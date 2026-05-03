@@ -11,6 +11,14 @@
 ## TL;DR — what to do at cutover
 
 ```bash
+# 0. PRE-CUTOVER (BEFORE clicking the upgrade button):
+#    Snapshot v18 prod data — packagings + Studio qty values.
+#    Once prod is upgraded the v19 schema drops product.packaging entirely;
+#    there is no way to read these back. Run NOW while v18 is still live.
+cd C:/Users/Anthony/Desktop/18to19upgrade/workflow
+python snapshot_v18_data.py
+# -> writes workflow/snapshots/v18_prod_snapshot.json (commit it).
+
 # 1. Click "Upgrade to 19.0" on production stage in Odoo.sh
 # 2. Push our v19 fix code to production:
 cd /c/msp_backups/extracted/v19audit  # or any local clone
@@ -19,9 +27,9 @@ git push origin 19_upgradetest2:msp_production    # fast-forward, no merge
 
 # 3. Wait 15–60 min for migration
 
-# 4. After upgrade completes, run the recovery script ONCE:
+# 4. After upgrade completes, run the recovery script ONCE.
+#    --from-snapshot is auto-detected from snapshots/v18_prod_snapshot.json.
 cd C:/Users/Anthony/Desktop/18to19upgrade/workflow
-# (set ODOO_PROD_* env vars in ../.env first)
 python post_migration_recovery.py --target prod --commit \
        --copy-data --copy-packagings
 

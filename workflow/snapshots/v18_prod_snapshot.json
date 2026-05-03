@@ -1,0 +1,6101 @@
+{
+  "snapshot_at": "2026-05-03T23:53:32.879634+00:00",
+  "source_url": "https://msplastics-odoo18.odoo.com",
+  "source_db": "msplastics-odoo18-msp-production-16023658",
+  "product_packagings": [
+    {
+      "id": 9,
+      "name": "Rail Car",
+      "product_id": 14,
+      "product_default_code": null,
+      "product_display_name": "Enable 2705RA",
+      "qty": 200000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 231,
+      "name": "Pallet",
+      "product_id": 673,
+      "product_default_code": null,
+      "product_display_name": "Exceed 7052.RA",
+      "qty": 3000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 15,
+      "name": "Box",
+      "product_id": 20,
+      "product_default_code": null,
+      "product_display_name": "Exceed Flow+ m 0238.MC",
+      "qty": 1500.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 16,
+      "name": "Box",
+      "product_id": 19,
+      "product_default_code": null,
+      "product_display_name": "Exceed Flow+ m 0938.RA",
+      "qty": 1500.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 10,
+      "name": "Rail Car",
+      "product_id": 15,
+      "product_default_code": null,
+      "product_display_name": "Exeed S 9243",
+      "qty": 200000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 2,
+      "name": "Rail Car",
+      "product_id": 3,
+      "product_default_code": null,
+      "product_display_name": "Frac1-A",
+      "qty": 200000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 3,
+      "name": "Truck",
+      "product_id": 3,
+      "product_default_code": null,
+      "product_display_name": "Frac1-A",
+      "qty": 42000.0,
+      "barcode": null,
+      "sequence": 2,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 4,
+      "name": "Rail car",
+      "product_id": 4,
+      "product_default_code": null,
+      "product_display_name": "Hex1-BF",
+      "qty": 200000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 5,
+      "name": "Truck",
+      "product_id": 5,
+      "product_default_code": null,
+      "product_display_name": "Liner1-M",
+      "qty": 40000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 230,
+      "name": "Pallet",
+      "product_id": 295,
+      "product_default_code": null,
+      "product_display_name": "Vistamaxx 6102FL",
+      "qty": 3000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 237,
+      "name": "Pallet",
+      "product_id": 478,
+      "product_default_code": "18x1500 Hand Stretch Wrap",
+      "product_display_name": "[18x1500 Hand Stretch Wrap] 10441",
+      "qty": 48.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 236,
+      "name": "Pallet",
+      "product_id": 476,
+      "product_default_code": "19.7x5000 Machine Stretch Wrap",
+      "product_display_name": "[19.7x5000 Machine Stretch Wrap] 10439",
+      "qty": 40.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 83,
+      "name": "Case",
+      "product_id": 245,
+      "product_default_code": "MSPL LLD-04",
+      "product_display_name": "[MSPL LLD-04]  10208 ",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 239,
+      "name": "Roll",
+      "product_id": 1100,
+      "product_default_code": "[INTERSTATE AZ] 28x2400 C-FOLD",
+      "product_display_name": "[[INTERSTATE AZ] 28x2400 C-FOLD] 11063",
+      "qty": 43.01,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 252,
+      "name": "Roll",
+      "product_id": 1164,
+      "product_default_code": "[INTERSTATE PKG - AZ] 28x5500 1MIL SAMPLE",
+      "product_display_name": "[[INTERSTATE PKG - AZ] 28x5500 1MIL SAMPLE] 11127",
+      "qty": 61.6,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 221,
+      "name": "Roll",
+      "product_id": 1036,
+      "product_default_code": "[MARIPAK] 14x3000 SAMPLE",
+      "product_display_name": "[[MARIPAK] 14x3000 SAMPLE] 10999",
+      "qty": 13.44,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 126,
+      "name": "Roll",
+      "product_id": 537,
+      "product_default_code": "[SAMPLE] Aspen Press 48x10500",
+      "product_display_name": "[[SAMPLE] Aspen Press 48x10500] 10500",
+      "qty": 302.4,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 184,
+      "name": "Roll",
+      "product_id": 845,
+      "product_default_code": null,
+      "product_display_name": " 10808 ",
+      "qty": 0.3,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 232,
+      "name": "Case",
+      "product_id": 793,
+      "product_default_code": null,
+      "product_display_name": "1.5IN BLACK ADJUSTABLE GATE",
+      "qty": 300.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 23,
+      "name": "Roll",
+      "product_id": 56,
+      "product_default_code": null,
+      "product_display_name": "10003",
+      "qty": 93.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 24,
+      "name": "Roll",
+      "product_id": 65,
+      "product_default_code": null,
+      "product_display_name": "10025",
+      "qty": 92.8,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 26,
+      "name": "Case",
+      "product_id": 73,
+      "product_default_code": null,
+      "product_display_name": "10036",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 27,
+      "name": "Case",
+      "product_id": 74,
+      "product_default_code": null,
+      "product_display_name": "10037",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 28,
+      "name": "Roll",
+      "product_id": 80,
+      "product_default_code": null,
+      "product_display_name": "10043",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 29,
+      "name": "Roll",
+      "product_id": 89,
+      "product_default_code": null,
+      "product_display_name": "10052",
+      "qty": 23.59,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 33,
+      "name": "Case",
+      "product_id": 95,
+      "product_default_code": null,
+      "product_display_name": "10058",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 34,
+      "name": "Case",
+      "product_id": 96,
+      "product_default_code": null,
+      "product_display_name": "10059",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 32,
+      "name": "Roll",
+      "product_id": 98,
+      "product_default_code": null,
+      "product_display_name": "10061",
+      "qty": 0.125,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 35,
+      "name": "Roll",
+      "product_id": 114,
+      "product_default_code": null,
+      "product_display_name": "10077",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 36,
+      "name": "Roll",
+      "product_id": 118,
+      "product_default_code": null,
+      "product_display_name": "10081",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 37,
+      "name": "Case",
+      "product_id": 119,
+      "product_default_code": null,
+      "product_display_name": "10082",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 38,
+      "name": "Roll",
+      "product_id": 120,
+      "product_default_code": null,
+      "product_display_name": "10083",
+      "qty": 70.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 39,
+      "name": "Case",
+      "product_id": 121,
+      "product_default_code": null,
+      "product_display_name": "10084",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 41,
+      "name": "Roll",
+      "product_id": 122,
+      "product_default_code": null,
+      "product_display_name": "10085",
+      "qty": 0.065,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 42,
+      "name": "Roll",
+      "product_id": 123,
+      "product_default_code": null,
+      "product_display_name": "10086",
+      "qty": 0.065,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 43,
+      "name": "Roll",
+      "product_id": 124,
+      "product_default_code": null,
+      "product_display_name": "10087",
+      "qty": 0.055,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 40,
+      "name": "Roll",
+      "product_id": 126,
+      "product_default_code": null,
+      "product_display_name": "10089",
+      "qty": 45.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 44,
+      "name": "Case",
+      "product_id": 130,
+      "product_default_code": null,
+      "product_display_name": "10093",
+      "qty": 0.05,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 45,
+      "name": "Case",
+      "product_id": 156,
+      "product_default_code": null,
+      "product_display_name": "10119",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 140,
+      "name": "Case",
+      "product_id": 157,
+      "product_default_code": null,
+      "product_display_name": "10120",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 46,
+      "name": "Pallet",
+      "product_id": 159,
+      "product_default_code": null,
+      "product_display_name": "10122",
+      "qty": 20.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 47,
+      "name": "Case",
+      "product_id": 163,
+      "product_default_code": null,
+      "product_display_name": "10126",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 48,
+      "name": "Case",
+      "product_id": 170,
+      "product_default_code": null,
+      "product_display_name": "10133",
+      "qty": 0.3,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 49,
+      "name": "Roll",
+      "product_id": 176,
+      "product_default_code": null,
+      "product_display_name": "10139",
+      "qty": 35.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 50,
+      "name": "Case",
+      "product_id": 181,
+      "product_default_code": null,
+      "product_display_name": "10144",
+      "qty": 2.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 51,
+      "name": "Case",
+      "product_id": 182,
+      "product_default_code": null,
+      "product_display_name": "10145",
+      "qty": 0.075,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 52,
+      "name": "Case",
+      "product_id": 184,
+      "product_default_code": null,
+      "product_display_name": "10147",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 53,
+      "name": "Case",
+      "product_id": 186,
+      "product_default_code": null,
+      "product_display_name": "10149",
+      "qty": 0.15,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 54,
+      "name": "Roll",
+      "product_id": 188,
+      "product_default_code": null,
+      "product_display_name": "10151",
+      "qty": 70.4,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 55,
+      "name": "Case",
+      "product_id": 189,
+      "product_default_code": null,
+      "product_display_name": "10152",
+      "qty": 0.05,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 56,
+      "name": "Case",
+      "product_id": 191,
+      "product_default_code": null,
+      "product_display_name": "10154",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 57,
+      "name": "Roll",
+      "product_id": 197,
+      "product_default_code": null,
+      "product_display_name": "10160",
+      "qty": 65.55,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 58,
+      "name": "Case",
+      "product_id": 198,
+      "product_default_code": null,
+      "product_display_name": "10161",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 59,
+      "name": "Roll",
+      "product_id": 199,
+      "product_default_code": null,
+      "product_display_name": "10162",
+      "qty": 98.7,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 93,
+      "name": "Case",
+      "product_id": 204,
+      "product_default_code": null,
+      "product_display_name": "10167",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 62,
+      "name": "Case",
+      "product_id": 205,
+      "product_default_code": null,
+      "product_display_name": "10168",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 66,
+      "name": "Case",
+      "product_id": 218,
+      "product_default_code": null,
+      "product_display_name": "10181",
+      "qty": 0.35,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 72,
+      "name": "Case",
+      "product_id": 224,
+      "product_default_code": null,
+      "product_display_name": "10187",
+      "qty": 1.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 73,
+      "name": "Case",
+      "product_id": 228,
+      "product_default_code": null,
+      "product_display_name": "10191",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 74,
+      "name": "Roll",
+      "product_id": 231,
+      "product_default_code": null,
+      "product_display_name": "10194",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 85,
+      "name": "Roll",
+      "product_id": 233,
+      "product_default_code": null,
+      "product_display_name": "10196",
+      "qty": 0.275,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 75,
+      "name": "Case",
+      "product_id": 235,
+      "product_default_code": null,
+      "product_display_name": "10198",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 76,
+      "name": "Roll",
+      "product_id": 239,
+      "product_default_code": null,
+      "product_display_name": "10202",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 77,
+      "name": "Roll",
+      "product_id": 240,
+      "product_default_code": null,
+      "product_display_name": "10203",
+      "qty": 90.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 78,
+      "name": "Roll",
+      "product_id": 241,
+      "product_default_code": null,
+      "product_display_name": "10204",
+      "qty": 90.72,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 79,
+      "name": "Roll",
+      "product_id": 242,
+      "product_default_code": null,
+      "product_display_name": "10205",
+      "qty": 77.76,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 80,
+      "name": "Roll",
+      "product_id": 243,
+      "product_default_code": null,
+      "product_display_name": "10206",
+      "qty": 87.48,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 81,
+      "name": "Roll",
+      "product_id": 244,
+      "product_default_code": null,
+      "product_display_name": "10207",
+      "qty": 77.28,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 82,
+      "name": "Case",
+      "product_id": 246,
+      "product_default_code": null,
+      "product_display_name": "10209",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 84,
+      "name": "Case",
+      "product_id": 250,
+      "product_default_code": null,
+      "product_display_name": "10213",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 86,
+      "name": "Roll",
+      "product_id": 262,
+      "product_default_code": null,
+      "product_display_name": "10225",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 87,
+      "name": "Roll",
+      "product_id": 267,
+      "product_default_code": null,
+      "product_display_name": "10230",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 88,
+      "name": "Case",
+      "product_id": 278,
+      "product_default_code": null,
+      "product_display_name": "10241",
+      "qty": 2.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 89,
+      "name": "Roll",
+      "product_id": 314,
+      "product_default_code": null,
+      "product_display_name": "10277",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 90,
+      "name": "Roll",
+      "product_id": 327,
+      "product_default_code": null,
+      "product_display_name": "10290",
+      "qty": 500.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 91,
+      "name": "Roll",
+      "product_id": 334,
+      "product_default_code": null,
+      "product_display_name": "10297",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 92,
+      "name": "Case",
+      "product_id": 371,
+      "product_default_code": null,
+      "product_display_name": "10334",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 168,
+      "name": "Pallet",
+      "product_id": 378,
+      "product_default_code": null,
+      "product_display_name": "10341",
+      "qty": 20.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 94,
+      "name": "Roll",
+      "product_id": 390,
+      "product_default_code": null,
+      "product_display_name": "10353",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 95,
+      "name": "Case",
+      "product_id": 397,
+      "product_default_code": null,
+      "product_display_name": "10360",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 96,
+      "name": "Case",
+      "product_id": 398,
+      "product_default_code": null,
+      "product_display_name": "10361",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 97,
+      "name": "Case",
+      "product_id": 399,
+      "product_default_code": null,
+      "product_display_name": "10362",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 98,
+      "name": "Case",
+      "product_id": 400,
+      "product_default_code": null,
+      "product_display_name": "10363",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 99,
+      "name": "Case",
+      "product_id": 405,
+      "product_default_code": null,
+      "product_display_name": "10368",
+      "qty": 0.125,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 100,
+      "name": "Roll",
+      "product_id": 409,
+      "product_default_code": null,
+      "product_display_name": "10372",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 101,
+      "name": "Case",
+      "product_id": 415,
+      "product_default_code": null,
+      "product_display_name": "10378",
+      "qty": 0.3,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 102,
+      "name": "Case",
+      "product_id": 416,
+      "product_default_code": null,
+      "product_display_name": "10379",
+      "qty": 0.3,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 103,
+      "name": "Roll",
+      "product_id": 418,
+      "product_default_code": null,
+      "product_display_name": "10381",
+      "qty": 0.03,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 104,
+      "name": "Roll",
+      "product_id": 419,
+      "product_default_code": null,
+      "product_display_name": "10382",
+      "qty": 0.025,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 105,
+      "name": "Case",
+      "product_id": 422,
+      "product_default_code": null,
+      "product_display_name": "10385",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 106,
+      "name": "Case",
+      "product_id": 433,
+      "product_default_code": null,
+      "product_display_name": "10396",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 107,
+      "name": "Roll",
+      "product_id": 436,
+      "product_default_code": null,
+      "product_display_name": "10399",
+      "qty": 1.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 108,
+      "name": "Case",
+      "product_id": 464,
+      "product_default_code": null,
+      "product_display_name": "10427",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 109,
+      "name": "Roll",
+      "product_id": 472,
+      "product_default_code": null,
+      "product_display_name": "10435",
+      "qty": 41.8,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 110,
+      "name": "Roll",
+      "product_id": 474,
+      "product_default_code": null,
+      "product_display_name": "10437",
+      "qty": 220.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 111,
+      "name": "Case",
+      "product_id": 483,
+      "product_default_code": null,
+      "product_display_name": "10446",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 112,
+      "name": "Roll",
+      "product_id": 496,
+      "product_default_code": null,
+      "product_display_name": "10459",
+      "qty": 0.075,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 113,
+      "name": "Case",
+      "product_id": 497,
+      "product_default_code": null,
+      "product_display_name": "10460",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 114,
+      "name": "Roll",
+      "product_id": 506,
+      "product_default_code": null,
+      "product_display_name": "10469",
+      "qty": 0.125,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 115,
+      "name": "Roll",
+      "product_id": 507,
+      "product_default_code": null,
+      "product_display_name": "10470",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 116,
+      "name": "Roll",
+      "product_id": 510,
+      "product_default_code": null,
+      "product_display_name": "10473",
+      "qty": 35.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 117,
+      "name": "Case",
+      "product_id": 513,
+      "product_default_code": null,
+      "product_display_name": "10476",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 118,
+      "name": "Roll",
+      "product_id": 519,
+      "product_default_code": null,
+      "product_display_name": "10482",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 119,
+      "name": "Roll",
+      "product_id": 521,
+      "product_default_code": null,
+      "product_display_name": "10484",
+      "qty": 308.56,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 120,
+      "name": "Case",
+      "product_id": 522,
+      "product_default_code": null,
+      "product_display_name": "10485",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 121,
+      "name": "Roll",
+      "product_id": 523,
+      "product_default_code": null,
+      "product_display_name": "10486",
+      "qty": 72.16,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 122,
+      "name": "Roll",
+      "product_id": 524,
+      "product_default_code": null,
+      "product_display_name": "10487",
+      "qty": 76.56,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 123,
+      "name": "Roll",
+      "product_id": 526,
+      "product_default_code": null,
+      "product_display_name": "10489",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 124,
+      "name": "Roll",
+      "product_id": 531,
+      "product_default_code": null,
+      "product_display_name": "10494",
+      "qty": 87.48,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 125,
+      "name": "Case",
+      "product_id": 535,
+      "product_default_code": null,
+      "product_display_name": "10498",
+      "qty": 0.125,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 127,
+      "name": "Roll",
+      "product_id": 542,
+      "product_default_code": null,
+      "product_display_name": "10505",
+      "qty": 0.05,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 128,
+      "name": "Case",
+      "product_id": 543,
+      "product_default_code": null,
+      "product_display_name": "10506",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 129,
+      "name": "Case",
+      "product_id": 546,
+      "product_default_code": null,
+      "product_display_name": "10509",
+      "qty": 0.35,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 130,
+      "name": "Roll",
+      "product_id": 574,
+      "product_default_code": null,
+      "product_display_name": "10537",
+      "qty": 139.12,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 132,
+      "name": "Roll",
+      "product_id": 582,
+      "product_default_code": null,
+      "product_display_name": "10545",
+      "qty": 0.06,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 134,
+      "name": "Roll",
+      "product_id": 586,
+      "product_default_code": null,
+      "product_display_name": "10549",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 135,
+      "name": "case",
+      "product_id": 587,
+      "product_default_code": null,
+      "product_display_name": "10550",
+      "qty": 120.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 136,
+      "name": "Roll",
+      "product_id": 589,
+      "product_default_code": null,
+      "product_display_name": "10552",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 137,
+      "name": "Roll",
+      "product_id": 598,
+      "product_default_code": null,
+      "product_display_name": "10561",
+      "qty": 86.4,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 138,
+      "name": "Roll",
+      "product_id": 601,
+      "product_default_code": null,
+      "product_display_name": "10564",
+      "qty": 67.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 139,
+      "name": "Case",
+      "product_id": 607,
+      "product_default_code": null,
+      "product_display_name": "10570",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 141,
+      "name": "Case",
+      "product_id": 622,
+      "product_default_code": null,
+      "product_display_name": "10585",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 143,
+      "name": "Case",
+      "product_id": 627,
+      "product_default_code": null,
+      "product_display_name": "10590",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 144,
+      "name": "Case",
+      "product_id": 628,
+      "product_default_code": null,
+      "product_display_name": "10591",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 145,
+      "name": "Case",
+      "product_id": 631,
+      "product_default_code": null,
+      "product_display_name": "10594",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 146,
+      "name": "Case",
+      "product_id": 650,
+      "product_default_code": null,
+      "product_display_name": "10613",
+      "qty": 0.3,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 147,
+      "name": "Roll",
+      "product_id": 651,
+      "product_default_code": null,
+      "product_display_name": "10614",
+      "qty": 0.275,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 148,
+      "name": "Case",
+      "product_id": 662,
+      "product_default_code": null,
+      "product_display_name": "10625",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 150,
+      "name": "Case",
+      "product_id": 678,
+      "product_default_code": null,
+      "product_display_name": "10641",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 151,
+      "name": "Roll",
+      "product_id": 689,
+      "product_default_code": null,
+      "product_display_name": "10652",
+      "qty": 71.68,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 152,
+      "name": "Roll",
+      "product_id": 690,
+      "product_default_code": null,
+      "product_display_name": "10653",
+      "qty": 220.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 153,
+      "name": "Roll",
+      "product_id": 691,
+      "product_default_code": null,
+      "product_display_name": "10654",
+      "qty": 220.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 154,
+      "name": "Case",
+      "product_id": 713,
+      "product_default_code": null,
+      "product_display_name": "10676",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 158,
+      "name": "Roll",
+      "product_id": 714,
+      "product_default_code": null,
+      "product_display_name": "10677",
+      "qty": 2.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 155,
+      "name": "Case",
+      "product_id": 719,
+      "product_default_code": null,
+      "product_display_name": "10682",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 156,
+      "name": "Roll",
+      "product_id": 721,
+      "product_default_code": null,
+      "product_display_name": "10684",
+      "qty": 75.07,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 157,
+      "name": "Roll",
+      "product_id": 725,
+      "product_default_code": null,
+      "product_display_name": "10688",
+      "qty": 290.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 159,
+      "name": "Case",
+      "product_id": 738,
+      "product_default_code": null,
+      "product_display_name": "10701",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 160,
+      "name": "Roll",
+      "product_id": 740,
+      "product_default_code": null,
+      "product_display_name": "10703",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 161,
+      "name": "Case",
+      "product_id": 741,
+      "product_default_code": null,
+      "product_display_name": "10704",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 162,
+      "name": "Case",
+      "product_id": 764,
+      "product_default_code": null,
+      "product_display_name": "10727",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 163,
+      "name": "Case",
+      "product_id": 777,
+      "product_default_code": null,
+      "product_display_name": "10740",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 164,
+      "name": "Roll",
+      "product_id": 779,
+      "product_default_code": null,
+      "product_display_name": "10742",
+      "qty": 100.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 165,
+      "name": "Roll",
+      "product_id": 780,
+      "product_default_code": null,
+      "product_display_name": "10743",
+      "qty": 46.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 166,
+      "name": "Roll",
+      "product_id": 789,
+      "product_default_code": null,
+      "product_display_name": "10752",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 167,
+      "name": "Case",
+      "product_id": 800,
+      "product_default_code": null,
+      "product_display_name": "10763",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 170,
+      "name": "Case",
+      "product_id": 817,
+      "product_default_code": null,
+      "product_display_name": "10780",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 171,
+      "name": "Case",
+      "product_id": 818,
+      "product_default_code": null,
+      "product_display_name": "10781",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 169,
+      "name": "Case",
+      "product_id": 819,
+      "product_default_code": null,
+      "product_display_name": "10782",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 172,
+      "name": "Case",
+      "product_id": 820,
+      "product_default_code": null,
+      "product_display_name": "10783",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 173,
+      "name": "Case",
+      "product_id": 821,
+      "product_default_code": null,
+      "product_display_name": "10784",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 174,
+      "name": "Case",
+      "product_id": 822,
+      "product_default_code": null,
+      "product_display_name": "10785",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 175,
+      "name": "Case",
+      "product_id": 823,
+      "product_default_code": null,
+      "product_display_name": "10786",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 176,
+      "name": "Case",
+      "product_id": 824,
+      "product_default_code": null,
+      "product_display_name": "10787",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 177,
+      "name": "Case",
+      "product_id": 825,
+      "product_default_code": null,
+      "product_display_name": "10788",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 178,
+      "name": "Case",
+      "product_id": 826,
+      "product_default_code": null,
+      "product_display_name": "10789",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 179,
+      "name": "Case",
+      "product_id": 827,
+      "product_default_code": null,
+      "product_display_name": "10790",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 180,
+      "name": "Case",
+      "product_id": 828,
+      "product_default_code": null,
+      "product_display_name": "10791",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 182,
+      "name": "Case",
+      "product_id": 839,
+      "product_default_code": null,
+      "product_display_name": "10802",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 181,
+      "name": "Roll",
+      "product_id": 840,
+      "product_default_code": null,
+      "product_display_name": "10803",
+      "qty": 139.12,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 183,
+      "name": "Roll",
+      "product_id": 841,
+      "product_default_code": null,
+      "product_display_name": "10804",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 185,
+      "name": "Roll",
+      "product_id": 846,
+      "product_default_code": null,
+      "product_display_name": "10809",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 186,
+      "name": "Roll",
+      "product_id": 847,
+      "product_default_code": null,
+      "product_display_name": "10810",
+      "qty": 0.075,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 187,
+      "name": "Case",
+      "product_id": 849,
+      "product_default_code": null,
+      "product_display_name": "10812",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 194,
+      "name": "Case",
+      "product_id": 850,
+      "product_default_code": null,
+      "product_display_name": "10813",
+      "qty": 10.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 188,
+      "name": "Roll",
+      "product_id": 860,
+      "product_default_code": null,
+      "product_display_name": "10823",
+      "qty": 61.82,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 189,
+      "name": "Roll",
+      "product_id": 861,
+      "product_default_code": null,
+      "product_display_name": "10824",
+      "qty": 142.56,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 190,
+      "name": "Roll",
+      "product_id": 863,
+      "product_default_code": null,
+      "product_display_name": "10826",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 191,
+      "name": "Roll",
+      "product_id": 864,
+      "product_default_code": null,
+      "product_display_name": "10827",
+      "qty": 0.15,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 192,
+      "name": "Roll",
+      "product_id": 865,
+      "product_default_code": null,
+      "product_display_name": "10828",
+      "qty": 0.03,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 193,
+      "name": "Roll",
+      "product_id": 867,
+      "product_default_code": null,
+      "product_display_name": "10830",
+      "qty": 0.4,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 195,
+      "name": "Roll",
+      "product_id": 874,
+      "product_default_code": null,
+      "product_display_name": "10837",
+      "qty": 0.06,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 196,
+      "name": "Case",
+      "product_id": 876,
+      "product_default_code": null,
+      "product_display_name": "10839",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 198,
+      "name": "Roll",
+      "product_id": 888,
+      "product_default_code": null,
+      "product_display_name": "10851",
+      "qty": 43.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 199,
+      "name": "Roll",
+      "product_id": 893,
+      "product_default_code": null,
+      "product_display_name": "10856",
+      "qty": 93.6,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 200,
+      "name": "Roll",
+      "product_id": 903,
+      "product_default_code": null,
+      "product_display_name": "10866",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 201,
+      "name": "Case",
+      "product_id": 904,
+      "product_default_code": null,
+      "product_display_name": "10867",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 202,
+      "name": "Roll",
+      "product_id": 906,
+      "product_default_code": null,
+      "product_display_name": "10869",
+      "qty": 369.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 203,
+      "name": "Case",
+      "product_id": 914,
+      "product_default_code": null,
+      "product_display_name": "10877",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 204,
+      "name": "Roll",
+      "product_id": 945,
+      "product_default_code": null,
+      "product_display_name": "10908",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 205,
+      "name": "Roll",
+      "product_id": 946,
+      "product_default_code": null,
+      "product_display_name": "10909",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 206,
+      "name": "Roll",
+      "product_id": 948,
+      "product_default_code": null,
+      "product_display_name": "10911",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 207,
+      "name": "Roll",
+      "product_id": 949,
+      "product_default_code": null,
+      "product_display_name": "10912",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 208,
+      "name": "Roll",
+      "product_id": 950,
+      "product_default_code": null,
+      "product_display_name": "10913",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 209,
+      "name": "Case",
+      "product_id": 951,
+      "product_default_code": null,
+      "product_display_name": "10914",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 211,
+      "name": "Roll",
+      "product_id": 968,
+      "product_default_code": null,
+      "product_display_name": "10931",
+      "qty": 75.6,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 212,
+      "name": "Case",
+      "product_id": 976,
+      "product_default_code": null,
+      "product_display_name": "10939",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 213,
+      "name": "Case",
+      "product_id": 984,
+      "product_default_code": null,
+      "product_display_name": "10947",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 215,
+      "name": "Roll",
+      "product_id": 989,
+      "product_default_code": null,
+      "product_display_name": "10952",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 214,
+      "name": "Roll",
+      "product_id": 1000,
+      "product_default_code": null,
+      "product_display_name": "10963",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 216,
+      "name": "Roll",
+      "product_id": 1010,
+      "product_default_code": null,
+      "product_display_name": "10973",
+      "qty": 249.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 229,
+      "name": "Roll",
+      "product_id": 1011,
+      "product_default_code": null,
+      "product_display_name": "10974",
+      "qty": 61.6,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 217,
+      "name": "Roll",
+      "product_id": 1023,
+      "product_default_code": null,
+      "product_display_name": "10986",
+      "qty": 0.125,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 218,
+      "name": "Roll",
+      "product_id": 1024,
+      "product_default_code": null,
+      "product_display_name": "10987",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 220,
+      "name": "Roll",
+      "product_id": 1030,
+      "product_default_code": null,
+      "product_display_name": "10993",
+      "qty": 91.8,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 222,
+      "name": "Case",
+      "product_id": 1037,
+      "product_default_code": null,
+      "product_display_name": "11000",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 223,
+      "name": "Case",
+      "product_id": 1038,
+      "product_default_code": null,
+      "product_display_name": "11001",
+      "qty": 0.1,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 224,
+      "name": "Case",
+      "product_id": 1040,
+      "product_default_code": null,
+      "product_display_name": "11003",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 225,
+      "name": "Roll",
+      "product_id": 1044,
+      "product_default_code": null,
+      "product_display_name": "11007",
+      "qty": 0.5,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 226,
+      "name": "Case",
+      "product_id": 1055,
+      "product_default_code": null,
+      "product_display_name": "11018",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 227,
+      "name": "Case",
+      "product_id": 1056,
+      "product_default_code": null,
+      "product_display_name": "11019",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 228,
+      "name": "Roll",
+      "product_id": 1057,
+      "product_default_code": null,
+      "product_display_name": "11020",
+      "qty": 0.03,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 234,
+      "name": "Case",
+      "product_id": 1079,
+      "product_default_code": null,
+      "product_display_name": "11042",
+      "qty": 0.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 235,
+      "name": "Roll",
+      "product_id": 1084,
+      "product_default_code": null,
+      "product_display_name": "11047",
+      "qty": 190.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 241,
+      "name": "Case",
+      "product_id": 1122,
+      "product_default_code": null,
+      "product_display_name": "11085",
+      "qty": 1.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 242,
+      "name": "Roll",
+      "product_id": 1126,
+      "product_default_code": null,
+      "product_display_name": "11089",
+      "qty": 90.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 243,
+      "name": "Roll",
+      "product_id": 1138,
+      "product_default_code": null,
+      "product_display_name": "11101",
+      "qty": 38.4,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 244,
+      "name": "Roll",
+      "product_id": 1147,
+      "product_default_code": null,
+      "product_display_name": "11110",
+      "qty": 91.08,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 245,
+      "name": "Roll",
+      "product_id": 1148,
+      "product_default_code": null,
+      "product_display_name": "11111",
+      "qty": 90.72,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 246,
+      "name": "Roll",
+      "product_id": 1149,
+      "product_default_code": null,
+      "product_display_name": "11112",
+      "qty": 90.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 247,
+      "name": "Roll",
+      "product_id": 1150,
+      "product_default_code": null,
+      "product_display_name": "11113",
+      "qty": 91.08,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 248,
+      "name": "Roll",
+      "product_id": 1151,
+      "product_default_code": null,
+      "product_display_name": "11114",
+      "qty": 90.48,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 249,
+      "name": "Roll",
+      "product_id": 1153,
+      "product_default_code": null,
+      "product_display_name": "11116",
+      "qty": 91.08,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 250,
+      "name": "Roll",
+      "product_id": 1154,
+      "product_default_code": null,
+      "product_display_name": "11117",
+      "qty": 91.08,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 254,
+      "name": "Case",
+      "product_id": 1162,
+      "product_default_code": null,
+      "product_display_name": "11125",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 251,
+      "name": "Roll",
+      "product_id": 1163,
+      "product_default_code": null,
+      "product_display_name": "11126",
+      "qty": 66.41,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 253,
+      "name": "Roll",
+      "product_id": 1165,
+      "product_default_code": null,
+      "product_display_name": "11128",
+      "qty": 67.2,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 255,
+      "name": "Roll",
+      "product_id": 1168,
+      "product_default_code": null,
+      "product_display_name": "11131",
+      "qty": 90.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 256,
+      "name": "Roll",
+      "product_id": 1169,
+      "product_default_code": null,
+      "product_display_name": "11132",
+      "qty": 0.05,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 257,
+      "name": "Roll",
+      "product_id": 1189,
+      "product_default_code": null,
+      "product_display_name": "11152",
+      "qty": 106.92,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 258,
+      "name": "Case",
+      "product_id": 1192,
+      "product_default_code": null,
+      "product_display_name": "11155",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 259,
+      "name": "Roll",
+      "product_id": 1211,
+      "product_default_code": null,
+      "product_display_name": "11174",
+      "qty": 0.25,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 238,
+      "name": "Pallet",
+      "product_id": 1092,
+      "product_default_code": null,
+      "product_display_name": "19.7x5000 63ga stretch film",
+      "qty": 50.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 233,
+      "name": "Case",
+      "product_id": 795,
+      "product_default_code": null,
+      "product_display_name": "2.5IN BLACK ADJUSTABLE GATE",
+      "qty": 100.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 7,
+      "name": "Skid",
+      "product_id": 10,
+      "product_default_code": null,
+      "product_display_name": "48-3 Roll cradle ",
+      "qty": 1000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 8,
+      "name": "Skid",
+      "product_id": 11,
+      "product_default_code": null,
+      "product_display_name": "48-5 Roll Cradle",
+      "qty": 1200.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 30,
+      "name": "Roll",
+      "product_id": 88,
+      "product_default_code": null,
+      "product_display_name": "4x1 label units",
+      "qty": 5560.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 31,
+      "name": "case",
+      "product_id": 88,
+      "product_default_code": null,
+      "product_display_name": "4x1 label units",
+      "qty": 22240.0,
+      "barcode": null,
+      "sequence": 2,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 1,
+      "name": "Rail Car",
+      "product_id": 2,
+      "product_default_code": null,
+      "product_display_name": "Butene1-F",
+      "qty": 200000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 149,
+      "name": "PALLET",
+      "product_id": 663,
+      "product_default_code": null,
+      "product_display_name": "HLD02G",
+      "qty": 2750.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 12,
+      "name": "Box",
+      "product_id": 16,
+      "product_default_code": null,
+      "product_display_name": "HM10LCX",
+      "qty": 1940.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 13,
+      "name": "Truck",
+      "product_id": 16,
+      "product_default_code": null,
+      "product_display_name": "HM10LCX",
+      "qty": 42680.0,
+      "barcode": null,
+      "sequence": 2,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 11,
+      "name": "Box",
+      "product_id": 6,
+      "product_default_code": null,
+      "product_display_name": "HM10MAX",
+      "qty": 1940.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 14,
+      "name": "Truck",
+      "product_id": 6,
+      "product_default_code": null,
+      "product_display_name": "HM10MAX",
+      "qty": 42680.0,
+      "barcode": null,
+      "sequence": 2,
+      "sales": false,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 17,
+      "name": "Pallet",
+      "product_id": 23,
+      "product_default_code": null,
+      "product_display_name": "MAYBERRY 15D1320WHT86RL",
+      "qty": 8.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 6,
+      "name": "Pallet",
+      "product_id": 1,
+      "product_default_code": null,
+      "product_display_name": "Testing Roll",
+      "qty": 30.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 22,
+      "name": "Pallet",
+      "product_id": 48,
+      "product_default_code": null,
+      "product_display_name": "VERITIVELPASO 161332CLR75CS",
+      "qty": 95.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": false,
+      "company_id": null
+    },
+    {
+      "id": 210,
+      "name": "gaylord",
+      "product_id": 579,
+      "product_default_code": null,
+      "product_display_name": "con-Antiblock/slip",
+      "qty": 1500.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 19,
+      "name": "gaylord",
+      "product_id": 40,
+      "product_default_code": null,
+      "product_display_name": "conANTIBLOCK clarity",
+      "qty": 1850.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 18,
+      "name": "gaylord",
+      "product_id": 39,
+      "product_default_code": null,
+      "product_display_name": "conANTIBLOCK talc",
+      "qty": 1850.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 21,
+      "name": "gaylord",
+      "product_id": 43,
+      "product_default_code": null,
+      "product_display_name": "conSLIP fast",
+      "qty": 1000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    },
+    {
+      "id": 20,
+      "name": "gaylord",
+      "product_id": 42,
+      "product_default_code": null,
+      "product_display_name": "conSLIP slow",
+      "qty": 1000.0,
+      "barcode": null,
+      "sequence": 1,
+      "sales": true,
+      "purchase": true,
+      "company_id": null
+    }
+  ],
+  "mrp_production_studio_qtys": [
+    {
+      "id": 1,
+      "name": "WH/MO/00001",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 10,
+      "name": "WH/MO/00010",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 11,
+      "name": "WH/MO/00011",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 12,
+      "name": "WH/MO/00012",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 2,
+      "name": "WH/MO/00002",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 15,
+      "name": "WH/MO/00016",
+      "x_studio_qtypkg": 8.0,
+      "x_studio_finished_qtyplt": 8.0
+    },
+    {
+      "id": 16,
+      "name": "WH/MO/00017",
+      "x_studio_qtypkg": 8.0,
+      "x_studio_finished_qtyplt": 8.0
+    },
+    {
+      "id": 25,
+      "name": "WH/MO/00026",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 26,
+      "name": "WH/MO/00027",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 34,
+      "name": "WH/MO/00035",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 35,
+      "name": "WH/MO/00036",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 36,
+      "name": "WH/MO/00037",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 37,
+      "name": "WH/MO/00038",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 49,
+      "name": "WH/MO/00050",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 50,
+      "name": "WH/MO/00051",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 51,
+      "name": "WH/MO/00052",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 52,
+      "name": "WH/MO/00053",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 54,
+      "name": "WH/MO/00055",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 57,
+      "name": "WH/MO/00058",
+      "x_studio_qtypkg": 0.065,
+      "x_studio_finished_qtyplt": 0.065
+    },
+    {
+      "id": 59,
+      "name": "WH/MO/00060-001",
+      "x_studio_qtypkg": 0.055,
+      "x_studio_finished_qtyplt": 0.055
+    },
+    {
+      "id": 62,
+      "name": "WH/MO/00063",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 32,
+      "name": "WH/MO/00033",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 29,
+      "name": "WH/MO/00030",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 74,
+      "name": "WH/MO/00075",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 27,
+      "name": "WH/MO/00028",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 28,
+      "name": "WH/MO/00029",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 101,
+      "name": "WH/MO/00102",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 56,
+      "name": "WH/MO/00057",
+      "x_studio_qtypkg": 45.0,
+      "x_studio_finished_qtyplt": 45.0
+    },
+    {
+      "id": 41,
+      "name": "WH/MO/00042-001",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 124,
+      "name": "WH/MO/00060-002",
+      "x_studio_qtypkg": 0.055,
+      "x_studio_finished_qtyplt": 0.055
+    },
+    {
+      "id": 43,
+      "name": "WH/MO/00044",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 48,
+      "name": "WH/MO/00049",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 58,
+      "name": "WH/MO/00059",
+      "x_studio_qtypkg": 0.065,
+      "x_studio_finished_qtyplt": 0.065
+    },
+    {
+      "id": 42,
+      "name": "WH/MO/00043",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 38,
+      "name": "WH/MO/00039-001",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 154,
+      "name": "WH/MO/00150",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 156,
+      "name": "WH/MO/00152",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 23,
+      "name": "WH/MO/00024",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 22,
+      "name": "WH/MO/00023",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 102,
+      "name": "WH/MO/00103",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 151,
+      "name": "WH/MO/00147",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 158,
+      "name": "WH/MO/00154",
+      "x_studio_qtypkg": 2.0,
+      "x_studio_finished_qtyplt": 2.0
+    },
+    {
+      "id": 77,
+      "name": "WH/MO/00078",
+      "x_studio_qtypkg": 0.15,
+      "x_studio_finished_qtyplt": 0.15
+    },
+    {
+      "id": 106,
+      "name": "WH/MO/00042-002",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 116,
+      "name": "WH/MO/00116",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 85,
+      "name": "WH/MO/00086",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 96,
+      "name": "WH/MO/00097",
+      "x_studio_qtypkg": 0.35,
+      "x_studio_finished_qtyplt": 0.35
+    },
+    {
+      "id": 171,
+      "name": "WH/MO/00167",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 86,
+      "name": "WH/MO/00087",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 173,
+      "name": "WH/MO/00169",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 113,
+      "name": "WH/MO/00113",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 115,
+      "name": "WH/MO/00115",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 126,
+      "name": "WH/MO/00124",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 165,
+      "name": "WH/MO/00161",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 174,
+      "name": "WH/MO/00170",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 175,
+      "name": "WH/MO/00171",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 191,
+      "name": "WH/MO/00187",
+      "x_studio_qtypkg": 500.0,
+      "x_studio_finished_qtyplt": 500.0
+    },
+    {
+      "id": 53,
+      "name": "WH/MO/00054-001",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 196,
+      "name": "WH/MO/00191",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 149,
+      "name": "WH/MO/00145",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 202,
+      "name": "WH/MO/00196",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 81,
+      "name": "WH/MO/00082",
+      "x_studio_qtypkg": 98.7,
+      "x_studio_finished_qtyplt": 98.7
+    },
+    {
+      "id": 208,
+      "name": "WH/MO/00202",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 213,
+      "name": "WH/MO/00207-001",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 217,
+      "name": "WH/MO/00211",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 218,
+      "name": "WH/MO/00212-001",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 220,
+      "name": "WH/MO/00214",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 227,
+      "name": "WH/MO/00221-001",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 148,
+      "name": "WH/MO/00039-002",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 203,
+      "name": "WH/MO/00197-001",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 244,
+      "name": "WH/MO/00237",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 246,
+      "name": "WH/MO/00239",
+      "x_studio_qtypkg": 0.03,
+      "x_studio_finished_qtyplt": 0.03
+    },
+    {
+      "id": 248,
+      "name": "WH/MO/00241",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 120,
+      "name": "WH/MO/00120",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 130,
+      "name": "WH/MO/00128",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 234,
+      "name": "WH/MO/00197-002",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 250,
+      "name": "WH/MO/00243",
+      "x_studio_qtypkg": 41.8,
+      "x_studio_finished_qtyplt": 41.8
+    },
+    {
+      "id": 268,
+      "name": "WH/MO/00261",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 272,
+      "name": "WH/MO/00265",
+      "x_studio_qtypkg": 220.0,
+      "x_studio_finished_qtyplt": 220.0
+    },
+    {
+      "id": 273,
+      "name": "WH/MO/00266",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 274,
+      "name": "WH/MO/00267-001",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 110,
+      "name": "WH/MO/00110-001",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 118,
+      "name": "WH/MO/00118",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 122,
+      "name": "WH/MO/00122",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 289,
+      "name": "WH/MO/00281",
+      "x_studio_qtypkg": 0.075,
+      "x_studio_finished_qtyplt": 0.075
+    },
+    {
+      "id": 290,
+      "name": "WH/MO/00282",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 111,
+      "name": "WH/MO/00111",
+      "x_studio_qtypkg": 90.72,
+      "x_studio_finished_qtyplt": 90.72
+    },
+    {
+      "id": 293,
+      "name": "WH/MO/00285",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 297,
+      "name": "WH/MO/00289",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 299,
+      "name": "WH/MO/00291",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 300,
+      "name": "WH/MO/00292",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 301,
+      "name": "WH/MO/00293",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 119,
+      "name": "WH/MO/00119",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 302,
+      "name": "WH/MO/00294",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 304,
+      "name": "WH/MO/00296",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 305,
+      "name": "WH/MO/00297",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 306,
+      "name": "WH/MO/00298",
+      "x_studio_qtypkg": 308.56,
+      "x_studio_finished_qtyplt": 308.56
+    },
+    {
+      "id": 112,
+      "name": "WH/MO/00112",
+      "x_studio_qtypkg": 77.28,
+      "x_studio_finished_qtyplt": 77.28
+    },
+    {
+      "id": 307,
+      "name": "WH/MO/00299",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 314,
+      "name": "WH/MO/00207-002",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 319,
+      "name": "WH/MO/00310",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 321,
+      "name": "WH/MO/00312",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 330,
+      "name": "WH/MO/00319",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 331,
+      "name": "WH/MO/00320",
+      "x_studio_qtypkg": 0.35,
+      "x_studio_finished_qtyplt": 0.35
+    },
+    {
+      "id": 166,
+      "name": "WH/MO/00162",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 341,
+      "name": "WH/MO/00330",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 342,
+      "name": "WH/MO/00331",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 346,
+      "name": "WH/MO/00335",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 349,
+      "name": "WH/MO/00338",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 352,
+      "name": "WH/MO/00341",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 209,
+      "name": "WH/MO/00203",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 356,
+      "name": "WH/MO/00221-002",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 362,
+      "name": "WH/MO/00347-001",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 363,
+      "name": "WH/MO/00348",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 364,
+      "name": "WH/MO/00349",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 365,
+      "name": "WH/MO/00350",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 366,
+      "name": "WH/MO/00351",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 368,
+      "name": "WH/MO/00353",
+      "x_studio_qtypkg": 0.35,
+      "x_studio_finished_qtyplt": 0.35
+    },
+    {
+      "id": 374,
+      "name": "WH/MO/00359-001",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 375,
+      "name": "WH/MO/00360",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 376,
+      "name": "WH/MO/00361",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 377,
+      "name": "WH/MO/00347-002",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 378,
+      "name": "WH/MO/00362",
+      "x_studio_qtypkg": 65.55,
+      "x_studio_finished_qtyplt": 65.55
+    },
+    {
+      "id": 379,
+      "name": "WH/MO/00212-002",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 412,
+      "name": "WH/MO/00393",
+      "x_studio_qtypkg": 0.06,
+      "x_studio_finished_qtyplt": 0.06
+    },
+    {
+      "id": 417,
+      "name": "WH/MO/00398",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 422,
+      "name": "WH/MO/00403",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 423,
+      "name": "WH/MO/00404",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 425,
+      "name": "WH/MO/00406",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 216,
+      "name": "WH/MO/00210",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 426,
+      "name": "WH/MO/00407-001",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 429,
+      "name": "WH/MO/00410",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 303,
+      "name": "WH/MO/00295",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 442,
+      "name": "WH/MO/00423",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 414,
+      "name": "WH/MO/00395",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 247,
+      "name": "WH/MO/00240",
+      "x_studio_qtypkg": 0.025,
+      "x_studio_finished_qtyplt": 0.025
+    },
+    {
+      "id": 447,
+      "name": "WH/MO/00428",
+      "x_studio_qtypkg": 86.4,
+      "x_studio_finished_qtyplt": 86.4
+    },
+    {
+      "id": 451,
+      "name": "WH/MO/00432",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 454,
+      "name": "WH/MO/00435",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 455,
+      "name": "WH/MO/00436",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 458,
+      "name": "WH/MO/00439",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 194,
+      "name": "WH/MO/00054-002",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 466,
+      "name": "WH/MO/00442",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 470,
+      "name": "WH/MO/00446",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 480,
+      "name": "WH/MO/00453",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 494,
+      "name": "WH/MO/00467",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 496,
+      "name": "WH/MO/00469",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 24,
+      "name": "WH/MO/00025",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 518,
+      "name": "WH/MO/00488",
+      "x_studio_qtypkg": 302.4,
+      "x_studio_finished_qtyplt": 302.4
+    },
+    {
+      "id": 524,
+      "name": "WH/MO/00494",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 481,
+      "name": "WH/MO/00454",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 528,
+      "name": "WH/MO/00498",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 529,
+      "name": "WH/MO/00499-001",
+      "x_studio_qtypkg": 0.275,
+      "x_studio_finished_qtyplt": 0.275
+    },
+    {
+      "id": 320,
+      "name": "WH/MO/00311",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 245,
+      "name": "WH/MO/00238",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 531,
+      "name": "WH/MO/00501",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 534,
+      "name": "WH/MO/00504",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 538,
+      "name": "WH/MO/00508",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 535,
+      "name": "WH/MO/00505-001",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 548,
+      "name": "WH/MO/00518",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 558,
+      "name": "WH/MO/00505-002",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 569,
+      "name": "WH/MO/00536-001",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 577,
+      "name": "WH/MO/00544",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 579,
+      "name": "WH/MO/00546",
+      "x_studio_qtypkg": 71.68,
+      "x_studio_finished_qtyplt": 71.68
+    },
+    {
+      "id": 580,
+      "name": "WH/MO/00547",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 581,
+      "name": "WH/MO/00548",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 572,
+      "name": "WH/MO/00539",
+      "x_studio_qtypkg": 220.0,
+      "x_studio_finished_qtyplt": 220.0
+    },
+    {
+      "id": 573,
+      "name": "WH/MO/00540",
+      "x_studio_qtypkg": 220.0,
+      "x_studio_finished_qtyplt": 220.0
+    },
+    {
+      "id": 589,
+      "name": "WH/MO/00555",
+      "x_studio_qtypkg": 0.065,
+      "x_studio_finished_qtyplt": 0.065
+    },
+    {
+      "id": 591,
+      "name": "WH/MO/00557",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 592,
+      "name": "WH/MO/00558",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 537,
+      "name": "WH/MO/00507",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 358,
+      "name": "WH/MO/00343",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 359,
+      "name": "WH/MO/00344",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 357,
+      "name": "WH/MO/00342",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 360,
+      "name": "WH/MO/00345",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 361,
+      "name": "WH/MO/00346",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 602,
+      "name": "WH/MO/00407-002",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 604,
+      "name": "WH/MO/00568",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 605,
+      "name": "WH/MO/00569",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 609,
+      "name": "WH/MO/00573",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 610,
+      "name": "WH/MO/00574",
+      "x_studio_qtypkg": 2.0,
+      "x_studio_finished_qtyplt": 2.0
+    },
+    {
+      "id": 621,
+      "name": "WH/MO/00585",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 626,
+      "name": "WH/MO/00590",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 456,
+      "name": "WH/MO/00437",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 630,
+      "name": "WH/MO/00359-002",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 635,
+      "name": "WH/MO/00598",
+      "x_studio_qtypkg": 290.0,
+      "x_studio_finished_qtyplt": 290.0
+    },
+    {
+      "id": 640,
+      "name": "WH/MO/00603",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 647,
+      "name": "WH/MO/00499-002",
+      "x_studio_qtypkg": 0.275,
+      "x_studio_finished_qtyplt": 0.275
+    },
+    {
+      "id": 652,
+      "name": "WH/MO/00614",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 655,
+      "name": "WH/MO/00616",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 657,
+      "name": "WH/MO/00618",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 658,
+      "name": "WH/MO/00619",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 659,
+      "name": "WH/MO/00620",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 664,
+      "name": "WH/MO/00625",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 665,
+      "name": "WH/MO/00626",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 666,
+      "name": "WH/MO/00627",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 684,
+      "name": "WH/MO/00639",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 688,
+      "name": "WH/MO/00643",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 643,
+      "name": "WH/MO/00606",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 692,
+      "name": "WH/MO/00647",
+      "x_studio_qtypkg": 500.0,
+      "x_studio_finished_qtyplt": 500.0
+    },
+    {
+      "id": 693,
+      "name": "WH/MO/00648",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 696,
+      "name": "WH/MO/00651",
+      "x_studio_qtypkg": 100.0,
+      "x_studio_finished_qtyplt": 100.0
+    },
+    {
+      "id": 698,
+      "name": "WH/MO/00653",
+      "x_studio_qtypkg": 46.2,
+      "x_studio_finished_qtyplt": 46.2
+    },
+    {
+      "id": 590,
+      "name": "WH/MO/00556",
+      "x_studio_qtypkg": 0.055,
+      "x_studio_finished_qtyplt": 0.055
+    },
+    {
+      "id": 701,
+      "name": "WH/MO/00656",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 707,
+      "name": "WH/MO/00662",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1007,
+      "name": "WH/MO/00935",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 717,
+      "name": "WH/MO/00672",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 578,
+      "name": "WH/MO/00545",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 656,
+      "name": "WH/MO/00617",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 697,
+      "name": "WH/MO/00652",
+      "x_studio_qtypkg": 41.8,
+      "x_studio_finished_qtyplt": 41.8
+    },
+    {
+      "id": 733,
+      "name": "WH/MO/00688",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 739,
+      "name": "WH/MO/00694",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 740,
+      "name": "WH/MO/00695",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 749,
+      "name": "WH/MO/00536-002",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 769,
+      "name": "WH/MO/00722",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 774,
+      "name": "WH/MO/00726",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 549,
+      "name": "WH/MO/00519",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 718,
+      "name": "WH/MO/00673",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 787,
+      "name": "WH/MO/00737",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 793,
+      "name": "WH/MO/00743",
+      "x_studio_qtypkg": 0.35,
+      "x_studio_finished_qtyplt": 0.35
+    },
+    {
+      "id": 799,
+      "name": "WH/MO/00267-002",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 800,
+      "name": "WH/MO/00747",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 801,
+      "name": "WH/MO/00748",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 802,
+      "name": "WH/MO/00749-001",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 803,
+      "name": "WH/MO/00750",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 804,
+      "name": "WH/MO/00751-001",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 809,
+      "name": "WH/MO/00756",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 811,
+      "name": "WH/MO/00758",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 813,
+      "name": "WH/MO/00760-001",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 814,
+      "name": "WH/MO/00761",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 815,
+      "name": "WH/MO/00762",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 816,
+      "name": "WH/MO/00763",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 817,
+      "name": "WH/MO/00764",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 818,
+      "name": "WH/MO/00765",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 819,
+      "name": "WH/MO/00766",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 820,
+      "name": "WH/MO/00767",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 821,
+      "name": "WH/MO/00768",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 822,
+      "name": "WH/MO/00769",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 823,
+      "name": "WH/MO/00770",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 825,
+      "name": "WH/MO/00772",
+      "x_studio_qtypkg": 0.075,
+      "x_studio_finished_qtyplt": 0.075
+    },
+    {
+      "id": 826,
+      "name": "WH/MO/00773",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 827,
+      "name": "WH/MO/00774",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 834,
+      "name": "WH/MO/00781",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 835,
+      "name": "WH/MO/00782",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 838,
+      "name": "WH/MO/00785",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 708,
+      "name": "WH/MO/00663",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 839,
+      "name": "WH/MO/00267-003",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 842,
+      "name": "WH/MO/00788",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 847,
+      "name": "WH/MO/00793",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 848,
+      "name": "WH/MO/00794",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 850,
+      "name": "WH/MO/00796",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 857,
+      "name": "WH/MO/00800",
+      "x_studio_qtypkg": 142.56,
+      "x_studio_finished_qtyplt": 142.56
+    },
+    {
+      "id": 858,
+      "name": "WH/MO/00801",
+      "x_studio_qtypkg": 142.56,
+      "x_studio_finished_qtyplt": 142.56
+    },
+    {
+      "id": 859,
+      "name": "WH/MO/00802",
+      "x_studio_qtypkg": 61.82,
+      "x_studio_finished_qtyplt": 61.82
+    },
+    {
+      "id": 860,
+      "name": "WH/MO/00803",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 862,
+      "name": "WH/MO/00805",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 875,
+      "name": "WH/MO/00818",
+      "x_studio_qtypkg": 90.72,
+      "x_studio_finished_qtyplt": 90.72
+    },
+    {
+      "id": 883,
+      "name": "WH/MO/00821",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 885,
+      "name": "WH/MO/00823",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 886,
+      "name": "WH/MO/00760-002",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 812,
+      "name": "WH/MO/00759",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 890,
+      "name": "WH/MO/00267-004",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 898,
+      "name": "WH/MO/00831",
+      "x_studio_qtypkg": 43.2,
+      "x_studio_finished_qtyplt": 43.2
+    },
+    {
+      "id": 906,
+      "name": "WH/MO/00839",
+      "x_studio_qtypkg": 369.0,
+      "x_studio_finished_qtyplt": 369.0
+    },
+    {
+      "id": 907,
+      "name": "WH/MO/00840",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 917,
+      "name": "WH/MO/00850",
+      "x_studio_qtypkg": 93.6,
+      "x_studio_finished_qtyplt": 93.6
+    },
+    {
+      "id": 918,
+      "name": "WH/MO/00851",
+      "x_studio_qtypkg": 93.6,
+      "x_studio_finished_qtyplt": 93.6
+    },
+    {
+      "id": 919,
+      "name": "WH/MO/00852",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 921,
+      "name": "WH/MO/00854",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 922,
+      "name": "WH/MO/00855",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 923,
+      "name": "WH/MO/00856",
+      "x_studio_qtypkg": 87.48,
+      "x_studio_finished_qtyplt": 87.48
+    },
+    {
+      "id": 928,
+      "name": "WH/MO/00858",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 935,
+      "name": "WH/MO/00865",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 936,
+      "name": "WH/MO/00866",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 772,
+      "name": "WH/MO/00725",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 794,
+      "name": "WH/MO/00744-001",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 941,
+      "name": "WH/MO/00871",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 944,
+      "name": "WH/MO/00874",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 946,
+      "name": "WH/MO/00876",
+      "x_studio_qtypkg": 0.03,
+      "x_studio_finished_qtyplt": 0.03
+    },
+    {
+      "id": 947,
+      "name": "WH/MO/00877",
+      "x_studio_qtypkg": 0.4,
+      "x_studio_finished_qtyplt": 0.4
+    },
+    {
+      "id": 952,
+      "name": "WH/MO/00882",
+      "x_studio_qtypkg": 0.275,
+      "x_studio_finished_qtyplt": 0.275
+    },
+    {
+      "id": 953,
+      "name": "WH/MO/00883",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 775,
+      "name": "WH/MO/00727",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 964,
+      "name": "WH/MO/00894",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 967,
+      "name": "WH/MO/00897",
+      "x_studio_qtypkg": 2.5,
+      "x_studio_finished_qtyplt": 2.5
+    },
+    {
+      "id": 824,
+      "name": "WH/MO/00771",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 977,
+      "name": "WH/MO/00744-002",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 796,
+      "name": "WH/MO/00746",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 979,
+      "name": "WH/MO/00908",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 980,
+      "name": "WH/MO/00909",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 982,
+      "name": "WH/MO/00911",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 983,
+      "name": "WH/MO/00912",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 984,
+      "name": "WH/MO/00913",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 910,
+      "name": "WH/MO/00843-001",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 849,
+      "name": "WH/MO/00795",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 990,
+      "name": "WH/MO/00918",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 994,
+      "name": "WH/MO/00922",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 995,
+      "name": "WH/MO/00923",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 996,
+      "name": "WH/MO/00924-001",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 998,
+      "name": "WH/MO/00926",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 999,
+      "name": "WH/MO/00927",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1000,
+      "name": "WH/MO/00928",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1002,
+      "name": "WH/MO/00930",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1003,
+      "name": "WH/MO/00931",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1004,
+      "name": "WH/MO/00932",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1005,
+      "name": "WH/MO/00933",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1006,
+      "name": "WH/MO/00934",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1008,
+      "name": "WH/MO/00936",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1009,
+      "name": "WH/MO/00937",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1010,
+      "name": "WH/MO/00938",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1011,
+      "name": "WH/MO/00939",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1013,
+      "name": "WH/MO/00941",
+      "x_studio_qtypkg": 92.8,
+      "x_studio_finished_qtyplt": 92.8
+    },
+    {
+      "id": 1026,
+      "name": "WH/MO/00952",
+      "x_studio_qtypkg": 0.065,
+      "x_studio_finished_qtyplt": 0.065
+    },
+    {
+      "id": 1028,
+      "name": "WH/MO/00954",
+      "x_studio_qtypkg": 0.055,
+      "x_studio_finished_qtyplt": 0.055
+    },
+    {
+      "id": 1029,
+      "name": "WH/MO/00955",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1040,
+      "name": "WH/MO/00966",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 1048,
+      "name": "WH/MO/00972",
+      "x_studio_qtypkg": 0.06,
+      "x_studio_finished_qtyplt": 0.06
+    },
+    {
+      "id": 1061,
+      "name": "WH/MO/00985",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 1067,
+      "name": "WH/MO/00991",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1070,
+      "name": "WH/MO/00994",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1071,
+      "name": "WH/MO/00995",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1073,
+      "name": "WH/MO/00997",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1074,
+      "name": "WH/MO/00998",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1075,
+      "name": "WH/MO/00999",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1083,
+      "name": "WH/MO/01007-001",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1085,
+      "name": "WH/MO/00749-002",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 1088,
+      "name": "WH/MO/01010",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1089,
+      "name": "WH/MO/01011",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1049,
+      "name": "WH/MO/00973",
+      "x_studio_qtypkg": 0.06,
+      "x_studio_finished_qtyplt": 0.06
+    },
+    {
+      "id": 1001,
+      "name": "WH/MO/00929",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 942,
+      "name": "WH/MO/00872",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 945,
+      "name": "WH/MO/00875",
+      "x_studio_qtypkg": 0.15,
+      "x_studio_finished_qtyplt": 0.15
+    },
+    {
+      "id": 1096,
+      "name": "WH/MO/01018",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1097,
+      "name": "WH/MO/00843-002",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 1098,
+      "name": "WH/MO/01019",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1103,
+      "name": "WH/MO/01024",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1107,
+      "name": "WH/MO/01028",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1109,
+      "name": "WH/MO/01030",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1111,
+      "name": "WH/MO/01032",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1112,
+      "name": "WH/MO/01033",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1130,
+      "name": "WH/MO/01051-001",
+      "x_studio_qtypkg": 249.0,
+      "x_studio_finished_qtyplt": 249.0
+    },
+    {
+      "id": 1149,
+      "name": "WH/MO/01069",
+      "x_studio_qtypkg": 91.8,
+      "x_studio_finished_qtyplt": 91.8
+    },
+    {
+      "id": 1152,
+      "name": "WH/MO/01072",
+      "x_studio_qtypkg": 13.44,
+      "x_studio_finished_qtyplt": 13.44
+    },
+    {
+      "id": 1160,
+      "name": "WH/MO/01080",
+      "x_studio_qtypkg": 2.0,
+      "x_studio_finished_qtyplt": 2.0
+    },
+    {
+      "id": 1177,
+      "name": "WH/MO/01097",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1174,
+      "name": "WH/MO/01094",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1162,
+      "name": "WH/MO/01082",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1163,
+      "name": "WH/MO/01083",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 19,
+      "name": "WH/MO/00020",
+      "x_studio_qtypkg": 30.0,
+      "x_studio_finished_qtyplt": 30.0
+    },
+    {
+      "id": 17,
+      "name": "WH/MO/00018",
+      "x_studio_qtypkg": 8.0,
+      "x_studio_finished_qtyplt": 8.0
+    },
+    {
+      "id": 1204,
+      "name": "WH/MO/01121",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1220,
+      "name": "WH/MO/01137",
+      "x_studio_qtypkg": 500.0,
+      "x_studio_finished_qtyplt": 500.0
+    },
+    {
+      "id": 1221,
+      "name": "WH/MO/00924-002",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1225,
+      "name": "WH/MO/01141",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 1226,
+      "name": "WH/MO/01142",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 1227,
+      "name": "WH/MO/01143",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    },
+    {
+      "id": 1231,
+      "name": "WH/MO/01147",
+      "x_studio_qtypkg": 0.03,
+      "x_studio_finished_qtyplt": 0.03
+    },
+    {
+      "id": 1234,
+      "name": "WH/MO/01150",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1237,
+      "name": "WH/MO/01153",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1238,
+      "name": "WH/MO/01154",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1239,
+      "name": "WH/MO/01155",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1259,
+      "name": "WH/MO/01175",
+      "x_studio_qtypkg": 0.03,
+      "x_studio_finished_qtyplt": 0.03
+    },
+    {
+      "id": 1260,
+      "name": "WH/MO/01176",
+      "x_studio_qtypkg": 61.6,
+      "x_studio_finished_qtyplt": 61.6
+    },
+    {
+      "id": 1262,
+      "name": "WH/MO/01178",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1266,
+      "name": "WH/MO/00924-003",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1267,
+      "name": "WH/MO/01181",
+      "x_studio_qtypkg": 77.76,
+      "x_studio_finished_qtyplt": 77.76
+    },
+    {
+      "id": 1272,
+      "name": "WH/MO/01186",
+      "x_studio_qtypkg": 90.72,
+      "x_studio_finished_qtyplt": 90.72
+    },
+    {
+      "id": 1274,
+      "name": "WH/MO/01188",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1105,
+      "name": "WH/MO/01026",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 1106,
+      "name": "WH/MO/01027",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1064,
+      "name": "WH/MO/00988",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1173,
+      "name": "WH/MO/01093",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1277,
+      "name": "WH/MO/01191",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1292,
+      "name": "WH/MO/01206",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1303,
+      "name": "WH/MO/01217",
+      "x_studio_qtypkg": 43.01,
+      "x_studio_finished_qtyplt": 43.01
+    },
+    {
+      "id": 1304,
+      "name": "WH/MO/01218",
+      "x_studio_qtypkg": 43.01,
+      "x_studio_finished_qtyplt": 43.01
+    },
+    {
+      "id": 1191,
+      "name": "WH/MO/01110-001",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1313,
+      "name": "WH/MO/01227",
+      "x_studio_qtypkg": 86.4,
+      "x_studio_finished_qtyplt": 86.4
+    },
+    {
+      "id": 1166,
+      "name": "WH/MO/01086",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1104,
+      "name": "WH/MO/01025",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1241,
+      "name": "WH/MO/01157",
+      "x_studio_qtypkg": 0.15,
+      "x_studio_finished_qtyplt": 0.15
+    },
+    {
+      "id": 1021,
+      "name": "WH/MO/00947",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1186,
+      "name": "WH/MO/01106",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1235,
+      "name": "WH/MO/01151",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1236,
+      "name": "WH/MO/01152",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1273,
+      "name": "WH/MO/01187",
+      "x_studio_qtypkg": 290.0,
+      "x_studio_finished_qtyplt": 290.0
+    },
+    {
+      "id": 1113,
+      "name": "WH/MO/01034",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1321,
+      "name": "WH/MO/01230",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1327,
+      "name": "WH/MO/01236",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 1027,
+      "name": "WH/MO/00953",
+      "x_studio_qtypkg": 0.065,
+      "x_studio_finished_qtyplt": 0.065
+    },
+    {
+      "id": 1341,
+      "name": "WH/MO/01250",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1072,
+      "name": "WH/MO/00996",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1346,
+      "name": "WH/MO/01255",
+      "x_studio_qtypkg": 220.0,
+      "x_studio_finished_qtyplt": 220.0
+    },
+    {
+      "id": 1360,
+      "name": "WH/MO/01269",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1361,
+      "name": "WH/MO/01270",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1366,
+      "name": "WH/MO/01275",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1368,
+      "name": "WH/MO/01277",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1369,
+      "name": "WH/MO/01278",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1371,
+      "name": "WH/MO/01280",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1370,
+      "name": "WH/MO/01279",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1375,
+      "name": "WH/MO/01282",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 1386,
+      "name": "WH/MO/01293",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1397,
+      "name": "WH/MO/01304",
+      "x_studio_qtypkg": 0.35,
+      "x_studio_finished_qtyplt": 0.35
+    },
+    {
+      "id": 1271,
+      "name": "WH/MO/01185",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1398,
+      "name": "WH/MO/01305",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 908,
+      "name": "WH/MO/00841",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1400,
+      "name": "WH/MO/00751-002",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 988,
+      "name": "WH/MO/00916",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 1365,
+      "name": "WH/MO/01274",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1404,
+      "name": "WH/MO/01310",
+      "x_studio_qtypkg": 0.06,
+      "x_studio_finished_qtyplt": 0.06
+    },
+    {
+      "id": 1405,
+      "name": "WH/MO/01311",
+      "x_studio_qtypkg": 38.4,
+      "x_studio_finished_qtyplt": 38.4
+    },
+    {
+      "id": 1407,
+      "name": "WH/MO/01313",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1411,
+      "name": "WH/MO/01317",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1412,
+      "name": "WH/MO/01318",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1428,
+      "name": "WH/MO/01334",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1429,
+      "name": "WH/MO/01335",
+      "x_studio_qtypkg": 91.08,
+      "x_studio_finished_qtyplt": 91.08
+    },
+    {
+      "id": 1431,
+      "name": "WH/MO/01337",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1432,
+      "name": "WH/MO/01338",
+      "x_studio_qtypkg": 91.08,
+      "x_studio_finished_qtyplt": 91.08
+    },
+    {
+      "id": 1433,
+      "name": "WH/MO/01339",
+      "x_studio_qtypkg": 90.48,
+      "x_studio_finished_qtyplt": 90.48
+    },
+    {
+      "id": 1434,
+      "name": "WH/MO/01340",
+      "x_studio_qtypkg": 90.72,
+      "x_studio_finished_qtyplt": 90.72
+    },
+    {
+      "id": 1435,
+      "name": "WH/MO/01341",
+      "x_studio_qtypkg": 91.08,
+      "x_studio_finished_qtyplt": 91.08
+    },
+    {
+      "id": 1436,
+      "name": "WH/MO/01342",
+      "x_studio_qtypkg": 91.08,
+      "x_studio_finished_qtyplt": 91.08
+    },
+    {
+      "id": 1449,
+      "name": "WH/MO/01354",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 997,
+      "name": "WH/MO/00925",
+      "x_studio_qtypkg": 139.12,
+      "x_studio_finished_qtyplt": 139.12
+    },
+    {
+      "id": 1461,
+      "name": "WH/MO/01366",
+      "x_studio_qtypkg": 66.41,
+      "x_studio_finished_qtyplt": 66.41
+    },
+    {
+      "id": 1463,
+      "name": "WH/MO/01368",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1473,
+      "name": "WH/MO/01377",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1468,
+      "name": "WH/MO/01373",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1477,
+      "name": "WH/MO/01381",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1062,
+      "name": "WH/MO/00986",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1322,
+      "name": "WH/MO/01231",
+      "x_studio_qtypkg": 190.0,
+      "x_studio_finished_qtyplt": 190.0
+    },
+    {
+      "id": 1486,
+      "name": "WH/MO/01390",
+      "x_studio_qtypkg": 67.2,
+      "x_studio_finished_qtyplt": 67.2
+    },
+    {
+      "id": 1492,
+      "name": "WH/MO/01393",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1494,
+      "name": "WH/MO/01394",
+      "x_studio_qtypkg": 66.41,
+      "x_studio_finished_qtyplt": 66.41
+    },
+    {
+      "id": 1513,
+      "name": "WH/MO/01413",
+      "x_studio_qtypkg": 190.0,
+      "x_studio_finished_qtyplt": 190.0
+    },
+    {
+      "id": 1514,
+      "name": "WH/MO/01414",
+      "x_studio_qtypkg": 190.0,
+      "x_studio_finished_qtyplt": 190.0
+    },
+    {
+      "id": 1390,
+      "name": "WH/MO/01297",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 1517,
+      "name": "WH/MO/01417-001",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1522,
+      "name": "WH/MO/01422",
+      "x_studio_qtypkg": 61.82,
+      "x_studio_finished_qtyplt": 61.82
+    },
+    {
+      "id": 1261,
+      "name": "WH/MO/01177",
+      "x_studio_qtypkg": 61.6,
+      "x_studio_finished_qtyplt": 61.6
+    },
+    {
+      "id": 1523,
+      "name": "WH/MO/01110-002",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1524,
+      "name": "WH/MO/01423",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1525,
+      "name": "WH/MO/01051-002",
+      "x_studio_qtypkg": 249.0,
+      "x_studio_finished_qtyplt": 249.0
+    },
+    {
+      "id": 1526,
+      "name": "WH/MO/01424",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1528,
+      "name": "WH/MO/01426",
+      "x_studio_qtypkg": 41.8,
+      "x_studio_finished_qtyplt": 41.8
+    },
+    {
+      "id": 1538,
+      "name": "WH/MO/01436",
+      "x_studio_qtypkg": 23.59,
+      "x_studio_finished_qtyplt": 23.59
+    },
+    {
+      "id": 1556,
+      "name": "WH/MO/01454",
+      "x_studio_qtypkg": 0.125,
+      "x_studio_finished_qtyplt": 0.125
+    },
+    {
+      "id": 1558,
+      "name": "WH/MO/01456",
+      "x_studio_qtypkg": 35.0,
+      "x_studio_finished_qtyplt": 35.0
+    },
+    {
+      "id": 1563,
+      "name": "WH/MO/01460",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 1571,
+      "name": "WH/MO/01468",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1574,
+      "name": "WH/MO/01471",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 1575,
+      "name": "WH/MO/01472",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 1090,
+      "name": "WH/MO/01012",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1537,
+      "name": "WH/MO/01435",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 1579,
+      "name": "WH/MO/01417-002",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1467,
+      "name": "WH/MO/01372",
+      "x_studio_qtypkg": 0.05,
+      "x_studio_finished_qtyplt": 0.05
+    },
+    {
+      "id": 1586,
+      "name": "WH/MO/01481",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1587,
+      "name": "WH/MO/01482",
+      "x_studio_qtypkg": 0.5,
+      "x_studio_finished_qtyplt": 0.5
+    },
+    {
+      "id": 1588,
+      "name": "WH/MO/01483",
+      "x_studio_qtypkg": 0.03,
+      "x_studio_finished_qtyplt": 0.03
+    },
+    {
+      "id": 1511,
+      "name": "WH/MO/01411",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1591,
+      "name": "WH/MO/01486",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 1592,
+      "name": "WH/MO/01487",
+      "x_studio_qtypkg": 70.0,
+      "x_studio_finished_qtyplt": 70.0
+    },
+    {
+      "id": 1594,
+      "name": "WH/MO/01489",
+      "x_studio_qtypkg": 70.4,
+      "x_studio_finished_qtyplt": 70.4
+    },
+    {
+      "id": 1595,
+      "name": "WH/MO/01490",
+      "x_studio_qtypkg": 2.0,
+      "x_studio_finished_qtyplt": 2.0
+    },
+    {
+      "id": 1578,
+      "name": "WH/MO/01475",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1597,
+      "name": "WH/MO/01492",
+      "x_studio_qtypkg": 2.0,
+      "x_studio_finished_qtyplt": 2.0
+    },
+    {
+      "id": 1394,
+      "name": "WH/MO/01301",
+      "x_studio_qtypkg": 38.4,
+      "x_studio_finished_qtyplt": 38.4
+    },
+    {
+      "id": 1395,
+      "name": "WH/MO/01302",
+      "x_studio_qtypkg": 38.4,
+      "x_studio_finished_qtyplt": 38.4
+    },
+    {
+      "id": 1406,
+      "name": "WH/MO/01312",
+      "x_studio_qtypkg": 38.4,
+      "x_studio_finished_qtyplt": 38.4
+    },
+    {
+      "id": 1598,
+      "name": "WH/MO/01493",
+      "x_studio_qtypkg": 20.0,
+      "x_studio_finished_qtyplt": 20.0
+    },
+    {
+      "id": 1363,
+      "name": "WH/MO/01272",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 1430,
+      "name": "WH/MO/01336",
+      "x_studio_qtypkg": 90.72,
+      "x_studio_finished_qtyplt": 90.72
+    },
+    {
+      "id": 1601,
+      "name": "WH/MO/01496",
+      "x_studio_qtypkg": 1.0,
+      "x_studio_finished_qtyplt": 1.0
+    },
+    {
+      "id": 1609,
+      "name": "WH/MO/01504",
+      "x_studio_qtypkg": 75.07,
+      "x_studio_finished_qtyplt": 75.07
+    },
+    {
+      "id": 1616,
+      "name": "WH/MO/01511",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1617,
+      "name": "WH/MO/01512",
+      "x_studio_qtypkg": 106.92,
+      "x_studio_finished_qtyplt": 106.92
+    },
+    {
+      "id": 1619,
+      "name": "WH/MO/01514",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1520,
+      "name": "WH/MO/01420",
+      "x_studio_qtypkg": 0.15,
+      "x_studio_finished_qtyplt": 0.15
+    },
+    {
+      "id": 1620,
+      "name": "WH/MO/01515",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1624,
+      "name": "WH/MO/01519",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1627,
+      "name": "WH/MO/01522",
+      "x_studio_qtypkg": 0.25,
+      "x_studio_finished_qtyplt": 0.25
+    },
+    {
+      "id": 1630,
+      "name": "WH/MO/01007-002",
+      "x_studio_qtypkg": 0.1,
+      "x_studio_finished_qtyplt": 0.1
+    },
+    {
+      "id": 278,
+      "name": "WH/MO/00110-002",
+      "x_studio_qtypkg": 90.0,
+      "x_studio_finished_qtyplt": 90.0
+    },
+    {
+      "id": 1462,
+      "name": "WH/MO/01367",
+      "x_studio_qtypkg": 66.41,
+      "x_studio_finished_qtyplt": 66.41
+    },
+    {
+      "id": 1495,
+      "name": "WH/MO/01395",
+      "x_studio_qtypkg": 66.41,
+      "x_studio_finished_qtyplt": 66.41
+    },
+    {
+      "id": 1293,
+      "name": "WH/MO/01207",
+      "x_studio_qtypkg": 1.5,
+      "x_studio_finished_qtyplt": 1.5
+    },
+    {
+      "id": 1557,
+      "name": "WH/MO/01455",
+      "x_studio_qtypkg": 0.3,
+      "x_studio_finished_qtyplt": 0.3
+    },
+    {
+      "id": 1110,
+      "name": "WH/MO/01031",
+      "x_studio_qtypkg": 0.2,
+      "x_studio_finished_qtyplt": 0.2
+    },
+    {
+      "id": 1593,
+      "name": "WH/MO/01488",
+      "x_studio_qtypkg": 93.0,
+      "x_studio_finished_qtyplt": 93.0
+    }
+  ]
+}
