@@ -357,6 +357,98 @@ def step_recreate_views(call, commit):
 
 
 # --------------------------------------------------------------------------
+# Step 4b: Migrate prod's product.packaging records to v19 staging.
+# Requires the msp_packaging module (which redeclares product.packaging) to
+# be installed. Idempotent — only creates packagings that don't already
+# exist (matched by product + name).
+# --------------------------------------------------------------------------
+
+def step_copy_packagings_from_prod(call, commit):
+    print("\n=== Step 4b: Copy product.packaging records from prod ===")
+    if not all(os.environ.get(f"ODOO_PROD_{k}") for k in ["URL", "DB", "USER", "API_KEY"]):
+        print("  ODOO_PROD_* env vars not set; skipping packaging migration")
+        return
+
+    # Verify msp_packaging is installed (model product.packaging must exist)
+    pp_model = call("ir.model", "search", [[("model", "=", "product.packaging")]])
+    if not pp_model:
+        print("  product.packaging model not found on target. msp_packaging not installed?")
+        print("  Skipping (push the module first, then re-run).")
+        return
+
+    prod_call = connect("prod")
+    prod_pkgs = prod_call("product.packaging", "search_read", [[]],
+                          {"fields": ["id", "name", "product_id", "qty", "barcode", "sequence"]})
+    print(f"  {len(prod_pkgs)} product.packaging records on prod")
+
+    # Build a fast lookup of prod product.product id -> default_code/name
+    prod_product_ids = list({p["product_id"][0] for p in prod_pkgs if p.get("product_id")})
+    prod_products = prod_call("product.product", "read", [prod_product_ids],
+                              {"fields": ["id", "default_code", "name"]})
+    prod_pp_by_id = {p["id"]: p for p in prod_products}
+
+    # On staging, find the equivalent product.product by id (IDs are usually
+    # preserved across the migration). Fallback to default_code match.
+    staging_pps = call("product.product", "read", [prod_product_ids],
+                       {"fields": ["id"]})
+    staging_pp_ids = {p["id"] for p in staging_pps}
+
+    # For each prod packaging, find/create the equivalent on staging.
+    created = skipped = failed = 0
+    for pkg in prod_pkgs:
+        if not pkg.get("product_id"):
+            continue
+        prod_pid = pkg["product_id"][0]
+        if prod_pid not in staging_pp_ids:
+            # Try by default_code as fallback
+            pp = prod_pp_by_id.get(prod_pid, {})
+            code = pp.get("default_code")
+            if code:
+                match = call("product.product", "search",
+                             [[("default_code", "=", code)]], {"limit": 1})
+                if match:
+                    target_pid = match[0]
+                else:
+                    skipped += 1
+                    continue
+            else:
+                skipped += 1
+                continue
+        else:
+            target_pid = prod_pid
+
+        # Skip if already exists (matched by product + name)
+        existing = call("product.packaging", "search",
+                        [[("product_id", "=", target_pid), ("name", "=", pkg["name"])]])
+        if existing:
+            skipped += 1
+            continue
+
+        if not commit:
+            created += 1
+            continue
+        try:
+            call("product.packaging", "create", [{
+                "name": pkg["name"],
+                "product_id": target_pid,
+                "qty": pkg["qty"],
+                "barcode": pkg.get("barcode") or False,
+                "sequence": pkg.get("sequence") or 1,
+                "sales": True,
+                "purchase": True,
+            }])
+            created += 1
+        except Exception as e:
+            failed += 1
+            print(f"  ! could not create '{pkg['name']}' for product {target_pid}: {str(e)[:120]}")
+
+    if commit:
+        print(f"  Created {created}, skipped (already present or no match) {skipped}, failed {failed}")
+    else:
+        print(f"  DRY-RUN: would create {created}, skip {skipped}")
+
+
+# --------------------------------------------------------------------------
 # Step 5: Optionally copy historical data from prod for the lost fields
 # --------------------------------------------------------------------------
 
@@ -407,6 +499,8 @@ def main():
                         help="actually apply changes (default: dry-run)")
     parser.add_argument("--copy-data", action="store_true",
                         help="also copy x_studio_qtypkg/finished_qtyplt historical values from prod (requires ODOO_PROD_* env vars)")
+    parser.add_argument("--copy-packagings", action="store_true",
+                        help="also recreate product.packaging records on target from prod (requires msp_packaging module + ODOO_PROD_* env vars)")
     args = parser.parse_args()
 
     print(f"Target: {args.target}, mode: {'COMMIT' if args.commit else 'dry-run'}")
@@ -416,6 +510,8 @@ def main():
     step_fix_qr_depends(call, args.commit)
     step_strip_broken_related(call, args.commit)
     step_recreate_views(call, args.commit)
+    if args.copy_packagings:
+        step_copy_packagings_from_prod(call, args.commit)
     if args.copy_data:
         step_copy_data_from_prod(call, args.commit)
 
