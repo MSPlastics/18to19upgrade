@@ -78,6 +78,45 @@ def connect(target):
 
 
 # --------------------------------------------------------------------------
+# Step 0: Install our new custom modules that aren't in the prod backup.
+# msp_packaging is a v19-only module (recreates v18's product.packaging),
+# so the migration won't have installed it. We do it here.
+# --------------------------------------------------------------------------
+
+NEW_MODULES = ["msp_packaging"]
+
+
+def step_install_new_modules(call, commit):
+    print("\n=== Step 0: Install new v19-only modules ===")
+    for mod_name in NEW_MODULES:
+        rows = call("ir.module.module", "search_read",
+                    [[("name", "=", mod_name)]],
+                    {"fields": ["id", "name", "state"]})
+        if not rows:
+            print(f"  {mod_name}: not found in addons (push the code first?)")
+            continue
+        info = rows[0]
+        if info["state"] == "installed":
+            print(f"  {mod_name}: already installed")
+            continue
+        if info["state"] in ("uninstalled", "uninstallable"):
+            if not commit:
+                print(f"  {mod_name}: would install (currently {info['state']})")
+                continue
+            try:
+                call("ir.module.module", "button_immediate_install", [[info["id"]]])
+                print(f"  {mod_name}: install requested OK")
+            except Exception as e:
+                msg = str(e)
+                if "another module operation" in msg:
+                    print(f"  {mod_name}: another op in progress; retry shortly")
+                else:
+                    print(f"  {mod_name}: install FAILED: {msg[-300:]}")
+        else:
+            print(f"  {mod_name}: state={info['state']} (no action)")
+
+
+# --------------------------------------------------------------------------
 # Step 1: Recreate lost Studio fields on mrp.production
 # --------------------------------------------------------------------------
 
@@ -506,6 +545,7 @@ def main():
     print(f"Target: {args.target}, mode: {'COMMIT' if args.commit else 'dry-run'}")
     call = connect(args.target)
 
+    step_install_new_modules(call, args.commit)
     step_create_lost_fields(call, args.commit)
     step_fix_qr_depends(call, args.commit)
     step_strip_broken_related(call, args.commit)
