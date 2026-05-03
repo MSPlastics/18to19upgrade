@@ -1,0 +1,112 @@
+<data>
+  <xpath expr="//button[@name='button_unbuild']" position="after">
+    <button string="Print Lables" name="828" type="action"/>
+    <button string="Print 2nd Label" name="861" type="action"/>
+  </xpath>
+  <xpath expr="//field[@name='show_valuation']" position="after">
+    <field filename="x_studio_product_drawings_filename" name="x_studio_product_drawings"/>
+    <field invisible="True" name="x_studio_product_drawings_filename"/>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/div[1]" position="after">
+    <field name="x_studio_rollcase_count" options="{&quot;enable_formatting&quot;:true,&quot;human_readable&quot;:false,&quot;decimals&quot;:0}"/>
+    <field name="x_studio_qtypkg"/>
+    <field name="x_studio_total_wgt_mo"/>
+  </xpath>
+  <xpath expr="//field[@name='bom_id']" position="attributes">
+    <attribute name="force_save">0</attribute>
+    <attribute name="options">{"horizontal":false}</attribute>
+    <attribute name="readonly">False</attribute>
+    <attribute name="required">False</attribute>
+  </xpath>
+  <xpath expr="//div[@name='bom_div']" position="after">
+    <field name="x_studio_roll_weight_limit_1"/>
+    <field name="x_studio_roll_diameter_limit_in_1"/>
+    <field name="x_studio_core_diameter_1"/>
+    <field name="x_studio_lanes_produced_per_master_roll"/>
+    <field name="x_studio_net_weight"/>
+    <field name="x_studio_ftunit"/>
+    <field name="x_studio_total_ft"/>
+    <field name="x_studio_ft_per_master_roll"/>
+    <field name="x_studio_full_master_rolls"/>
+    <field name="x_studio_ft_on_final_roll"/>
+  </xpath>
+  <xpath expr="//field[@name='user_id']" position="after">
+    <field name="x_studio_mil_1"/>
+    <field name="x_studio_density_1"/>
+    <field name="x_studio_custom_density" invisible="True"/>
+    <field name="x_studio_total_width_2"/>
+    <field name="x_studio_layers_of_film_1"/>
+    <field name="x_studio_blend_1" options="{'create_name_field': 'x_name'}"/>
+    <field name="x_studio_box_id"/>
+    <field name="x_studio_qr_data"/>
+    <field widget="image" name="x_studio_printvent" string="Print/Vent Pattern" options="{&quot;size&quot;:[0,270],&quot;zoom&quot;:false}" class="img-fluid"/>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='operations']/field[@name='workorder_ids']" position="inside">
+    <list editable="bottom" js_class="mrp_workorder_list_view" multi_edit="1">
+      <field name="consumption" column_invisible="True"/>
+      <field name="company_id" column_invisible="True"/>
+      <field name="is_produced" column_invisible="True"/>
+      <field name="is_user_working" column_invisible="True"/>
+      <field name="product_uom_id" readonly="0" column_invisible="True"/>
+      <field name="production_state" column_invisible="True"/>
+      <field name="production_bom_id" column_invisible="True"/>
+      <field name="qty_producing" column_invisible="True"/>
+      <field name="time_ids" column_invisible="True"/>
+      <field name="working_state" column_invisible="True"/>
+      <field name="operation_id" column_invisible="True" domain="['|', ('bom_id', '=', production_bom_id), ('bom_id', '=', False)]" context="{'default_workcenter_id': workcenter_id, 'default_company_id': company_id}"/>
+      <field name="sequence" widget="handle" column_invisible="parent.state != 'draft'"/>
+      <field name="name" string="Operation" readonly="state in ['cancel', 'done']"/>
+      <field name="allowed_employees" column_invisible="True"/>
+      <field name="all_employees_allowed" column_invisible="True"/>
+      <field name="employee_assigned_ids" widget="many2many_avatar_user" domain="not all_employees_allowed and [('id','in',allowed_employees)] or []" optional="hidden"/>
+      <field name="workcenter_id" readonly="state in ['cancel', 'done', 'progress']"/>
+      <field optional="show" name="x_studio_extrusion_diameter_limit" sum="Sum of New Related Field"/>
+      <field optional="show" name="x_studio_extrusion_roll_weight_limit_lbs" sum="Sum of Extrusion Roll Weight Limit (lbs) "/>
+      <field name="product_id" optional="show"/>
+      <field name="qty_remaining" optional="show" string="Quantity Remaining" column_invisible="parent.state == 'done'"/>
+      <field name="qty_produced" optional="show" string="Quantity Produced" column_invisible="parent.state != 'done'"/>
+      <field name="finished_lot_id" optional="hide" string="Lot/Serial"/>
+      <field name="date_start" optional="hide" readonly="state in ['progress', 'done', 'cancel']"/>
+      <field name="date_finished" optional="hide" readonly="state in ['progress', 'done', 'cancel']"/>
+      <field name="duration_expected" widget="float_time" sum="expected duration" readonly="state in ['cancel', 'done']"/>
+      <field name="duration" widget="mrp_timer" invisible="production_state == 'draft'" readonly="is_user_working" sum="real duration"/>
+      <field name="state" widget="badge" decoration-warning="state == 'progress'" decoration-success="state == 'done'" decoration-danger="state == 'cancel'" decoration-info="state not in ('progress', 'done', 'cancel')" column_invisible="parent and parent.state == 'draft'" invisible="production_state == 'draft'"/>
+      <field name="production_state" column_invisible="True"/>
+      <field name="employee_ids" widget="many2many_avatar_employee" readonly="1" nolabel="1"/>
+      <button name="button_start" type="object" string="Start" class="btn-success px-3" invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or state in ('done', 'cancel') or is_user_working"/>
+      <button name="button_pending" type="object" string="Pause" class="btn-warning px-3" invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working"/>
+      <button name="button_finish" type="object" string="Done" class="btn-success px-3" invisible="production_state in ('draft', 'done', 'cancel') or working_state == 'blocked' or not is_user_working"/>
+      <button name="button_unblock" type="object" string="Unblock" context="{'default_workcenter_id': workcenter_id}" class="btn-danger px-3" invisible="production_state in ('draft', 'done', 'cancel') or working_state != 'blocked'"/>
+      <widget name="mo_view_list_dropdown"/>
+      <button name="action_open_wizard" type="object" icon="fa-external-link" class="oe_edit_only" title="Open Work Order" context="{'default_workcenter_id': workcenter_id}"/>
+      <field name="show_json_popover" column_invisible="True"/>
+      <field name="json_popover" widget="mrp_workorder_popover" string=" " invisible="not show_json_popover"/>
+    </list>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='miscellaneous']/group[1]/group[2]/field[@name='date_deadline']" position="after">
+    <field name="x_studio_customer"/>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+    <page string="Pallet Info" name="studio_page_6u1_1igpf1ub5">
+      <group name="studio_group_6u1">
+        <group name="studio_group_6u1_left">
+          <field name="x_studio_finished_qtyplt"/>
+          <field name="x_studio_rollscasesplt"/>
+        </group>
+        <group name="studio_group_6u1_right"/>
+      </group>
+    </page>
+    <page string="Labels" name="studio_page_4qn_1iumqrocs">
+      <group name="studio_group_4qn">
+        <group name="studio_group_4qn_left">
+          <field name="x_studio_labels_to_print" invisible="True"/>
+          <field name="x_studio_start_label"/>
+          <field name="x_studio_end_label"/>
+          <field name="x_studio_label_id"/>
+          <field name="x_studio_secondary_label"/>
+        </group>
+        <group name="studio_group_4qn_right"/>
+      </group>
+    </page>
+  </xpath>
+</data>

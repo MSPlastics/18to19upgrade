@@ -1,0 +1,378 @@
+<data>
+  <xpath expr="//button[@name='action_open_label_layout']" position="after">
+    <button string="Print TDS" name="studio_customization.product_report_8f0bce3b-6396-41fc-9108-e6133788cbcd" type="action"/>
+  </xpath>
+  <xpath expr="//button[@name='open_pricelist_rules']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/div[@name='button_box']/t[2]" position="after">
+    <button class="oe_stat_button" icon="fa-money" type="action" name="studio_customization.pricelist_8116e932-02ca-44a0-9b92-38c4377358a9">
+      <field widget="statinfo" name="x_product_tmpl_id_product_pricelist_item_count" string="Pricelist"/>
+    </button>
+  </xpath>
+  <xpath expr="//field[@name='active']" position="after">
+    <field widget="binary" filename="x_studio_product_drawings_filename" name="x_studio_product_drawings"/>
+    <field widget="file" invisible="True" name="x_studio_product_drawings_filename"/>
+    <field name="x_studio_sage_legacy_code" invisible="categ_id in [24]"/>
+    <field name="x_studio_product_line" options="{'create_name_field': 'x_name'}"/>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='general_information']/group[1]/group[@name='group_general']/div[1]" position="after">
+    <field widget="file" invisible="True" name="x_studio_tds_1_filename"/>
+  </xpath>
+  <xpath expr="//field[@name='product_tooltip']" position="after">
+    <field widget="file" filename="x_studio_tds_2_filename" name="x_studio_tds_2"/>
+    <field widget="file" invisible="True" name="x_studio_tds_2_filename"/>
+    <field name="x_studio_process_steps" invisible="True"/>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='general_information']/group[1]/group[@name='group_standard_price']/label[1]" position="before">
+    <field name="x_studio_is_contracted_product"/>
+    <field name="x_studio_moq" options="{&quot;enable_formatting&quot;:true}"/>
+    <field widget="binary" filename="x_studio_contract_paperwork_info_filename" name="x_studio_contract_paperwork_info" invisible="x_studio_is_contracted_product != True"/>
+    <field widget="file" invisible="True" name="x_studio_contract_paperwork_info_filename"/>
+  </xpath>
+  <xpath expr="//div[@name='standard_price_uom']" position="after">
+    <field name="x_studio_cost_per_lb" invisible="True"/>
+  </xpath>
+  <xpath expr="//group[@name='upsell']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//group[@name='extra_info']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//field[@name='customer_ids']" position="inside">
+    <list>
+      <field name="sequence" widget="handle"/>
+      <field name="partner_id" string="Customer" domain="[(&quot;x_studio_is_verified_customer&quot;, &quot;=&quot;, True)]"/>
+      <field name="product_id" column_invisible="context.get('product_template_invisible_variant', False)" groups="product.group_product_variant"/>
+      <!-- Keep this field as readonly to prevent mistakes in product.product.
+                When a user adds more than one customer info, they aren't saved correctly. -->
+      <field name="product_tmpl_id" readonly="1" string="Product" column_invisible="context.get('visible_product_tmpl_id', True)"/>
+      <field name="product_name" string="Customer Product Name"/>
+      <field name="product_code" string="Drop Part Number"/>
+      <field name="x_studio_freight_terms" optional="show"/>
+      <field optional="show" name="x_studio_item_specific_freight_instructions"/>
+      <field name="company_id" readonly="1" groups="base.group_multi_company"/>
+      <field name="min_qty" column_invisible="True"/>
+      <field name="price" string="Price" column_invisible="True"/>
+      <field name="date_start" optional="hide"/>
+      <field name="date_end" optional="hide"/>
+    </list>
+    <form>
+      <group name="studio_group_1af341">
+        <group string="Customer" name="studio_group_6621e6">
+          <field name="company_id" invisible="1"/>
+          <field name="product_id" groups="product.group_product_variant" options="{'no_create_edit': True}" invisible="context.get('product_template_invisible_variant', False)"/>
+          <field name="partner_id" string="Customer" context="{'res_partner_search_mode': 'customer'}"/>
+          <field name="product_name" string="Customer Product Name"/>
+          <field name="product_code" string="Drop Part Number"/>
+          <field name="x_studio_freight_terms"/>
+          <field name="x_studio_item_specific_freight_instructions"/>
+        </group>
+        <group string="Price List" invisible="True" name="studio_group_a8aeb8">
+          <field name="company_id" invisible="1"/>
+          <field name="product_tmpl_id" string="Product" invisible="context.get('visible_product_tmpl_id', True)"/>
+          <label for="min_qty"/>
+          <div name="studio_div_5831e6">
+            <field name="min_qty" class="oe_inline" invisible="True"/>
+            <field name="product_uom" class="oe_inline" groups="uom.group_uom" invisible="True"/>
+          </div>
+          <label for="price"/>
+          <div name="studio_div_40c27e">
+            <field name="price" class="oe_inline" invisible="True"/>
+            <field name="currency_id" class="oe_inline" groups="base.group_multi_currency"/>
+          </div>
+          <label for="date_start" string="Validity"/>
+          <div name="studio_div_882121"><field name="date_start" class="oe_inline" invisible="True"/> to <field name="date_end" class="oe_inline" invisible="True"/>
+          </div>
+        </group>
+        <group string="Other Information" groups="base.group_multi_company" name="studio_group_05b8ca">
+          <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company"/>
+        </group>
+      </group>
+    </form>
+  </xpath>
+  <xpath expr="//field[@name='seller_ids']" position="inside">
+    <form string="Vendor Information">
+      <sheet>
+        <group name="studio_group_01d77a">
+          <group name="vendor" string="Vendor">
+            <field name="product_variant_count" invisible="1"/>
+            <field name="partner_id"/>
+            <field name="product_name"/>
+            <field name="product_code"/>
+            <label for="delay"/>
+            <div name="studio_div_2974b5"><field name="delay" class="oe_inline"/> days
+                            </div>
+          </group>
+          <group string="Pricelist" name="studio_group_7e42f0">
+            <field name="product_tmpl_id" string="Product" invisible="context.get('visible_product_tmpl_id', True)"/>
+            <field name="product_id" groups="product.group_product_variant" options="{'no_create': True}"/>
+            <label for="min_qty"/>
+            <div class="o_row" name="studio_div_9d7c2c">
+              <field name="min_qty"/>
+              <field name="product_uom" groups="uom.group_uom" options="{'no_open': True}"/>
+            </div>
+            <label for="price" string="Unit Price"/>
+            <div class="o_row" name="studio_div_7b2871">
+              <field name="price" class="oe_inline"/>
+              <field name="currency_id" groups="base.group_multi_currency" options="{'no_open': True}"/>
+            </div>
+            <label for="date_start" string="Validity"/>
+            <div class="o_row" name="studio_div_59aef0"><field name="date_start" class="oe_inline"/> to <field name="date_end" class="oe_inline"/>
+            </div>
+            <field name="discount"/>
+            <field name="company_id" options="{'no_create': True}"/>
+          </group>
+        </group>
+      </sheet>
+    </form>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='purchase']/group[@name='purchase']" position="after">
+    <group name="studio_group_2qu_1inro55td">
+      <group name="studio_group_2qu_left">
+        <field name="x_studio_vendor_name"/>
+      </group>
+      <group name="studio_group_2qu_right"/>
+    </group>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='inventory']" position="attributes">
+    <attribute name="invisible">categ_id in [24]</attribute>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='inventory']/group[@name='inventory']/group[@name='group_lots_and_weight']/div[@name='volume']/field[@name='volume']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//field[@name='sale_delay']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//field[@name='hs_code']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//field[@name='country_of_origin']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//group[@name='stock_property']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='inventory']/group[@name='inventory']" position="after">
+    <group name="studio_group_1km_1igso9ab7">
+      <group name="studio_group_1km_left"/>
+      <group name="studio_group_1km_right"/>
+    </group>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]/page[@name='inventory']/group[not(@name)][1]" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//page[@name='invoicing']" position="attributes">
+    <attribute name="invisible">True</attribute>
+  </xpath>
+  <xpath expr="//form[@name='Product Template']/sheet[@name='product_form']/notebook[1]" position="inside">
+    <page string="Final Product Information" name="studio_page_5td_1icr5dtv3" invisible="categ_id == 14 or categ_id == 13 or categ_id in [24]">
+      <group name="studio_group_5td">
+        <group name="studio_group_5td_left" string="Dimensions ">
+          <field name="x_studio_production_mil_mil_1"/>
+          <field name="x_studio_width_in" digits="[16,3]"/>
+          <field name="x_studio_side_gusset_in_1"/>
+          <field name="x_studio_length" options="{&quot;digits&quot;:[6,3]}"/>
+          <field name="x_studio_length_uom"/>
+          <field name="x_studio_bottom_gusset_in"/>
+          <field name="x_studio_lip_in"/>
+          <field name="x_studio_tolerance_1"/>
+        </group>
+        <group name="studio_group_5td_right">
+          <field name="x_studio_product_configuration" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_film_color" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print"/>
+        </group>
+      </group>
+      <group name="studio_group_763_1id3oqgum">
+        <group name="studio_group_763_left" string="Count and Weight">
+          <field name="x_studio_count_per_unit"/>
+          <field name="x_studio_ftunit"/>
+          <field name="x_studio_net_weight_lbs"/>
+          <field name="x_studio_gram_weight_lbs" string="Gram weight "/>
+          <field name="x_studio_finished_product_weight_lbs"/>
+          <field name="x_studio_overall_density" options="{&quot;placeholder_field&quot;:&quot;x_studio_blend_1&quot;}"/>
+          <field name="x_studio_blend"/>
+        </group>
+        <group name="studio_group_763_right" string="Packaging">
+          <field name="x_studio_poly_liner"/>
+          <field name="x_studio_core_plugs_1"/>
+          <field name="x_studio_roll_support"/>
+        </group>
+      </group>
+      <group name="studio_group_7ip_1id3p53if">
+        <group name="studio_group_7ip_left" string="Special Instructions">
+          <field name="x_studio_special_instructions"/>
+        </group>
+        <group name="studio_group_7ip_right"/>
+      </group>
+    </page>
+    <page string="Resin Info" name="studio_page_48u_1igio8bme" invisible="categ_id != 6 and categ_id != 13">
+      <group name="studio_group_48u">
+        <group name="studio_group_48u_left">
+          <field name="x_studio_manufacturer"/>
+          <field name="x_studio_melt"/>
+          <field name="x_studio_density" options="{&quot;digits&quot;:[6,3]}"/>
+          <field name="x_studio_bulk_density" options="{&quot;digits&quot;:[6,3]}"/>
+          <field name="x_studio_slip_ppm"/>
+          <field name="x_studio_anti_block_ppm"/>
+          <field name="x_studio_haze_"/>
+        </group>
+        <group name="studio_group_48u_right">
+          <field widget="file" filename="x_studio_tds_filename" name="x_studio_tds"/>
+          <field widget="file" filename="x_studio_sds_filename" name="x_studio_sds"/>
+          <field widget="file" filename="x_studio_pfas_letter_1_filename" name="x_studio_pfas_letter_1"/>
+          <field widget="file" filename="x_studio_fda_letter_filename" name="x_studio_fda_letter"/>
+          <field widget="file" invisible="True" name="x_studio_fda_letter_filename"/>
+          <field widget="file" invisible="True" name="x_studio_sds_filename"/>
+          <field widget="file" invisible="True" name="x_studio_tds_filename"/>
+          <field widget="file" invisible="True" name="x_studio_pfas_letter_1_filename"/>
+        </group>
+      </group>
+    </page>
+    <page string="Printing" name="studio_page_t0_1igrtffed" invisible="categ_id != 14 or categ_id != 13">
+      <group name="studio_group_t0">
+        <group name="studio_group_t0_left">
+          <field name="x_studio_number_of_colors"/>
+          <field name="x_studio_ink_color" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]" string="Ink Color 1"/>
+          <field name="x_studio_ink_color_2" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]"/>
+          <field name="x_studio_ink_color_3" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]"/>
+          <field name="x_studio_ink_color_4" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]"/>
+          <field name="x_studio_ink_color_5" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]"/>
+          <field name="x_studio_ink_color_6" domain="[(&quot;categ_id&quot;, &quot;=&quot;, 17)]"/>
+        </group>
+        <group name="studio_group_t0_right">
+          <field name="x_studio_print_type"/>
+          <field name="x_studio_print_plate_1" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print_plate_2" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print_plate_3" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print_plate_4" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print_plate_5" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_print_plate_6" options="{'create_name_field': 'x_name'}"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_6_filename"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_5_filename"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_4_filename"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_3_filename"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_2_filename"/>
+          <field widget="file" invisible="True" name="x_studio_print_plate_1_filename"/>
+        </group>
+      </group>
+      <group name="studio_group_6u4_1igseef7v">
+        <group name="studio_group_6u4_left"/>
+        <group name="studio_group_6u4_right"/>
+      </group>
+      <group name="studio_group_7tq_1igsdu5qt">
+        <group name="studio_group_7tq_left">
+          <field name="x_studio_cylinder_size" options="{'create_name_field': 'x_name'}"/>
+        </group>
+        <group name="studio_group_7tq_right">
+          <field name="x_studio_plate_1_side"/>
+          <field name="x_studio_plate_2_side_1"/>
+          <field name="x_studio_plate_3_side"/>
+          <field name="x_studio_plate_4_side_1"/>
+          <field name="x_studio_plate_5_side"/>
+          <field name="x_studio_plate_6_side"/>
+        </group>
+      </group>
+    </page>
+    <page string="Convert " name="studio_page_9i9_1igrtfoao" invisible="categ_id != 14 and categ_id != 13">
+      <group name="studio_group_9i9">
+        <group name="studio_group_9i9_left"/>
+        <group name="studio_group_9i9_right"/>
+      </group>
+    </page>
+    <page string="Label Info" name="studio_page_1sj_1iunb2sp7" invisible="categ_id in [24]">
+      <group name="studio_group_1sj">
+        <group name="studio_group_1sj_left">
+          <field name="x_studio_label_name" domain="[]"/>
+          <field name="x_studio_secondary_label"/>
+          <field name="x_studio_size"/>
+          <field name="x_studio_description"/>
+        </group>
+        <group name="studio_group_1sj_right"/>
+      </group>
+    </page>
+    <page string="Pallet Info" name="studio_page_3pl_1j1qps804" invisible="categ_id in [24]">
+      <group name="studio_group_3pl">
+        <group name="studio_group_3pl_left">
+          <field name="x_studio_rollscasesplt"/>
+          <field name="x_studio_pallet_type" domain="[(&quot;categ_id&quot;, &quot;ilike&quot;, &quot;pallet&quot;)]"/>
+          <field name="x_studio_palletization_instructions"/>
+        </group>
+        <group name="studio_group_3pl_right"/>
+      </group>
+    </page>
+    <page string="Product Capability " name="studio_page_2k2_1j577ka9s" invisible="categ_id not in [24]">
+      <group name="studio_group_2k2">
+        <group name="studio_group_2k2_left">
+          <field widget="file" filename="x_studio_sell_sheet_filename" name="x_studio_sell_sheet"/>
+          <field widget="file" invisible="True" name="x_studio_sell_sheet_filename"/>
+          <field name="x_studio_fda"/>
+          <field name="x_studio_packaging_options"/>
+          <field name="x_studio_min_mil"/>
+          <field name="x_studio_max_mil"/>
+          <field name="x_studio_core_diameter_1"/>
+          <field name="x_studio_min_roll_dia" string="Min Roll Dia (in)"/>
+          <field name="x_studio_max_roll_dia" string="Max Roll Dia (in)"/>
+        </group>
+        <group name="studio_group_2k2_right">
+          <field name="x_studio_min_size" string="Min Size (in)"/>
+          <field name="x_studio_max_size" string="Max Size (in)"/>
+        </group>
+      </group>
+      <group name="studio_group_2b4_1j578lusc">
+        <group name="studio_group_2b4_left"/>
+        <group name="studio_group_2b4_right"/>
+      </group>
+      <group name="studio_group_360_1j578mcur">
+        <group name="studio_group_360_left">
+          <field name="x_studio_key_attributes">
+            <list editable="bottom">
+              <field name="x_studio_sequence" widget="handle"/>
+              <field name="x_name"/>
+            </list>
+          </field>
+        </group>
+        <group name="studio_group_360_right"/>
+      </group>
+    </page>
+    <page string="TDS" name="studio_page_3br_1j5cqskg0">
+      <group name="studio_group_3br">
+        <group name="studio_group_3br_left">
+          <field name="x_studio_date_1"/>
+          <field name="x_studio_manufacturer_part_no"/>
+          <field name="x_studio_customer_2"/>
+          <field name="x_studio_blend_1"/>
+        </group>
+        <group name="studio_group_3br_right">
+          <field name="x_studio_related_field_97f_1j5eut3hh"/>
+          <field name="x_studio_size_3"/>
+          <field name="x_studio_mil_1"/>
+          <field name="x_studio_configuration" widget="char" string="Tolerance"/>
+          <field name="x_studio_configuration_1" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_recommended_use"/>
+        </group>
+      </group>
+    </page>
+  </xpath>
+  <xpath expr="/form[1]/sheet[1]/notebook[1]/page[4]/field[1]" position="inside">
+    <list string="Vendor Information" multi_edit="1" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="partner_id" readonly="0"/>
+                <field name="product_id" optional="hide" readonly="0" column_invisible="context.get('product_template_invisible_variant', False)" groups="product.group_product_variant" domain="[('product_tmpl_id', '=', parent.id)]" options="{'no_create': True, 'no_open': True}"/>
+                <field name="product_tmpl_id" string="Product" readonly="1" column_invisible="context.get('visible_product_tmpl_id', True)"/>
+                <field name="product_name" optional="hide"/>
+                <field name="product_code" optional="hide"/>
+                <field name="date_start" optional="hide"/>
+                <field name="date_end" optional="hide"/>
+                <field name="company_id" readonly="0" groups="base.group_multi_company" optional="hide"/>
+                <field name="min_qty" optional="show"/>
+                <field name="product_uom" groups="uom.group_uom" optional="hide"/>
+                <field name="price" string="Price"/>
+                <field name="discount" optional="hide"/>
+                <field name="currency_id" groups="base.group_multi_currency"/>
+                <field name="delay" optional="show"/>
+                    <field name="company_id" column_invisible="True"/>
+            </list>
+  </xpath>
+</data>

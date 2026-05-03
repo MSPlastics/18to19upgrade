@@ -1,0 +1,230 @@
+<data>
+  <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/div[1]" position="after">
+    <field name="x_studio_net_weight"/>
+    <field name="x_studio_master_rolls_yn" required="True"/>
+    <field name="x_studio_custom_blend" required="False" invisible="True"/>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='components']/field[@name='bom_line_ids']/list[1]/field[@name='product_qty']" position="attributes">
+    <attribute name="options">{"digits":[6,3],"enable_formatting":true,"human_readable":false}</attribute>
+    <attribute name="sum">Sum of Quantity</attribute>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='components']/field[@name='bom_line_ids']/list[1]" position="after">
+    <form string="Bill of Material line" create="0" edit="0">
+      <sheet name="studio_sheet_0922ff">
+        <group name="studio_group_d5d5ac">
+          <group string="Component" name="studio_group_fb399c">
+            <field name="product_id"/>
+            <field name="parent_product_tmpl_id" invisible="1"/>
+            <label for="product_qty" string="Quantity"/>
+            <div class="o_row" name="studio_div_1b7ba5">
+              <field name="product_qty"/>
+              <field name="product_uom_category_id" invisible="1"/>
+              <field name="product_uom_id" options="{'no_open':True,'no_create':True}" groups="uom.group_uom"/>
+            </div>
+            <field name="possible_bom_product_template_attribute_value_ids" invisible="1"/>
+            <field name="bom_product_template_attribute_value_ids" widget="many2many_tags" options="{'no_create': True}" groups="product.group_product_variant"/>
+          </group>
+          <group string="Operation" name="studio_group_68bc71">
+            <field name="company_id" invisible="1"/>
+            <field name="sequence" groups="base.group_no_one"/>
+            <field name="allowed_operation_ids" invisible="1"/>
+            <field name="operation_id" groups="mrp.group_mrp_routings"/>
+          </group>
+        </group>
+      </sheet>
+    </form>
+  </xpath>
+  <xpath expr="//field[@name='operation_ids']" position="inside">
+    <form string="Routing Work Centers">
+      <sheet name="studio_sheet_d8f090">
+        <div class="oe_button_box" name="button_box">
+          <button class="oe_stat_button" name="action_mrp_workorder_show_steps" type="object" icon="fa-wrench" invisible="quality_point_count == 0">
+            <div class="o_field_widget o_stat_info" name="studio_div_f9bd62">
+              <span class="o_stat_value">
+                <field name="quality_point_count"/>
+              </span>
+              <span class="o_stat_text">Instructions</span>
+            </div>
+          </button>
+        </div>
+        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+        <group name="studio_group_ddf677">
+          <group name="description">
+            <field name="active" invisible="1"/>
+            <field name="company_id" invisible="1"/>
+            <field name="name"/>
+            <field name="bom_id" invisible="context.get('bom_id_invisible', False)" domain="[]" readonly="context.get('default_bom_id', False)"/>
+            <field name="workcenter_id" context="{'default_company_id': company_id}"/>
+            <field name="x_studio_operation_type"/>
+            <field name="possible_bom_product_template_attribute_value_ids" invisible="1"/>
+            <field name="bom_product_template_attribute_value_ids" widget="many2many_tags" options="{'no_create': True}" groups="product.group_product_variant"/>
+            <field name="allow_operation_dependencies" invisible="1"/>
+            <field name="blocked_by_operation_ids" widget="many2many_tags" context="{'default_bom_id':bom_id}" invisible="not allow_operation_dependencies"/>
+          </group>
+          <group name="workorder">
+            <field name="workorder_count" invisible="1"/>
+            <field name="time_mode" widget="radio"/>
+            <field name="x_studio_batch_duration"/>
+            <label for="time_mode_batch" invisible="time_mode == 'manual'"/>
+            <div invisible="time_mode == 'manual'" name="studio_div_4d49ae">
+                                    last
+                                    <field name="time_mode_batch" class="oe_inline"/>
+                                    work orders
+                                </div>
+            <label for="time_cycle_manual" invisible="time_mode == 'auto' and workorder_count != 0" string="Default Duration"/>
+            <div invisible="time_mode == 'auto' and workorder_count != 0" name="studio_div_77ec98">
+              <field name="time_cycle_manual" widget="float_time" class="oe_inline"/> minutes
+                                </div>
+            <field name="x_studio_fpm"/>
+            <field name="employee_ratio" groups="base.group_no_one"/>
+            <field name="time_cycle" invisible="1"/>
+            <field name="company_id" groups="base.group_multi_company"/>
+          </group>
+        </group>
+        <notebook name="studio_notebook_f291b2">
+          <page string="Work Sheet" name="worksheet">
+            <group name="studio_group_2ae15a">
+              <field name="worksheet_type" widget="radio"/>
+              <field name="worksheet" help="Upload your PDF file." widget="pdf_viewer" invisible="worksheet_type != 'pdf'" required="worksheet_type == 'pdf'"/>
+              <field name="worksheet_google_slide" placeholder="Google Slide Link" widget="embed_viewer" invisible="worksheet_type != 'google_slide'" required="worksheet_type == 'google_slide'"/>
+              <field name="note" invisible="worksheet_type != 'text'"/>
+            </group>
+          </page>
+        </notebook>
+      </sheet>
+    </form>
+    <list string="Routing Work Centers" multi_edit="1" delete="0">
+      <field name="active" column_invisible="True"/>
+      <field name="company_id" column_invisible="True"/>
+      <field name="time_cycle_manual" column_invisible="True"/>
+      <field name="sequence" widget="handle"/>
+      <field name="name"/>
+      <field name="bom_id" column_invisible="True"/>
+      <field name="blocked_by_operation_ids" widget="many2many_tags" optional="hide" column_invisible="not parent.allow_operation_dependencies"/>
+      <field name="workcenter_id"/>
+      <field name="time_mode" optional="show"/>
+      <field name="x_studio_fpm" optional="show"/>
+      <field name="time_computed_on" optional="hide"/>
+      <field name="time_cycle" widget="float_time" string="Duration (minutes)" sum="Total Duration"/>
+      <field name="quality_point_count"/>
+      <button name="action_mrp_workorder_show_steps" class="btn-link" title="Show Instructions" type="object" icon="fa-list-ul"/>
+      <field name="company_id" optional="hide" groups="base.group_multi_company"/>
+      <field name="possible_bom_product_template_attribute_value_ids" column_invisible="True"/>
+      <field name="bom_product_template_attribute_value_ids" optional="hide" widget="many2many_tags" options="{'no_create': True}" groups="product.group_product_variant" column_invisible="parent.product_id"/>
+      <button name="action_archive" class="float-end" type="object" string="Archive Operation" invisible="context.get('parent_production_id')"/>
+      <control>
+        <create string="Add a line"/>
+        <button name="copy_existing_operations" class="btn-link" type="object" string="Copy Existing Operations" context="{'bom_id': parent.id}"/>
+      </control>
+    </list>
+  </xpath>
+  <xpath expr="//form[1]/sheet[1]/notebook[1]" position="inside">
+    <page string="Extrusion" name="studio_page_2h_1ijjpd1tm">
+      <group name="studio_group_2h">
+        <group name="studio_group_2h_left">
+          <field name="x_studio_mil_mil" placeholder="Ex: 4.0" options="{&quot;digits&quot;:[8,4]}"/>
+          <field name="x_studio_face_width_in" digits="[16,3]"/>
+          <field name="x_studio_side_gusset_in" digits="[16,3]"/>
+          <field name="x_studio_total_width_in" digits="[16,3]"/>
+          <field name="x_studio_layers_of_film_wound"/>
+          <field name="x_studio_lanes_produced_per_master_roll" options="{&quot;enable_formatting&quot;:true}"/>
+        </group>
+        <group name="studio_group_2h_right">
+          <field name="x_studio_core_diameter_in"/>
+          <field name="x_studio_core_length_in"/>
+          <field name="x_studio_roll_diameter_limit_in"/>
+          <field name="x_studio_roll_weight_limit_lbs"/>
+          <field name="x_studio_notes"/>
+        </group>
+      </group>
+      <group name="studio_group_36q_1ijjprduj">
+        <group name="studio_group_36q_left"/>
+        <group name="studio_group_36q_right"/>
+      </group>
+      <group name="studio_group_9fd_1ijjprlad">
+        <group name="studio_group_9fd_left" string="Line Speeds">
+          <field name="x_studio_take_off_speed"/>
+          <field name="x_studio_rotation_speed"/>
+        </group>
+        <group name="studio_group_9fd_right" string="Output">
+          <field name="x_studio_target_output_lbshr"/>
+        </group>
+      </group>
+      <group name="studio_group_1ar_1ijjq75fd">
+        <group name="studio_group_1ar_left"/>
+        <group name="studio_group_1ar_right"/>
+      </group>
+      <group name="studio_group_5gp_1ijjq7ahu">
+        <group name="studio_group_5gp_left" string="Extruder Settings">
+          <field name="x_studio_blend" options="{'create_name_field': 'x_name'}"/>
+          <field name="x_studio_overall_density"/>
+          <field name="x_studio_number_of_layers"/>
+          <field name="x_studio_ext_a_rpm"/>
+          <field name="x_studio_ext_b_rpm" invisible="x_studio_number_of_layers == &quot;1&quot;"/>
+          <field name="x_studio_ext_c_rpm" invisible="x_studio_number_of_layers == &quot;1&quot;"/>
+          <field name="x_studio_ext_d_rpm" invisible="x_studio_number_of_layers == &quot;1&quot; or x_studio_number_of_layers == &quot;3&quot;"/>
+          <field name="x_studio_ext_e_rpm" invisible="x_studio_number_of_layers == &quot;1&quot; or x_studio_number_of_layers == &quot;3&quot;"/>
+        </group>
+        <group name="studio_group_5gp_right" string="Air Settings">
+          <field name="x_studio_ibc_supply"/>
+          <field name="x_studio_ibc_exhaust"/>
+          <field name="x_studio_air_ring"/>
+          <field name="x_studio_elevator_height_mm"/>
+        </group>
+      </group>
+      <group name="studio_group_5k0_1ijjpr9cc">
+        <group name="studio_group_5k0_left"/>
+        <group name="studio_group_5k0_right"/>
+      </group>
+    </page>
+    <page string="Printing" name="studio_page_23d_1ijjpd9p0">
+      <group name="studio_group_23d">
+        <group name="studio_group_23d_left"/>
+        <group name="studio_group_23d_right"/>
+      </group>
+    </page>
+    <page string="Converting" name="studio_page_2jh_1ijjpdif1">
+      <group name="studio_group_2jh">
+        <group name="studio_group_2jh_left">
+          <field name="x_studio_unwinder_tension"/>
+          <field name="x_studio_unwinder_pressure"/>
+          <field name="x_studio_winder_tension"/>
+          <field name="x_studio_winder_pressure"/>
+        </group>
+        <group name="studio_group_2jh_right"/>
+      </group>
+    </page>
+    <page string="Custom Blend" name="studio_page_3li_1j9ndmimj" invisible="True">
+      <group name="studio_group_3li">
+        <group name="studio_group_3li_left">
+          <field name="x_studio_custom_density"/>
+        </group>
+        <group name="studio_group_3li_right"/>
+      </group>
+      <field name="x_studio_one2many_field_7va_1j9ndrn4s">
+        <list editable="bottom">
+          <field name="x_studio_sequence" widget="handle"/>
+          <field name="x_name" optional="show" column_invisible="False" invisible="False" string="Extruder"/>
+          <field optional="show" name="x_studio_hopper"/>
+          <field optional="show" name="x_studio_material"/>
+          <field optional="show" name="x_studio_percent"/>
+          <field optional="show" name="x_studio_density"/>
+        </list>
+        <form>
+          <header/>
+          <sheet string="mrp_bom_line" name="studio_sheet_dd24eb">
+            <div class="oe_title" name="studio_div_a24b27">
+              <h1>
+                <field name="x_name" required="True" placeholder="Name..."/>
+              </h1>
+            </div>
+            <group name="studio_group_5156d8">
+              <group name="studio_group_5156d8_left"/>
+              <group name="studio_group_5156d8_right"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </page>
+  </xpath>
+</data>
