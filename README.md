@@ -1,31 +1,46 @@
 # MSPlastics Odoo 18 → 19 Upgrade
 
-This repo is the documentation + tooling backup from the v18→v19 migration of MSPlastics' Odoo Online instance (May 2026).
+Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 to v19. **For the full story, read [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md).**
 
 ## What's in here
 
 | File / folder | Purpose |
 |---|---|
-| [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) | Per-module fix log: what broke on v19, what we changed, why, commit hash. **Read this first.** |
-| [PLAYBOOK.md](PLAYBOOK.md) | Repeatable runbook for the upgrade procedure (prod prep + cutover). |
+| [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) | **Read this first.** Complete fix journal: every v19 break we found, the per-module fixes, the migration-level damage, and the recovery process. |
+| [PLAYBOOK.md](PLAYBOOK.md) | Repeatable upgrade runbook (prod prep + cutover steps). |
 | [tools/](tools/) | XML-RPC diagnostic scripts: check module state, force upgrade, uninstall, read logs. |
-| [workflow/](workflow/) | Prod prep scripts: zero negative quants, disable phantom BOMs, restore. |
-| [.env.example](.env.example) | Template for credentials. Copy to `.env` (gitignored) and fill in. |
+| [workflow/](workflow/) | Cutover scripts: prod prep, post-migration recovery, Studio view archs. |
+| [workflow/post_migration_recovery.py](workflow/post_migration_recovery.py) | **The single command** to restore Studio + packaging after migration. Run on staging after every rebuild + ONCE on prod after cutover. |
+| [workflow/studio_arch/](workflow/studio_arch/) | Saved prod Studio view XML — the recovery script applies these. |
+| [.env.example](.env.example) | Credential template. Copy to `.env` (gitignored), fill in `ODOO_PROD_*` and `ODOO_STAGING_*`. |
 
-## Where the actual code fixes live
+## Where the actual code lives
 
-The v19-compatible code itself is on **`MSPlastics/odoo18`** in branch **`19_upgradetest2`** (and pushed to `msp_production` at cutover). This repo only contains documentation and operational tooling.
+| Repo | Branch | Purpose |
+|---|---|---|
+| **MSPlastics/odoo18** | `msp_production` | Production target branch. Currently at `124a8e1` — needs fast-forward to `19_upgradetest2` at cutover. |
+| **MSPlastics/odoo18** | `19_upgradetest2` | All v19 module fixes + new `msp_packaging` module. Currently at `b8ea7d0`. |
+| **MSPlastics/18to19upgrade** (this repo) | `main` | Recovery tooling + docs. |
 
-Last commit on `19_upgradetest2` at time of staging-green: `213191c`.
+This repo does **not** contain Odoo module code — only the operational scripts and documentation.
 
-## Quick links
+## Quick reference
 
-- Production URL: `https://msplastics-odoo18.odoo.com`
-- Source repo: `https://github.com/MSPlastics/odoo18` (branches: `msp_production`, `19_upgradetest2`)
-- Odoo.sh dashboard: dashboard for the project
+- **Production URL**: `https://msplastics-odoo18.odoo.com`
+- **Latest 19_upgradetest2 commit**: `b8ea7d0` (`feat(msp_packaging): recreate v18 product.packaging for v19`)
 
-## Status (as of last commit)
+## Cutover one-liner (after Odoo.sh upgrade button)
 
-- **Staging upgrade**: GREEN. All 15 custom modules load. JS bundle compiles. UI renders.
-- **Prod upgrade**: pending re-trigger. First attempt rolled back due to module loader issues that have since been fixed.
-- **Known caveat**: ZPL printing on staging needs a v19 session API migration — not fixed yet, deferred.
+```bash
+# Set env vars first (cp .env.example .env, fill in)
+cd workflow
+python post_migration_recovery.py --target prod --commit \
+       --copy-data --copy-packagings
+python prod_disable_kits.py --restore
+```
+
+## Status
+
+- **Staging**: ✅ GREEN. All 15 custom modules load. UI renders. Studio views recovered. Packaging behavior restored via `msp_packaging` module.
+- **Prod**: ⏸ Pending cutover. First attempt rolled back; all known issues are now fixed in code.
+- **Known deferred items**: ZPL printing (`label_zebra_printer`) needs v19 session API migration — UI loads but actual print broken; cosmetic warnings on `ksc_partner` and `product_customerinfo`.
