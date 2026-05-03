@@ -80,7 +80,7 @@ Two Studio fields had `related='product_id.packaging_ids.qty'`. v19 deleted `pro
 - `x_studio_qtypkg` ("Qty/pkg")
 - `x_studio_finished_qtyplt` ("Finished QTY/PLT")
 
-Recovery: recreate as plain `Float` stored fields, copy historical values from prod for ~491 MOs (`--copy-data`). New MOs going forward will have these blank unless filled in or computed (consider using msp_packaging's `product_packaging_id` instead).
+Recovery (Steps 1 + 3b): recreate the field records (Step 1) and, once `msp_packaging` is installed, restore `related='product_id.packaging_ids.qty'` (Step 3b). Result: same v18 behavior — both fields auto-populate from the product's first packaging qty. Downstream Studio computes (`x_studio_rollcase_count` = `product_qty / x_studio_qtypkg`) work without modification. Historical values for the ~491 MOs that pre-date a packaging record are still copied over via `--copy-data`.
 
 ### Broken `depends` on Studio computed fields
 
@@ -90,9 +90,9 @@ Recovery: strip the removed field name from the depends list.
 
 ### Broken `related` paths on manual Studio fields
 
-One Studio field on mrp.production had `related='product_id.packaging_ids.package_type_id.display_name'`. Same root cause as above.
+One Studio field on mrp.production (`x_studio_related_field_vr_1igpf4lep`, labelled "New Related Field") had `related='product_id.packaging_ids.package_type_id.display_name'`. Our minimal `msp_packaging` model omits `package_type_id` (we never use it), so this path can't be restored verbatim.
 
-Recovery: clear the `related` setting (becomes a plain stored field, just empty).
+Recovery: Step 3 clears the related setting. Field exists as a plain empty char. If MSP ever uses this field, add `package_type_id = fields.Many2one('stock.package.type')` to `msp_packaging` and add it to the restore list in Step 3b.
 
 ### Studio form views deleted entirely
 
@@ -129,6 +129,7 @@ Idempotent — safe to re-run. Designed for both staging iteration and prod cuto
 | **1** | Recreate lost Studio fields on `mrp.production` |
 | **2** | Strip removed-in-v19 fields from Studio compute `depends` |
 | **3** | Strip broken `related` settings on manual Studio fields (idempotent) |
+| **3b** | Restore `related='product_id.packaging_ids.qty'` on `x_studio_qtypkg` + `x_studio_finished_qtyplt` (only after `msp_packaging` is installed). This is what makes Studio fields auto-populate from packagings exactly like v18. |
 | **4** | Recreate MO + BOM + product Studio form views from saved arch |
 | **4b** | (`--copy-packagings`) Port `product.packaging` records from prod |
 | **5** | (`--copy-data`) Copy historical `x_studio_qtypkg`/`finished_qtyplt` values from prod |

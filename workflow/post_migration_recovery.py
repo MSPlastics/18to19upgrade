@@ -233,6 +233,56 @@ def step_strip_broken_related(call, commit):
 
 
 # --------------------------------------------------------------------------
+# Step 3b: Restore packaging-related Studio fields.
+# Step 3 strips related paths whose first hop is missing. On a fresh staging
+# rebuild, msp_packaging may not have finished installing when Step 3 ran, so
+# fields like x_studio_qtypkg (related='product_id.packaging_ids.qty') get
+# stripped. After msp_packaging is in place, restore those paths. Idempotent.
+# --------------------------------------------------------------------------
+
+PACKAGING_RELATED_RESTORE = [
+    {"model": "mrp.production", "name": "x_studio_qtypkg",
+     "related": "product_id.packaging_ids.qty"},
+    {"model": "mrp.production", "name": "x_studio_finished_qtyplt",
+     "related": "product_id.packaging_ids.qty"},
+]
+
+
+def step_restore_packaging_related(call, commit):
+    print("\n=== Step 3b: Restore packaging-related Studio fields ===")
+    if not call("ir.model", "search", [[("model", "=", "product.packaging")]]):
+        print("  product.packaging model missing; skip (msp_packaging not installed)")
+        return
+    if not call("ir.model.fields", "search",
+                [[("model", "=", "product.product"), ("name", "=", "packaging_ids")]]):
+        print("  product.product.packaging_ids missing; skip")
+        return
+    for spec in PACKAGING_RELATED_RESTORE:
+        rows = call("ir.model.fields", "search_read",
+                    [[("model", "=", spec["model"]), ("name", "=", spec["name"])]],
+                    {"fields": ["id", "name", "related", "state"]})
+        if not rows:
+            print(f"  {spec['model']}.{spec['name']}: missing, skip")
+            continue
+        f = rows[0]
+        if (f.get("related") or "") == spec["related"]:
+            print(f"  {spec['name']}: already related={spec['related']}")
+            continue
+        if f["state"] != "manual":
+            print(f"  {spec['name']}: state={f['state']} (not writable), skip")
+            continue
+        if not commit:
+            print(f"  {spec['name']}: would set related={spec['related']}")
+            continue
+        try:
+            call("ir.model.fields", "write",
+                 [[f["id"]], {"related": spec["related"]}])
+            print(f"  {spec['name']}: related restored -> {spec['related']}")
+        except Exception as e:
+            print(f"  {spec['name']}: restore FAILED: {str(e)[:200]}")
+
+
+# --------------------------------------------------------------------------
 # Step 4: Recreate Studio form views from saved arch + v19 patches
 # --------------------------------------------------------------------------
 
@@ -549,6 +599,7 @@ def main():
     step_create_lost_fields(call, args.commit)
     step_fix_qr_depends(call, args.commit)
     step_strip_broken_related(call, args.commit)
+    step_restore_packaging_related(call, args.commit)
     step_recreate_views(call, args.commit)
     if args.copy_packagings:
         step_copy_packagings_from_prod(call, args.commit)
