@@ -340,6 +340,56 @@ def step_patch_lot_producing_actions(call, commit):
 
 
 # --------------------------------------------------------------------------
+# Step 3d: Patch QWeb report views that reference v18's sale.order.line
+# `product_uom` (renamed to `product_uom_id` in v19). The PDF report fails
+# at render time with KeyError: 'product_uom' otherwise.
+#
+# Narrow regex: `\bline\.product_uom\b(?!_)` — only touches sale.order.line
+# context. Does NOT touch `bo_line.product_uom` or `raw_line.product_uom`
+# (those refer to stock.move records where `product_uom` is still valid in
+# v19). Idempotent — only writes when the broken pattern is present.
+# --------------------------------------------------------------------------
+
+_LINE_UOM_RE = re.compile(r"\bline\.product_uom\b(?!_)")
+
+
+def step_patch_sale_report_uom(call, commit):
+    print("\n=== Step 3d: Patch sale order QWeb reports for product_uom_id (v19) ===")
+    views = call("ir.ui.view", "search_read",
+                 [[("type", "=", "qweb"), ("arch_db", "ilike", "line.product_uom\"")]],
+                 {"fields": ["id", "name", "key", "arch_db"]})
+    if not views:
+        print("  no qweb views referencing line.product_uom; skip")
+        return
+    patched = skipped = failed = 0
+    for v in views:
+        old = v["arch_db"] or ""
+        if not _LINE_UOM_RE.search(old):
+            # Matched the ilike on attribute close-quote but `line.` boundary
+            # didn't apply (e.g. only bo_line/raw_line); no actual change.
+            skipped += 1
+            continue
+        new = _LINE_UOM_RE.sub("line.product_uom_id", old)
+        if new == old:
+            skipped += 1
+            continue
+        if not commit:
+            occ = len(_LINE_UOM_RE.findall(old))
+            print(f"  id={v['id']} {v['key']!r}: would patch {occ} occurrence(s)")
+            patched += 1
+            continue
+        try:
+            call("ir.ui.view", "write", [[v["id"]], {"arch_db": new}])
+            occ = len(_LINE_UOM_RE.findall(old))
+            print(f"  id={v['id']} {v['key']!r}: patched {occ} occurrence(s)")
+            patched += 1
+        except Exception as e:
+            print(f"  id={v['id']} {v['key']!r}: write FAILED: {str(e)[:200]}")
+            failed += 1
+    print(f"  Patched {patched}, untouched {skipped}, failed {failed}")
+
+
+# --------------------------------------------------------------------------
 # Step 4: Recreate Studio form views from saved arch + v19 patches
 # --------------------------------------------------------------------------
 
@@ -701,6 +751,7 @@ def main():
     step_strip_broken_related(call, args.commit)
     step_restore_packaging_related(call, args.commit)
     step_patch_lot_producing_actions(call, args.commit)
+    step_patch_sale_report_uom(call, args.commit)
     step_recreate_views(call, args.commit)
     if args.copy_packagings:
         step_copy_packagings_from_prod(call, args.commit, snapshot_data)
