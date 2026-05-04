@@ -4,7 +4,7 @@
 - Odoo modules: `MSPlastics/odoo18` (branches: `msp_production` for prod, `19_upgradetest2` for v19 fixes)
 - Recovery tooling + docs: `MSPlastics/18to19upgrade` (this repo)
 
-**Current state**: Staging GREEN (all modules load, Studio views recovered, packaging behavior restored). **Prod cutover pending** — `msp_production` needs to be fast-forwarded to `19_upgradetest2`'s tip and prod upgrade re-triggered.
+**Current state**: Production COMPLETE. Cut over 2026-05-03; post-cutover Studio QWeb report fixes shipped 2026-05-04. All custom modules load, Studio views recovered, packaging behavior restored on sale.order.line + purchase.order.line + stock.move, sale/purchase/delivery PDFs render.
 
 ---
 
@@ -155,6 +155,47 @@ Run on prod after cutover (same command, different target):
 python post_migration_recovery.py --target prod --commit \
        --copy-data --copy-packagings
 ```
+
+⚠ **`post_migration_recovery.py` is now archive material** — production is live on v19 since 2026-05-03 and the recovery has done its job. Step 4 (recreate Studio views) and Step 5 (copy historical qtys from snapshot) would clobber post-cutover edits if re-run. For any *post-cutover* fix, write a small targeted script (see `fix_qweb_v18_residue.py` for the canonical pattern).
+
+---
+
+## Post-cutover fixes (2026-05-04)
+
+Studio-customized QWeb report templates kept several v18 field names that v19 had renamed or removed. PDF rendering blew up at print time — the migration didn't catch these because views render lazily, not at install. We discovered them one at a time as users tried to print, then wrote a single comprehensive patcher.
+
+### `workflow/fix_qweb_v18_residue.py`
+
+Idempotent patcher that runs over every active QWeb view and applies a small rule table:
+
+| Context | Rule |
+|---|---|
+| sale.order.line / purchase.order.line | `line.product_uom` → `line.product_uom_id` |
+| sale.order.line | `line.tax_id` → `line.tax_ids` |
+| purchase.order.line | `line.taxes_id` → `line.tax_ids` |
+| purchase.order | `o.notes` → `o.note` |
+| stock.picking | `o.has_packages` → `o.packages_count` (truthy in `t-if`) |
+| MSP-specific | `line.sh_line_customer_code` → `line.product_customer_code` (was a third-party `sh_product_customer_code` module that's gone in v19) |
+| MSP-specific | `<span line.sh_line_customer_product_name/>` deleted entirely (no v19 equivalent — Anthony chose to drop the column) |
+
+Verified on staging, then run on prod cleanly (4 views patched: 2010, 2315, 2398, 2418). Use the same command for any future v18 residue surface that gets discovered.
+
+### msp_packaging extensions (2026-05-04, version `19.0.1.3.0`)
+
+v19 dropped `product.packaging` everywhere. Our v19-only `msp_packaging` initially restored it on `sale.order.line` only; we extended to mirror v18 fully:
+- **`purchase.order.line`** (`19.0.1.2.0`, commit `16b0ae3`): `product_packaging_id`, `product_packaging_qty`, plus the same forward+inverse compute pattern as sale.order.line
+- **`stock.move`** (`19.0.1.3.0`, commit `ac09fbc`): `product_packaging_id`, `product_packaging_qty`, `product_packaging_quantity` (v18 alias). Propagated from `sale_line_id` or `purchase_line_id` so existing v18 Studio delivery slips render.
+
+### Method-call false positives — DON'T patch these
+
+While building `fix_qweb_v18_residue.py` we noticed several QWeb references that *look* like missing fields but are method calls. They still work in v19. Don't add rules for them:
+- `o.should_print_delivery_address()` — method on stock.picking
+- `o._get_report_lang()`, `o.with_context`, `o.sudo`, `o.env` — Python attributes/methods
+- `move.name` — typically inherited from base, may not appear in `ir.model.fields` queries
+
+### Heads-up: Studio fields on sale.order in view 2442
+
+`studio_customization.studio_report_docume_b79dd625-...` references several `doc.x_studio_*` fields that don't exist on v19 sale.order (likely wiped by the migration like the mrp.production ones were). The view is active but no `ir.actions.report` matches it directly so it's not in any active render path. Left alone for now; if MSP later wants to use a Studio sale order report variant, those fields would need to be recreated similarly to how Step 1 of the recovery handled the MO ones.
 
 ---
 
