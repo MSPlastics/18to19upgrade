@@ -40,15 +40,22 @@ def _list_block(list_id, columns, start_row, n_rows):
     """Build cell formulas for a list section starting at start_row.
     Returns dict of cell-ref -> formula string."""
     cells = {}
-    # 0-indexed col letters
     for col_idx, fname in enumerate(columns):
         col_letter = chr(ord('A') + col_idx)
-        # Header row
         cells[f"{col_letter}{start_row}"] = f'=ODOO.LIST.HEADER({list_id}, "{fname}")'
-        # Data rows
         for r in range(1, n_rows + 1):
             cells[f"{col_letter}{start_row + r}"] = f'=ODOO.LIST({list_id},{r},"{fname}")'
     return cells
+
+
+def _style_block(start_row, start_col, n_rows, n_cols, style_id):
+    """Apply style_id to a rectangular block of cells. Returns dict of cellref -> styleId."""
+    out = {}
+    for r in range(start_row, start_row + n_rows):
+        for c in range(start_col, start_col + n_cols):
+            col_letter = chr(ord('A') + c)
+            out[f"{col_letter}{r}"] = style_id
+    return out
 
 
 def build_spreadsheet_data():
@@ -97,56 +104,154 @@ def build_spreadsheet_data():
         },
     }
 
+    # ----- Top-level styles (referenced by integer ids in sheet.styles map) -----
+    styles = {
+        "1": {  # Title
+            "bold": True, "fontSize": 22, "textColor": "#0A182F",
+            "verticalAlign": "middle",
+        },
+        "2": {  # Subtitle
+            "fontSize": 10, "textColor": "#7B8794", "italic": True,
+            "verticalAlign": "middle",
+        },
+        "3": {  # Section banner — navy bg, white text
+            "bold": True, "fontSize": 13, "textColor": "#FFFFFF",
+            "fillColor": "#0A182F", "verticalAlign": "middle",
+        },
+        "4": {  # Column header — light panel bg, navy text
+            "bold": True, "fontSize": 10, "textColor": "#0A182F",
+            "fillColor": "#F4F6F9", "verticalAlign": "middle",
+        },
+        "5": {  # Data cell (default)
+            "fontSize": 10, "textColor": "#2C3E50", "verticalAlign": "middle",
+        },
+    }
+
     # ----- Sheet cells -----
     cells = {}
+    cell_styles = {}    # cellref -> styleId
+    rows_sizes = {}     # rowIndex (0-based, str) -> {"size": int}
+    tables = []
 
-    # Title block
+    # --- Title block ---
     cells["A1"] = "MSP — Open Sales Orders Dashboard"
-    cells["A2"] = "Sorted by Expected Delivery Date. Updates live from the database."
+    cell_styles["A1"] = 1
+    rows_sizes["0"] = {"size": 38}
 
-    # Section 1: open sales orders
+    cells["A2"] = "Sorted by Expected Delivery Date. Live data — refreshes when you reopen."
+    cell_styles["A2"] = 2
+    rows_sizes["1"] = {"size": 18}
+
+    # --- Section 1: open sales orders ---
     section1_row = 4
-    cells[f"A{section1_row}"] = "1) Open Sales Orders"
-    cells.update(_list_block(1, so_cols, section1_row + 1, SO_ROWS))
+    cells[f"A{section1_row}"] = "  1.  OPEN SALES ORDERS"
+    # Banner across all 7 columns of section
+    cell_styles.update(_style_block(section1_row, 0, 1, len(so_cols), 3))
+    rows_sizes[str(section1_row - 1)] = {"size": 30}
 
-    # Section 2: order lines with qty info
-    section2_row = section1_row + SO_ROWS + 4
-    cells[f"A{section2_row}"] = "2) Order Lines — Qty Ordered vs Delivered"
-    cells.update(_list_block(2, line_cols, section2_row + 1, LINE_ROWS))
+    # List header + data
+    list1_start = section1_row + 1
+    cells.update(_list_block(1, so_cols, list1_start, SO_ROWS))
+    cell_styles.update(_style_block(list1_start, 0, 1, len(so_cols), 4))   # column headers
+    cell_styles.update(_style_block(list1_start + 1, 0, SO_ROWS, len(so_cols), 5))  # data
+    rows_sizes[str(list1_start - 1)] = {"size": 26}
+    # Banded table over header + data
+    tables.append({
+        "range": f"A{list1_start}:{chr(ord('A') + len(so_cols) - 1)}{list1_start + SO_ROWS}",
+        "type": "static",
+        "config": {
+            "hasFilters": False, "totalRow": False, "firstColumn": False,
+            "lastColumn": False, "numberOfHeaders": 1, "bandedRows": True,
+            "bandedColumns": False, "automaticAutofill": True, "styleId": "None",
+        },
+    })
 
-    # Section 3: MOs with manufactured qty
-    section3_row = section2_row + LINE_ROWS + 4
-    cells[f"A{section3_row}"] = "3) Manufacturing Orders — Qty Produced (drilled into the linked sales order line)"
-    cells.update(_list_block(3, mo_cols, section3_row + 1, MO_ROWS))
+    # --- Section 2: order lines ---
+    section2_row = list1_start + SO_ROWS + 3
+    cells[f"A{section2_row}"] = "  2.  ORDER LINES — QTY ORDERED vs DELIVERED"
+    cell_styles.update(_style_block(section2_row, 0, 1, len(line_cols), 3))
+    rows_sizes[str(section2_row - 1)] = {"size": 30}
 
-    total_rows = section3_row + MO_ROWS + 5
+    list2_start = section2_row + 1
+    cells.update(_list_block(2, line_cols, list2_start, LINE_ROWS))
+    cell_styles.update(_style_block(list2_start, 0, 1, len(line_cols), 4))
+    cell_styles.update(_style_block(list2_start + 1, 0, LINE_ROWS, len(line_cols), 5))
+    rows_sizes[str(list2_start - 1)] = {"size": 26}
+    tables.append({
+        "range": f"A{list2_start}:{chr(ord('A') + len(line_cols) - 1)}{list2_start + LINE_ROWS}",
+        "type": "static",
+        "config": {
+            "hasFilters": False, "totalRow": False, "firstColumn": False,
+            "lastColumn": False, "numberOfHeaders": 1, "bandedRows": True,
+            "bandedColumns": False, "automaticAutofill": True, "styleId": "None",
+        },
+    })
+
+    # --- Section 3: MOs ---
+    section3_row = list2_start + LINE_ROWS + 3
+    cells[f"A{section3_row}"] = "  3.  MANUFACTURING ORDERS — QTY PRODUCED (linked to the open SO line)"
+    cell_styles.update(_style_block(section3_row, 0, 1, len(mo_cols), 3))
+    rows_sizes[str(section3_row - 1)] = {"size": 30}
+
+    list3_start = section3_row + 1
+    cells.update(_list_block(3, mo_cols, list3_start, MO_ROWS))
+    cell_styles.update(_style_block(list3_start, 0, 1, len(mo_cols), 4))
+    cell_styles.update(_style_block(list3_start + 1, 0, MO_ROWS, len(mo_cols), 5))
+    rows_sizes[str(list3_start - 1)] = {"size": 26}
+    tables.append({
+        "range": f"A{list3_start}:{chr(ord('A') + len(mo_cols) - 1)}{list3_start + MO_ROWS}",
+        "type": "static",
+        "config": {
+            "hasFilters": False, "totalRow": False, "firstColumn": False,
+            "lastColumn": False, "numberOfHeaders": 1, "bandedRows": True,
+            "bandedColumns": False, "automaticAutofill": True, "styleId": "None",
+        },
+    })
+
+    total_rows = list3_start + MO_ROWS + 5
+
+    # ----- Column widths (cols dict is 0-indexed by column number, as string) -----
+    # Pick the widest layout among the three sections so all sections look right.
+    # Sections: SO has 7 cols, lines has 6, MOs has 7.
+    cols_sizes = {
+        "0": {"size": 130},   # Order # / MO # / Order
+        "1": {"size": 230},   # Customer / Sale Line / Product
+        "2": {"size": 140},   # Expected Delivery / Description / Product
+        "3": {"size": 110},   # Drop PO / Qty Ordered / State
+        "4": {"size": 130},   # Customer PO / Qty Delivered / Qty to Produce
+        "5": {"size": 130},   # Total / Freight / Qty Produced
+        "6": {"size": 140},   # Salesperson / — / Date Finished
+    }
 
     sheet = {
         "id": "sheet1",
         "name": "Open Orders",
-        "colNumber": 12,
+        "colNumber": max(len(so_cols), len(line_cols), len(mo_cols)),
         "rowNumber": max(total_rows, 100),
         "cells": cells,
-        "rows": {},
-        "cols": {},
+        "rows": rows_sizes,
+        "cols": cols_sizes,
         "merges": [],
-        "styles": {},
+        "styles": cell_styles,
         "formats": {},
         "borders": {},
         "conditionalFormats": [],
         "dataValidationRules": [],
         "figures": [],
-        "tables": [],
-        "areGridLinesVisible": True,
+        "tables": tables,
+        "areGridLinesVisible": False,   # cleaner without the default grid
         "isVisible": True,
         "headerGroups": {"ROW": [], "COL": []},
         "comments": {},
     }
 
     return {
-        "version": 1,
+        # The "version" key is the o-spreadsheet engine version, not Odoo's
+        # version. Odoo 19 ships with engine 18.5.10. Storing a different
+        # version (e.g. 1) makes the engine refuse to render cells.
+        "version": "18.5.10",
         "sheets": [sheet],
-        "styles": {},
+        "styles": styles,
         "formats": {},
         "borders": {},
         "revisionId": "START_REVISION",
