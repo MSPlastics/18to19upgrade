@@ -69,14 +69,19 @@ _IMG_RE = re.compile(
 )
 
 
-def rewrite(match):
+def rewrite(_match):
     # Use Odoo's standard company-logo class. Studio's `img img-fluid
     # o_we_custom_image` blows the logo up to 100% container width,
     # which looks wrong on a report header — `o_company_logo_big` has
     # the proper max-height styling.
+    #
+    # Also cap with explicit max-height: 60px. The Studio diff layout
+    # for `external_layout_boxed` overlaps the customer-address row
+    # when the logo is taller, so 60px keeps it clear.
     return (
         '<img t-if="company.logo" '
         'class="o_company_logo_big" '
+        'style="max-height: 60px;" '
         't-att-src="image_data_uri(company.logo)" '
         'alt="Logo"/>'
     )
