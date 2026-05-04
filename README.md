@@ -13,6 +13,9 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [workflow/post_migration_recovery.py](workflow/post_migration_recovery.py) | **Migration-only.** Already used 2026-05-03. Archived — re-running risks clobbering post-cutover Studio edits (Steps 4 + 5). |
 | [workflow/snapshot_v18_data.py](workflow/snapshot_v18_data.py) | Pre-cutover snapshot of v18 prod data (242 packagings + 491 MO Studio qtys). Already captured. |
 | [workflow/fix_qweb_v18_residue.py](workflow/fix_qweb_v18_residue.py) | **Post-cutover patcher.** Targeted, idempotent fix for stale v18 field names in Studio QWeb reports (`product_uom`/`tax_id`/`taxes_id`/`notes`/`has_packages`/`sh_*`). Run with `--target prod --commit` whenever a new v18 residue surfaces. |
+| [workflow/fix_external_layout_logo.py](workflow/fix_external_layout_logo.py) | Restore dynamic `company.logo` binding in Studio-customized external layouts (replaces hardcoded `<img src="/web/image/{id}-..."/>` from old logo uploads). Caps logo at 60px. Idempotent. |
+| [workflow/create_msp_sale_report.py](workflow/create_msp_sale_report.py) | **Custom MSP sale order PDF.** Idempotent — creates or updates `msp.report_saleorder_msp_v1` (ir.ui.view) + "Quotation / Order — MSP" (ir.actions.report). Re-run after editing the embedded QWEB_ARCH constant to push design changes. PDF filename = sale order number (e.g. `S01071.pdf`) via `print_report_name`. |
+| [workflow/set_msp_report_on_email_templates.py](workflow/set_msp_report_on_email_templates.py) | Wire the new MSP report into the four standard sale.order email templates (Send Quotation, Order Confirmation, Order Confirmation copy, Payment Done). Pro Forma left alone. |
 | [workflow/studio_arch/](workflow/studio_arch/) | Saved prod Studio view XML — the recovery script applied these during cutover. |
 | [workflow/snapshots/](workflow/snapshots/) | Pre-cutover JSON dumps of v18 prod data (read by the recovery script). |
 | [.env.example](.env.example) | Credential template. Copy to `.env` (gitignored), fill in `ODOO_PROD_*` and `ODOO_STAGING_*`. |
@@ -36,6 +39,7 @@ This repo does **not** contain Odoo module code — only the operational scripts
 
 - ✅ **Cutover complete** (2026-05-03). 242 packagings + 491 MO Studio qtys restored from snapshot. 164 phantom BOMs flipped back.
 - ✅ **Post-cutover Studio QWeb fixes** (2026-05-04). Sale/purchase/delivery PDFs render — see [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) "Post-cutover fixes" section for the full rule table.
+- ✅ **Custom MSP sale order PDF + email send** (2026-05-04). New report `msp.report_saleorder_msp_v1` deployed on prod, wired into Send-by-email templates (Send Quotation, Order Confirmation, etc.). PDFs named after the order number (`S01071.pdf`). Filename + design + field mapping documented in [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) "Custom MSP sale order report" section.
 - **Known deferred items**:
   - ZPL printing (`label_zebra_printer`) — UI loads but print path needs v19 session API migration
   - View 2442 (`studio_customization` sale order Studio report) references `doc.x_studio_*` fields wiped during migration. Inactive in render path; recreate Studio fields if MSP wants to use that variant

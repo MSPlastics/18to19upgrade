@@ -199,6 +199,91 @@ While building `fix_qweb_v18_residue.py` we noticed several QWeb references that
 
 ---
 
+## Custom MSP sale order report (post-cutover, 2026-05-04)
+
+Built and shipped a fully custom modern QWeb sale order report. Lives entirely in DB records (ir.ui.view + ir.actions.report) created via XML-RPC — not a module. The script `workflow/create_msp_sale_report.py` is idempotent and can be re-run to update the design in place.
+
+### Records on prod
+
+| Type | Key / id | Name |
+|---|---|---|
+| `ir.ui.view` (qweb) | `msp.report_saleorder_msp_v1` (id 3038) | "MSP Quotation/Order Report" |
+| `ir.actions.report` | id 1083 | "Quotation / Order — MSP" |
+
+The action has `print_report_name = "object.name"` so attached PDFs are named e.g. `S01071.pdf`, not `report.pdf`.
+
+### Layout
+
+Source design: `option_4_readability.html` on Anthony's desktop (May 2026).
+
+- Top section split 68/32: left = company logo + name + 3-up address columns (Bill To / Invoice, Sold To / Branch, Ship To); right = light navy-accented panel with order metadata (Order No, Date, Expected Delivery Date, Customer PO, Drop PO, Incoterm, Terms, Acct Mgr)
+- Item table: MSP PN | Description | Shipping Info | Qty | Price | Amount, zebra striped, monospaced numerics
+- Totals: 280px right-aligned panel — Untaxed Amount + Tax (when nonzero) + navy TOTAL bar
+- Footer: payment terms note, fiscal position remark, terms & conditions, signature
+
+Brand palette (sampled from MSP logo): navy `#0A182F`, panel `#f1f5f9`, zebra `#f8fafc`, border `#cbd5e1`, muted `#334155`.
+
+### Field mapping (note these — they are MSP-specific)
+
+| Mockup label | Odoo field |
+|---|---|
+| MSP PN column | `line.product_id.name` (NOT `default_code`, NOT `product_customer_code` — MSP stores the internal product number in `product.product.name` like "10853") |
+| Description bold | first line of `line.name` (typically the customer SKU like "SEK26243803CGB") |
+| Description sub | remaining lines of `line.name` (size + pack + cust PN echo) |
+| Shipping Info | `line.x_studio_freight_terms` (Char) + `line.x_studio_item_specific_freight_instructions` (Text) |
+| Drop PO | `doc.msp_drop_po` (Char, "Drop PO") |
+| Customer PO | `doc.client_order_ref` |
+| Expected Delivery Date | `doc.commitment_date.strftime('%m/%d/%Y')` (US format) |
+| Terms | `doc.payment_term_id` (renders the term's name) |
+| Acct Mgr | `doc.user_id` |
+| Bill To address | falls back to `commercial_partner_id` when partner_invoice_id has no street (since MSP's invoice-address children carry only the contact name, parent has the actual street/city) |
+| Logo | dynamic via `image_data_uri(company.logo)`, capped 70px |
+
+### Email Send templates
+
+`workflow/set_msp_report_on_email_templates.py` wires the new report into the Send-by-email flow on prod (`mail.template` records):
+
+| id | Template | Now attaches |
+|---|---|---|
+| 12 | Sales: Send Quotation | `msp.report_saleorder_msp_v1` |
+| 13 | Sales: Order Confirmation | `msp.report_saleorder_msp_v1` |
+| 14 | Sales: Payment Done | `msp.report_saleorder_msp_v1` |
+| 30 | Sales: Order Confirmation (copy) | `msp.report_saleorder_msp_v1` |
+| 45 | Sales: Send Proforma | left as `sale.report_saleorder_pro_forma` (intentional — different flow) |
+
+### QWeb gotchas learned (very useful for future report work)
+
+1. **NBSP encoding corruption** — Odoo's `widget="monetary"` outputs `<currency_symbol>&nbsp;<amount>`. wkhtmltopdf misreads the UTF-8 NBSP (`0xC2 0xA0`) as Latin-1, rendering as `Â `. Fix: format amounts manually with a regular space and Python str format:
+   ```xml
+   <t t-out="cur_sym + ' ' + '{:,.2f}'.format(amount)"/>
+   ```
+   Skip the monetary widget entirely. The standard external_layout doesn't hit this because of how it wraps content; custom layouts using `web.html_container` directly do.
+
+2. **XML attribute newline normalization** — When you put `t-value="line.name.split('\n', 1)"` in QWeb arch (stored as XML), the XML parser normalizes the embedded newline character to a single space *before* QWeb evaluates the Python expression. So your code ends up splitting on the first space, not the first newline. Use `.splitlines()` instead:
+   ```xml
+   <t t-set="lines" t-value="line.name.splitlines() or ['']"/>
+   <div t-out="lines[0]"/>
+   <t t-foreach="lines[1:]" t-as="ln"><div t-out="ln"/></t>
+   ```
+
+3. **`t-field` auto-wraps website fields in `<a href>`** — live links in PDF attachments increase spam-folder odds. Use `t-out="company.website"` (plain text) instead of `t-field="company.website"`.
+
+4. **Address fallback for partner children** — when `partner_invoice_id` is a child contact (e.g., "SEK Enterprise, Invoice Address") with only its own name and no street, the contact widget renders `--<name>--` and looks broken. Fall back to `commercial_partner_id` for the actual address:
+   ```xml
+   <t t-set="bill_addr" t-value="doc.partner_invoice_id if doc.partner_invoice_id.street else doc.partner_invoice_id.commercial_partner_id"/>
+   ```
+   Then render street/city/state/zip from `bill_addr` field-by-field.
+
+5. **`print_report_name`** — Python expression on `ir.actions.report` evaluated against `object` at render time. Set to `"object.name"` so emailed PDFs are named `S01071.pdf` instead of `report.pdf`.
+
+6. **Method-call false positives in field scans** — when scanning views for stale field references, methods like `o.with_context`, `o.sudo`, `o.should_print_delivery_address()`, `o._get_report_lang()` look like missing fields but they're methods that still exist. Don't auto-fix them.
+
+### Iteration workflow
+
+`create_msp_sale_report.py` is idempotent (looks the view up by key `msp.report_saleorder_msp_v1` — updates if found, creates if not). Same for the email template script (looks up by template name). Edit the QWEB_ARCH constant in the create script, re-run with `--commit`, refresh + print to see the change. Used this loop ~10 times on staging to land the final design.
+
+---
+
 ## Production cutover playbook (current target)
 
 ### Pre-cutover (already done — verify still in place)
