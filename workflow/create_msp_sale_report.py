@@ -371,6 +371,9 @@ def upsert_action(call, commit):
         "report_file": REPORT_VIEW_KEY,
         "binding_model_id": so_model_id,
         "binding_type": "report",
+        # Filename used when the PDF is downloaded or attached to email.
+        # Evaluated against `object` (the sale.order record) at render time.
+        "print_report_name": "object.name",
     }
     if existing:
         aid = existing[0]["id"]
