@@ -92,13 +92,16 @@ def build_spreadsheet_data():
         },
         "3": {
             "id": "3",
-            "name": "Manufacturing Orders Linked to Open Sales",
+            "name": "Recent Manufacturing Orders (in progress + completed)",
             "model": "mrp.production",
-            "domain": [["state", "not in", ["cancel", "draft"]],
-                       ["sale_line_id", "!=", False],
-                       ["sale_line_id.order_id.state", "=", "sale"]],
+            # Show MOs that have produced or are producing material, regardless
+            # of sale_line link (most MSP MOs are stock replenishment, not
+            # directly procured by a sale order). Sorted most-recent first so
+            # whatever was just produced shows at the top.
+            "domain": [["state", "in", ["progress", "to_close", "done"]]],
             "context": {},
-            "orderBy": [{"name": "sale_line_id", "asc": True}, {"name": "id", "asc": True}],
+            "orderBy": [{"name": "date_finished", "asc": False},
+                        {"name": "id", "asc": False}],
             "columns": mo_cols,
             "fieldMatching": {},
         },
@@ -189,7 +192,7 @@ def build_spreadsheet_data():
 
     # --- Section 3: MOs ---
     section3_row = list2_start + LINE_ROWS + 3
-    cells[f"A{section3_row}"] = "  3.  MANUFACTURING ORDERS — QTY PRODUCED (linked to the open SO line)"
+    cells[f"A{section3_row}"] = "  3.  RECENT MANUFACTURING ORDERS — QTY PRODUCED (most recent first)"
     cell_styles.update(_style_block(section3_row, 0, 1, len(mo_cols), 3))
     rows_sizes[str(section3_row - 1)] = {"size": 30}
 
