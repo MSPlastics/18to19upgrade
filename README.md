@@ -30,6 +30,18 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 
 This repo does **not** contain Odoo module code — only the operational scripts and documentation.
 
+## Staging-first rule
+
+**Every change goes through staging before prod.** No exceptions.
+
+| Type of change | Staging step | Prod step |
+|---|---|---|
+| Module code (`MSPlastics/odoo18`) | Push to `19_upgradetest2` → wait for Odoo.sh rebuild → verify in UI on `…dev.odoo.com` | After verification: `git push origin 19_upgradetest2:msp_production` (FF only) |
+| Workflow scripts that write to Odoo | Run with `--target staging --commit` → verify in UI | After verification: `--target prod --commit` |
+| Studio / dashboard / report design (`create_*.py` upserters) | Same as above — staging first, click through the affected UI / print the affected PDF | Same — only after staging is confirmed working |
+
+The 2026-05-04 `NewId` fix is the canonical example: the `_calculate_date_by_sequence` AttributeError surfaced when producing a quantity on a workorder. We caught it on staging, verified the fix there, then fast-forwarded to prod. **Don't bundle the prod step into the same proposal as the staging step** — wait for explicit "this worked" before doing the prod push.
+
 ## Quick reference
 
 - **Production URL**: `https://msplastics-odoo18.odoo.com` — live on Odoo 19.0+e since 2026-05-03

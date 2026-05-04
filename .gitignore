@@ -20,3 +20,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local agent state (Claude Code)
+.claude/
