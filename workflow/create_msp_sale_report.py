@@ -181,15 +181,17 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt; font-weight:bold;">
                                 <t t-if="line.product_id"><t t-out="line.product_id.name"/></t>
                             </td>
-                            <!-- Description: first line of line.name in bold + remaining lines (multi-line desc + cust PN + pack size) below -->
+                            <!-- Description: first line of line.name in bold + remaining lines below.
+                                 splitlines() avoids the XML attribute normalisation that turns
+                                 embedded \n into a single space inside split('\n',...). -->
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0;">
-                                <t t-set="name_parts" t-value="(line.name or '').split('\n', 1)"/>
+                                <t t-set="name_lines" t-value="(line.name or '').splitlines() or ['']"/>
                                 <div style="font-weight:bold; font-size:10pt; color:#0A182F;">
-                                    <t t-out="name_parts[0]"/>
+                                    <t t-out="name_lines[0]"/>
                                 </div>
-                                <t t-if="len(name_parts) > 1">
-                                    <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500; white-space:pre-line;">
-                                        <t t-out="name_parts[1]"/>
+                                <t t-foreach="name_lines[1:]" t-as="extra_line">
+                                    <div style="color:#334155; font-size:8.5pt; margin-top:2px; font-weight:500;">
+                                        <t t-out="extra_line"/>
                                     </div>
                                 </t>
                                 <t t-if="line.product_customer_code">
