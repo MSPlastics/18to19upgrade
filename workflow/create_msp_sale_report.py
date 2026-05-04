@@ -72,9 +72,9 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                         <t t-if="company.city or company.state_id or company.zip"> | </t>
                                         <span t-if="company.city" t-field="company.city"/><t t-if="company.state_id">, <span t-field="company.state_id.code"/></t><t t-if="company.zip"> <span t-field="company.zip"/></t>
                                         <br/>
-                                        <span t-if="company.phone" t-field="company.phone"/>
+                                        <t t-if="company.phone"><t t-out="company.phone"/></t>
                                         <t t-if="company.phone and company.website"> | </t>
-                                        <span t-if="company.website" t-field="company.website"/>
+                                        <t t-if="company.website"><t t-out="company.website"/></t>
                                     </div>
                                 </td>
                             </tr>
