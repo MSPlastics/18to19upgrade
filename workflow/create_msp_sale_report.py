@@ -37,141 +37,158 @@ QWEB_ARCH = '''<t t-call="web.html_container">
         <t t-set="is_proforma" t-value="env.context.get('proforma', False)"/>
         <t t-set="lines_to_report" t-value="doc._get_order_lines_to_report()"/>
         <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report)"/>
-        <div class="page" style="font-family: 'Lato','Helvetica Neue',Arial,sans-serif; color:#2C3E50; font-size:11px;">
+        <t t-set="brand_navy" t-value="'#0A182F'"/>
+        <t t-set="brand_panel" t-value="'#f1f5f9'"/>
+        <t t-set="brand_border" t-value="'#cbd5e1'"/>
+        <t t-set="brand_zebra" t-value="'#f8fafc'"/>
+        <t t-set="brand_text" t-value="'#0A182F'"/>
+        <t t-set="brand_muted" t-value="'#334155'"/>
+        <div class="page" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#111; font-size:9pt;">
 
-            <!-- HEADER BAND -->
-            <table style="width:100%; background-color:#0F2347; color:#FFFFFF; border-collapse:collapse; margin:0 0 24px 0;">
+            <!-- TOP LAYOUT: left = company + addresses; right = meta panel -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
                 <tr>
-                    <td style="padding:22px 30px; vertical-align:middle; width:50%;">
-                        <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height:56px; max-width:100%;" alt="Logo"/>
-                    </td>
-                    <td style="padding:22px 30px; vertical-align:middle; text-align:right; width:50%; line-height:1.5;">
-                        <div style="font-size:14px; font-weight:700; letter-spacing:0.5px; margin-bottom:4px;">
-                            <span t-field="company.name"/>
-                        </div>
-                        <div style="font-size:10px; color:#C8D2E0;">
-                            <span t-field="company.partner_id" t-options='{"widget":"contact","fields":["address","phone","email"],"no_marker":true}'/>
-                        </div>
-                    </td>
-                </tr>
-            </table>
+                    <!-- LEFT 68% -->
+                    <td style="width:68%; vertical-align:top; padding-right:20px;">
 
-            <!-- TITLE -->
-            <div style="padding:0 30px; margin-bottom:18px;">
-                <h1 style="color:#0F2347; font-size:26px; font-weight:700; margin:0; letter-spacing:0.5px;">
-                    <t t-if="is_proforma">PRO FORMA INVOICE</t>
-                    <t t-elif="doc.state in ('draft','sent')">QUOTATION</t>
-                    <t t-else="">SALES ORDER</t>
-                </h1>
-                <div style="color:#7B8794; font-size:13px; margin-top:4px;">
-                    <span t-field="doc.name"/>
-                </div>
-            </div>
+                        <!-- LOGO + COMPANY -->
+                        <table style="width:100%; border-collapse:collapse; margin-bottom:25px;">
+                            <tr>
+                                <td style="width:90px; vertical-align:middle;">
+                                    <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height:70px; max-width:80px;" alt="Logo"/>
+                                </td>
+                                <td style="vertical-align:middle; padding-left:14px;">
+                                    <div style="font-size:18pt; font-weight:900; color:#0A182F; text-transform:uppercase; letter-spacing:-0.5px;">
+                                        <span t-field="company.name"/>
+                                    </div>
+                                    <div style="font-size:8.5pt; color:#334155; font-weight:500; line-height:1.5;">
+                                        <span t-field="company.street"/><t t-if="company.street2"> <span t-field="company.street2"/></t>
+                                        <t t-if="company.city or company.state_id or company.zip"> | </t>
+                                        <span t-if="company.city" t-field="company.city"/><t t-if="company.state_id">, <span t-field="company.state_id.code"/></t><t t-if="company.zip"> <span t-field="company.zip"/></t>
+                                        <br/>
+                                        <span t-if="company.phone" t-field="company.phone"/>
+                                        <t t-if="company.phone and company.website"> | </t>
+                                        <span t-if="company.website" t-field="company.website"/>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
 
-            <!-- BILL TO / SHIP TO -->
-            <table style="width:100%; border-collapse:collapse; margin:0 0 24px 0;">
-                <tr>
-                    <td style="padding:0 30px; vertical-align:top; width:50%;">
-                        <div style="background-color:#F4F6F9; border-left:3px solid #0F2347; padding:12px 16px;">
-                            <div style="font-size:9px; font-weight:700; color:#0F2347; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:6px;">Bill To</div>
-                            <div style="line-height:1.5;">
-                                <strong><span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/></strong><br/>
-                                <span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
-                                <t t-if="doc.partner_invoice_id.vat">
-                                    <br/><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="doc.partner_invoice_id.vat"/>
-                                </t>
-                            </div>
-                        </div>
+                        <!-- 3-UP ADDRESSES -->
+                        <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+                            <tr>
+                                <td style="vertical-align:top; padding-right:15px;">
+                                    <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Bill To / Invoice</div>
+                                    <br/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;">
+                                        <span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
+                                    </strong><br/>
+                                    <span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                    <t t-if="doc.partner_invoice_id.vat">
+                                        <br/><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="doc.partner_invoice_id.vat"/>
+                                    </t>
+                                </td>
+                                <td style="vertical-align:top; padding-right:15px;">
+                                    <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Sold To / Branch</div>
+                                    <br/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;">
+                                        <span t-field="doc.partner_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
+                                    </strong><br/>
+                                    <span t-field="doc.partner_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                </td>
+                                <td style="vertical-align:top;">
+                                    <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Ship To</div>
+                                    <br/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;">
+                                        <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
+                                    </strong><br/>
+                                    <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                </td>
+                            </tr>
+                        </table>
                     </td>
-                    <td style="padding:0 30px; vertical-align:top; width:50%;">
-                        <div style="background-color:#F4F6F9; border-left:3px solid #0F2347; padding:12px 16px;">
-                            <div style="font-size:9px; font-weight:700; color:#0F2347; letter-spacing:1.2px; text-transform:uppercase; margin-bottom:6px;">Ship To</div>
-                            <div style="line-height:1.5;">
-                                <strong><span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/></strong><br/>
-                                <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
-                            </div>
-                        </div>
-                    </td>
-                </tr>
-            </table>
 
-            <!-- META STRIP -->
-            <table style="width:auto; margin:0 30px 24px 30px; border-collapse:collapse;">
-                <tr style="background-color:#0F2347; color:#FFFFFF;">
-                    <th style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">Order #</th>
-                    <th style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">
-                        <t t-if="doc.state in ('draft','sent')">Quotation Date</t>
-                        <t t-else="">Order Date</t>
-                    </th>
-                    <th style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">Expiration</th>
-                    <th style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">Customer PO</th>
-                    <th style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">Salesperson</th>
-                    <th t-if="doc.incoterm" style="padding:8px 14px; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; text-align:left;">Incoterm</th>
-                </tr>
-                <tr>
-                    <td style="padding:9px 14px; border-bottom:1px solid #E1E5EC;"><span t-field="doc.name"/></td>
-                    <td style="padding:9px 14px; border-bottom:1px solid #E1E5EC;"><span t-field="doc.date_order" t-options='{"widget":"date"}'/></td>
-                    <td style="padding:9px 14px; border-bottom:1px solid #E1E5EC;">
-                        <t t-if="doc.validity_date"><span t-field="doc.validity_date" t-options='{"widget":"date"}'/></t>
-                        <t t-else=""><span style="color:#C8D2E0;">—</span></t>
-                    </td>
-                    <td style="padding:9px 14px; border-bottom:1px solid #E1E5EC;">
-                        <t t-if="doc.client_order_ref"><span t-field="doc.client_order_ref"/></t>
-                        <t t-else=""><span style="color:#C8D2E0;">—</span></t>
-                    </td>
-                    <td style="padding:9px 14px; border-bottom:1px solid #E1E5EC;"><span t-field="doc.user_id"/></td>
-                    <td t-if="doc.incoterm" style="padding:9px 14px; border-bottom:1px solid #E1E5EC;">
-                        <span t-field="doc.incoterm.code"/><t t-if="doc.incoterm_location"> – <span t-field="doc.incoterm_location"/></t>
+                    <!-- RIGHT 32%: META PANEL -->
+                    <td style="width:32%; background-color:#f1f5f9; vertical-align:top; padding:20px; border-radius:4px; border-top:6px solid #0A182F; box-sizing:border-box;">
+                        <div style="font-size:18pt; font-weight:bold; color:#0A182F; text-transform:uppercase; margin-bottom:15px; letter-spacing:1px;">
+                            <t t-if="is_proforma">Pro Forma</t>
+                            <t t-elif="doc.state in ('draft','sent')">Quotation</t>
+                            <t t-else="">Sales Order</t>
+                        </div>
+                        <table style="width:100%; border-collapse:collapse;">
+                            <tr><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Order No</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:13pt; font-weight:bold; text-align:right; color:#0A182F; font-family:monospace;"><span t-field="doc.name"/></td></tr>
+                            <tr><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Date</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F;"><span t-field="doc.date_order" t-options='{"widget":"date"}'/></td></tr>
+                            <tr t-if="doc.validity_date"><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Expiration</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F;"><span t-field="doc.validity_date" t-options='{"widget":"date"}'/></td></tr>
+                            <tr><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Customer PO</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F; font-family:monospace;"><t t-if="doc.client_order_ref"><span t-field="doc.client_order_ref"/></t></td></tr>
+                            <tr><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Drop PO</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F; font-family:monospace;"><t t-if="doc.msp_drop_po"><span t-field="doc.msp_drop_po"/></t></td></tr>
+                            <tr t-if="doc.incoterm"><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Incoterm</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F;"><span t-field="doc.incoterm.code"/><t t-if="doc.incoterm_location"> <span t-field="doc.incoterm_location"/></t></td></tr>
+                            <tr><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Terms</td><td style="padding:6px 0; border-bottom:1px solid #cbd5e1; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F;"><t t-if="doc.payment_term_id"><span t-field="doc.payment_term_id"/></t></td></tr>
+                            <tr><td style="padding:6px 0; font-size:7.5pt; text-transform:uppercase; color:#334155; font-weight:bold;">Acct Mgr</td><td style="padding:6px 0; font-size:10pt; font-weight:bold; text-align:right; color:#0A182F;"><span t-field="doc.user_id"/></td></tr>
+                        </table>
                     </td>
                 </tr>
             </table>
 
             <!-- LINE ITEMS -->
-            <table style="width:auto; margin:0 30px; border-collapse:collapse;">
+            <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
                 <thead>
-                    <tr style="background-color:#0F2347; color:#FFFFFF;">
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:left;">Description</th>
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:left;">MSP Part #</th>
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:right;">Quantity</th>
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:right;">Unit Price</th>
-                        <th t-if="display_discount" style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:right;">Disc.</th>
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:left;">Tax</th>
-                        <th style="padding:10px 12px; font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; text-align:right;">Amount</th>
+                    <tr>
+                        <th style="background-color:#0A182F; color:white; text-align:left; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:12%;">MSP PN</th>
+                        <th style="background-color:#0A182F; color:white; text-align:left; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:33%;">Description</th>
+                        <th style="background-color:#0A182F; color:white; text-align:left; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:18%;">Shipping Info</th>
+                        <th style="background-color:#0A182F; color:white; text-align:left; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:13%;">Qty</th>
+                        <th style="background-color:#0A182F; color:white; text-align:left; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:10%;">Price</th>
+                        <th style="background-color:#0A182F; color:white; text-align:right; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px; width:14%;">Amount</th>
                     </tr>
                 </thead>
                 <tbody>
+                    <t t-set="row_index" t-value="0"/>
                     <t t-foreach="lines_to_report" t-as="line">
-                        <tr t-if="line.display_type == 'line_section'" style="background-color:#E8EEF5;">
-                            <td t-att-colspan="display_discount and 7 or 6" style="padding:8px 12px; font-weight:700; color:#0F2347; text-transform:uppercase; font-size:10px; letter-spacing:0.5px;">
+                        <!-- SECTION ROW -->
+                        <tr t-if="line.display_type == 'line_section'" style="background-color:#e8eef5;">
+                            <td colspan="6" style="padding:10px; font-weight:bold; color:#0A182F; text-transform:uppercase; font-size:9pt; letter-spacing:0.5px; border-bottom:1px solid #e2e8f0;">
                                 <span t-field="line.name"/>
                             </td>
                         </tr>
-                        <tr t-elif="line.display_type == 'line_note'" style="background-color:#F8F9FB;">
-                            <td t-att-colspan="display_discount and 7 or 6" style="padding:6px 12px; font-style:italic; color:#7B8794;">
+                        <!-- NOTE ROW -->
+                        <tr t-elif="line.display_type == 'line_note'">
+                            <td colspan="6" style="padding:8px 10px; font-style:italic; color:#334155; font-size:8.5pt; border-bottom:1px solid #e2e8f0;">
                                 <span t-field="line.name"/>
                             </td>
                         </tr>
-                        <tr t-else="" style="border-bottom:1px solid #E1E5EC;">
-                            <td style="padding:9px 12px; vertical-align:top;"><span t-field="line.name"/></td>
-                            <td style="padding:9px 12px; vertical-align:top;"><span t-field="line.product_customer_code"/></td>
-                            <td style="padding:9px 12px; vertical-align:top; text-align:right;">
+                        <!-- PRODUCT ROW -->
+                        <tr t-else="" t-att-style="row_index % 2 == 1 and 'background-color:#f8fafc;' or ''">
+                            <t t-set="row_index" t-value="row_index + 1"/>
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt; font-weight:bold;">
+                                <span t-field="line.product_customer_code"/>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0;">
+                                <div style="font-weight:bold; font-size:10pt; color:#0A182F;">
+                                    <t t-if="line.product_id and line.product_id.default_code"><span t-field="line.product_id.default_code"/></t>
+                                </div>
+                                <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500;">
+                                    <span t-field="line.name"/>
+                                </div>
+                                <t t-if="line.discount">
+                                    <div style="margin-top:4px; font-size:8pt; color:#0A182F; font-style:italic;">
+                                        Discount: <span t-field="line.discount"/>%
+                                    </div>
+                                </t>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-size:8pt; color:#0A182F; font-style:italic;">
+                                <t t-if="line.x_studio_freight_terms"><span t-field="line.x_studio_freight_terms"/></t>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt;">
                                 <span t-field="line.product_uom_qty"/>
                                 <span t-field="line.product_uom_id" groups="uom.group_uom"/>
                                 <t t-if="line.product_packaging_id">
-                                    <br/><span style="color:#7B8794; font-size:10px;">(<span t-field="line.product_packaging_qty" t-options='{"widget":"integer"}'/> <span t-field="line.product_packaging_id"/>)</span>
+                                    <br/><span style="color:#334155; font-size:8.5pt; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">(<span t-field="line.product_packaging_qty" t-options='{"widget":"integer"}'/> <span t-field="line.product_packaging_id"/>)</span>
                                 </t>
                             </td>
-                            <td style="padding:9px 12px; vertical-align:top; text-align:right;">
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0;">
                                 <span t-field="line.price_unit" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
                             </td>
-                            <td t-if="display_discount" style="padding:9px 12px; vertical-align:top; text-align:right;">
-                                <t t-if="line.discount"><span t-field="line.discount"/>%</t>
-                            </td>
-                            <td style="padding:9px 12px; vertical-align:top; font-size:10px;">
-                                <t t-set="taxes" t-value="', '.join([(t.invoice_label or t.name) for t in line.tax_ids])"/>
-                                <span t-out="taxes"/>
-                            </td>
-                            <td style="padding:9px 12px; vertical-align:top; text-align:right; font-weight:600;">
+                            <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:bold;">
                                 <span t-field="line.price_subtotal" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
                             </td>
                         </tr>
@@ -180,59 +197,54 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </table>
 
             <!-- TOTALS -->
-            <table style="width:auto; margin:24px 30px 0 30px; border-collapse:collapse;">
-                <tr>
-                    <td style="width:60%; padding:0;"></td>
-                    <td style="width:40%; padding:0; vertical-align:top;">
-                        <table style="width:100%; border-collapse:collapse;">
-                            <tr style="border-bottom:1px solid #E1E5EC;">
-                                <td style="padding:8px 14px; text-align:right; color:#7B8794; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.5px;">Subtotal</td>
-                                <td style="padding:8px 14px; text-align:right; width:130px;">
-                                    <span t-field="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
-                                </td>
-                            </tr>
-                            <tr t-if="doc.amount_tax" style="border-bottom:1px solid #E1E5EC;">
-                                <td style="padding:8px 14px; text-align:right; color:#7B8794; font-weight:600; font-size:10px; text-transform:uppercase; letter-spacing:0.5px;">Tax</td>
-                                <td style="padding:8px 14px; text-align:right;">
-                                    <span t-field="doc.amount_tax" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
-                                </td>
-                            </tr>
-                            <tr style="background-color:#0F2347; color:#FFFFFF;">
-                                <td style="padding:12px 14px; text-align:right; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; font-size:11px;">Total</td>
-                                <td style="padding:12px 14px; text-align:right; font-weight:700; font-size:14px;">
-                                    <span t-field="doc.amount_total" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
-                                </td>
-                            </tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+            <div style="width:100%; text-align:right;">
+                <table style="display:inline-table; width:280px; border-collapse:collapse; background-color:#f1f5f9; border-radius:4px;">
+                    <tr>
+                        <td style="padding:10px 15px; text-align:right; color:#334155; font-size:10pt; font-weight:bold;">Untaxed Amount:</td>
+                        <td style="padding:10px 15px; text-align:right; font-weight:bold; font-size:10pt; color:#0A182F;">
+                            <span t-field="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                        </td>
+                    </tr>
+                    <tr t-if="doc.amount_tax">
+                        <td style="padding:10px 15px; text-align:right; color:#334155; font-size:10pt; font-weight:bold;">Tax:</td>
+                        <td style="padding:10px 15px; text-align:right; font-weight:bold; font-size:10pt; color:#0A182F;">
+                            <span t-field="doc.amount_tax" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                        </td>
+                    </tr>
+                    <tr style="font-size:15pt; font-weight:800; color:white; background-color:#0A182F;">
+                        <td style="padding:10px 15px; text-align:right; color:white; border-radius:0 0 0 4px;">TOTAL</td>
+                        <td style="padding:10px 15px; text-align:right; color:white; border-radius:0 0 4px 0;">
+                            <span t-field="doc.amount_total" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
 
-            <!-- NOTES -->
-            <div style="padding:0 30px; margin-top:30px;">
+            <!-- FOOTER NOTES -->
+            <div style="margin-top:30px; font-size:8.5pt;">
                 <t t-if="doc.payment_term_id and doc.payment_term_id.note">
                     <div style="margin-bottom:12px;">
-                        <div style="font-weight:700; color:#0F2347; text-transform:uppercase; letter-spacing:1px; font-size:9px; margin-bottom:4px;">Payment Terms</div>
+                        <div style="font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:0.5px; font-size:7.5pt; margin-bottom:4px;">Payment Terms</div>
                         <span t-field="doc.payment_term_id.note"/>
                     </div>
                 </t>
                 <t t-if="doc.fiscal_position_id and doc.fiscal_position_id.sudo().note">
                     <div style="margin-bottom:12px;">
-                        <div style="font-weight:700; color:#0F2347; text-transform:uppercase; letter-spacing:1px; font-size:9px; margin-bottom:4px;">Fiscal Position Remark</div>
+                        <div style="font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:0.5px; font-size:7.5pt; margin-bottom:4px;">Fiscal Position Remark</div>
                         <span t-field="doc.fiscal_position_id.sudo().note"/>
                     </div>
                 </t>
                 <t t-if="doc.note">
                     <div style="margin-bottom:12px;">
-                        <div style="font-weight:700; color:#0F2347; text-transform:uppercase; letter-spacing:1px; font-size:9px; margin-bottom:4px;">Notes</div>
+                        <div style="font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:0.5px; font-size:7.5pt; margin-bottom:4px;">Terms &amp; Conditions</div>
                         <span t-field="doc.note"/>
                     </div>
                 </t>
             </div>
 
             <!-- SIGNATURE -->
-            <div t-if="doc.signed_by" style="padding:12px 30px 0 30px; margin-top:24px; border-top:2px solid #0F2347;">
-                <div style="font-weight:700; color:#0F2347; text-transform:uppercase; letter-spacing:1px; font-size:9px; margin-bottom:4px;">Signed by</div>
+            <div t-if="doc.signed_by" style="margin-top:24px; padding-top:12px; border-top:2px solid #0A182F;">
+                <div style="font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:0.5px; font-size:7.5pt; margin-bottom:4px;">Signed by</div>
                 <span t-field="doc.signed_by"/>
             </div>
 
