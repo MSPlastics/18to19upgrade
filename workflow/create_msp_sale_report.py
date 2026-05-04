@@ -43,6 +43,12 @@ QWEB_ARCH = '''<t t-call="web.html_container">
         <t t-set="brand_zebra" t-value="'#f8fafc'"/>
         <t t-set="brand_text" t-value="'#0A182F'"/>
         <t t-set="brand_muted" t-value="'#334155'"/>
+        <!-- Use the commercial partner's address when the invoice/shipping partner is a child without its own street -->
+        <t t-set="bill_addr" t-value="doc.partner_invoice_id if doc.partner_invoice_id.street else doc.partner_invoice_id.commercial_partner_id"/>
+        <t t-set="ship_addr" t-value="doc.partner_shipping_id if doc.partner_shipping_id.street else doc.partner_shipping_id.commercial_partner_id"/>
+        <t t-set="sold_addr" t-value="doc.partner_id if doc.partner_id.street else doc.partner_id.commercial_partner_id"/>
+        <!-- Currency symbol pulled once; we format amounts manually with a regular space to avoid wkhtmltopdf's NBSP-as-Latin1 corruption -->
+        <t t-set="cur_sym" t-value="doc.currency_id.symbol"/>
         <div class="page" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#111; font-size:9pt;">
 
             <!-- TOP LAYOUT: left = company + addresses; right = meta panel -->
@@ -80,29 +86,41 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <td style="vertical-align:top; padding-right:15px;">
                                     <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Bill To / Invoice</div>
                                     <br/>
-                                    <strong style="font-size:9.5pt; color:#0A182F;">
-                                        <span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
-                                    </strong><br/>
-                                    <span t-field="doc.partner_invoice_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;"><t t-out="doc.partner_invoice_id.name"/></strong><br/>
+                                    <t t-if="bill_addr.street"><t t-out="bill_addr.street"/><br/></t>
+                                    <t t-if="bill_addr.street2"><t t-out="bill_addr.street2"/><br/></t>
+                                    <t t-if="bill_addr.city or bill_addr.state_id or bill_addr.zip">
+                                        <t t-out="bill_addr.city"/><t t-if="bill_addr.state_id">, <t t-out="bill_addr.state_id.code"/></t><t t-if="bill_addr.zip"> <t t-out="bill_addr.zip"/></t><br/>
+                                    </t>
+                                    <t t-if="bill_addr.country_id"><t t-out="bill_addr.country_id.name"/><br/></t>
+                                    <t t-if="bill_addr.phone"><t t-out="bill_addr.phone"/></t>
                                     <t t-if="doc.partner_invoice_id.vat">
-                                        <br/><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <span t-field="doc.partner_invoice_id.vat"/>
+                                        <br/><t t-out="company.account_fiscal_country_id.vat_label or 'Tax ID'"/>: <t t-out="doc.partner_invoice_id.vat"/>
                                     </t>
                                 </td>
                                 <td style="vertical-align:top; padding-right:15px;">
                                     <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Sold To / Branch</div>
                                     <br/>
-                                    <strong style="font-size:9.5pt; color:#0A182F;">
-                                        <span t-field="doc.partner_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
-                                    </strong><br/>
-                                    <span t-field="doc.partner_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;"><t t-out="doc.partner_id.name"/></strong><br/>
+                                    <t t-if="sold_addr.street"><t t-out="sold_addr.street"/><br/></t>
+                                    <t t-if="sold_addr.street2"><t t-out="sold_addr.street2"/><br/></t>
+                                    <t t-if="sold_addr.city or sold_addr.state_id or sold_addr.zip">
+                                        <t t-out="sold_addr.city"/><t t-if="sold_addr.state_id">, <t t-out="sold_addr.state_id.code"/></t><t t-if="sold_addr.zip"> <t t-out="sold_addr.zip"/></t><br/>
+                                    </t>
+                                    <t t-if="sold_addr.country_id"><t t-out="sold_addr.country_id.name"/><br/></t>
+                                    <t t-if="sold_addr.phone"><t t-out="sold_addr.phone"/></t>
                                 </td>
                                 <td style="vertical-align:top;">
                                     <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:white; background-color:#0A182F; padding:4px 8px; margin-bottom:8px; border-radius:2px; display:inline-block;">Ship To</div>
                                     <br/>
-                                    <strong style="font-size:9.5pt; color:#0A182F;">
-                                        <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["name"],"no_marker":true}'/>
-                                    </strong><br/>
-                                    <span t-field="doc.partner_shipping_id" t-options='{"widget":"contact","fields":["address","phone"],"no_marker":true}'/>
+                                    <strong style="font-size:9.5pt; color:#0A182F;"><t t-out="doc.partner_shipping_id.name"/></strong><br/>
+                                    <t t-if="ship_addr.street"><t t-out="ship_addr.street"/><br/></t>
+                                    <t t-if="ship_addr.street2"><t t-out="ship_addr.street2"/><br/></t>
+                                    <t t-if="ship_addr.city or ship_addr.state_id or ship_addr.zip">
+                                        <t t-out="ship_addr.city"/><t t-if="ship_addr.state_id">, <t t-out="ship_addr.state_id.code"/></t><t t-if="ship_addr.zip"> <t t-out="ship_addr.zip"/></t><br/>
+                                    </t>
+                                    <t t-if="ship_addr.country_id"><t t-out="ship_addr.country_id.name"/><br/></t>
+                                    <t t-if="ship_addr.phone"><t t-out="ship_addr.phone"/></t>
                                 </td>
                             </tr>
                         </table>
@@ -159,37 +177,47 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <!-- PRODUCT ROW -->
                         <tr t-else="" t-att-style="row_index % 2 == 1 and 'background-color:#f8fafc;' or ''">
                             <t t-set="row_index" t-value="row_index + 1"/>
+                            <!-- MSP PN: pull from product.product.name (MSP's internal product number, e.g. 10853) -->
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt; font-weight:bold;">
-                                <span t-field="line.product_customer_code"/>
+                                <t t-if="line.product_id"><t t-out="line.product_id.name"/></t>
                             </td>
+                            <!-- Description: first line of line.name in bold + remaining lines (multi-line desc + cust PN + pack size) below -->
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0;">
+                                <t t-set="name_parts" t-value="(line.name or '').split('\n', 1)"/>
                                 <div style="font-weight:bold; font-size:10pt; color:#0A182F;">
-                                    <t t-if="line.product_id and line.product_id.default_code"><span t-field="line.product_id.default_code"/></t>
+                                    <t t-out="name_parts[0]"/>
                                 </div>
-                                <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500;">
-                                    <span t-field="line.name"/>
-                                </div>
+                                <t t-if="len(name_parts) > 1">
+                                    <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500; white-space:pre-line;">
+                                        <t t-out="name_parts[1]"/>
+                                    </div>
+                                </t>
+                                <t t-if="line.product_customer_code">
+                                    <div style="margin-top:4px; font-size:8pt; color:#334155;">
+                                        Cust Code: <t t-out="line.product_customer_code"/>
+                                    </div>
+                                </t>
                                 <t t-if="line.discount">
                                     <div style="margin-top:4px; font-size:8pt; color:#0A182F; font-style:italic;">
-                                        Discount: <span t-field="line.discount"/>%
+                                        Discount: <t t-out="('%g' % line.discount)"/>%
                                     </div>
                                 </t>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-size:8pt; color:#0A182F; font-style:italic;">
-                                <t t-if="line.x_studio_freight_terms"><span t-field="line.x_studio_freight_terms"/></t>
+                                <t t-if="line.x_studio_freight_terms"><t t-out="line.x_studio_freight_terms"/></t>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt;">
-                                <span t-field="line.product_uom_qty"/>
-                                <span t-field="line.product_uom_id" groups="uom.group_uom"/>
+                                <t t-out="('%g' % line.product_uom_qty)"/>
+                                <t t-if="line.product_uom_id"> <t t-out="line.product_uom_id.name"/></t>
                                 <t t-if="line.product_packaging_id">
-                                    <br/><span style="color:#334155; font-size:8.5pt; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">(<span t-field="line.product_packaging_qty" t-options='{"widget":"integer"}'/> <span t-field="line.product_packaging_id"/>)</span>
+                                    <br/><span style="color:#334155; font-size:8.5pt; font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">(<t t-out="('%g' % line.product_packaging_qty)"/> <t t-out="line.product_packaging_id.name"/>)</span>
                                 </t>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0;">
-                                <span t-field="line.price_unit" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                                <t t-out="cur_sym + ' ' + '{:,.2f}'.format(line.price_unit)"/>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; text-align:right; font-weight:bold;">
-                                <span t-field="line.price_subtotal" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                                <t t-out="cur_sym + ' ' + '{:,.2f}'.format(line.price_subtotal)"/>
                             </td>
                         </tr>
                     </t>
@@ -202,19 +230,19 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <tr>
                         <td style="padding:10px 15px; text-align:right; color:#334155; font-size:10pt; font-weight:bold;">Untaxed Amount:</td>
                         <td style="padding:10px 15px; text-align:right; font-weight:bold; font-size:10pt; color:#0A182F;">
-                            <span t-field="doc.amount_untaxed" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                            <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_untaxed)"/>
                         </td>
                     </tr>
                     <tr t-if="doc.amount_tax">
                         <td style="padding:10px 15px; text-align:right; color:#334155; font-size:10pt; font-weight:bold;">Tax:</td>
                         <td style="padding:10px 15px; text-align:right; font-weight:bold; font-size:10pt; color:#0A182F;">
-                            <span t-field="doc.amount_tax" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                            <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_tax)"/>
                         </td>
                     </tr>
                     <tr style="font-size:15pt; font-weight:800; color:white; background-color:#0A182F;">
                         <td style="padding:10px 15px; text-align:right; color:white; border-radius:0 0 0 4px;">TOTAL</td>
                         <td style="padding:10px 15px; text-align:right; color:white; border-radius:0 0 4px 0;">
-                            <span t-field="doc.amount_total" t-options='{"widget":"monetary","display_currency":doc.currency_id}'/>
+                            <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_total)"/>
                         </td>
                     </tr>
                 </table>
