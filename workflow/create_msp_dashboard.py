@@ -65,8 +65,11 @@ def build_spreadsheet_data():
     line_cols = ["order_id", "product_id", "name",
                  "product_uom_qty", "qty_delivered",
                  "x_studio_freight_terms"]
-    mo_cols = ["name", "sale_line_id", "product_id", "state",
-               "product_qty", "qty_produced", "date_finished"]
+    # Note: MSP populates sale_order_line_id / sale_order_id (likely a custom
+    # module override) — not the standard sale_line_id. ~73% of MOs are
+    # linked via these fields.
+    mo_cols = ["name", "sale_order_id", "sale_order_line_id", "product_id",
+               "state", "product_qty", "qty_produced", "date_finished"]
 
     lists = {
         "1": {
@@ -92,16 +95,21 @@ def build_spreadsheet_data():
         },
         "3": {
             "id": "3",
-            "name": "Recent Manufacturing Orders (in progress + completed)",
+            "name": "Produced — Linked Sales Order Still Open",
             "model": "mrp.production",
-            # Show MOs that have produced or are producing material, regardless
-            # of sale_line link (most MSP MOs are stock replenishment, not
-            # directly procured by a sale order). Sorted most-recent first so
-            # whatever was just produced shows at the top.
-            "domain": [["state", "in", ["progress", "to_close", "done"]]],
+            # Production is in progress or complete (state in progress/
+            # to_close/done) AND the linked sales order is still open
+            # (sale_order_id.state = 'sale'). When the SO state flips to
+            # 'done' the order is fully shipped, so the MO drops off the
+            # dashboard. Approximates "produced material not yet shipped".
+            "domain": [
+                ["state", "in", ["progress", "to_close", "done"]],
+                ["sale_order_line_id", "!=", False],
+                ["sale_order_id.state", "=", "sale"],
+            ],
             "context": {},
-            "orderBy": [{"name": "date_finished", "asc": False},
-                        {"name": "id", "asc": False}],
+            "orderBy": [{"name": "sale_order_id", "asc": True},
+                        {"name": "date_finished", "asc": False}],
             "columns": mo_cols,
             "fieldMatching": {},
         },
@@ -192,7 +200,7 @@ def build_spreadsheet_data():
 
     # --- Section 3: MOs ---
     section3_row = list2_start + LINE_ROWS + 3
-    cells[f"A{section3_row}"] = "  3.  RECENT MANUFACTURING ORDERS — QTY PRODUCED (most recent first)"
+    cells[f"A{section3_row}"] = "  3.  MANUFACTURED — LINKED SALES ORDER STILL OPEN (i.e. not yet fully shipped)"
     cell_styles.update(_style_block(section3_row, 0, 1, len(mo_cols), 3))
     rows_sizes[str(section3_row - 1)] = {"size": 30}
 
@@ -217,13 +225,14 @@ def build_spreadsheet_data():
     # Pick the widest layout among the three sections so all sections look right.
     # Sections: SO has 7 cols, lines has 6, MOs has 7.
     cols_sizes = {
-        "0": {"size": 130},   # Order # / MO # / Order
-        "1": {"size": 230},   # Customer / Sale Line / Product
-        "2": {"size": 140},   # Expected Delivery / Description / Product
-        "3": {"size": 110},   # Drop PO / Qty Ordered / State
-        "4": {"size": 130},   # Customer PO / Qty Delivered / Qty to Produce
-        "5": {"size": 130},   # Total / Freight / Qty Produced
-        "6": {"size": 140},   # Salesperson / — / Date Finished
+        "0": {"size": 130},   # Order # / Order / MO #
+        "1": {"size": 220},   # Customer / Product / Sale Order
+        "2": {"size": 140},   # Expected Delivery / Description / Sale Line
+        "3": {"size": 110},   # Drop PO / Qty Ordered / Product
+        "4": {"size": 130},   # Customer PO / Qty Delivered / State
+        "5": {"size": 130},   # Total / Freight / Qty to Produce
+        "6": {"size": 130},   # Salesperson / — / Qty Produced
+        "7": {"size": 140},   # — / — / Date Finished
     }
 
     sheet = {
