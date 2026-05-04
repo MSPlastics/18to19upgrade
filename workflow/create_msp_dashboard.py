@@ -68,8 +68,13 @@ def build_spreadsheet_data():
     # Note: MSP populates sale_order_line_id / sale_order_id (likely a custom
     # module override) — not the standard sale_line_id. ~73% of MOs are
     # linked via these fields.
+    # Visual order: id/links/state on the left, then a contiguous block of
+    # quantity columns (To Produce | Produced | Delivered | Balance) at the
+    # right so the math flows naturally. Balance is a computed spreadsheet
+    # formula appended after the list columns.
     mo_cols = ["name", "sale_order_id", "sale_order_line_id", "product_id",
-               "state", "product_qty", "qty_produced", "date_finished"]
+               "state", "date_finished", "product_qty", "qty_produced",
+               "sale_order_line_id.qty_delivered"]
 
     lists = {
         "1": {
@@ -209,8 +214,27 @@ def build_spreadsheet_data():
     cell_styles.update(_style_block(list3_start, 0, 1, len(mo_cols), 4))
     cell_styles.update(_style_block(list3_start + 1, 0, MO_ROWS, len(mo_cols), 5))
     rows_sizes[str(list3_start - 1)] = {"size": 26}
+
+    # Append a Balance column after the list. mo_cols has 9 entries (cols
+    # A..I), so Balance lives in column J. The header cell + per-row formula
+    # = qty_produced - qty_delivered. Cells are blanked when the row is empty
+    # so we don't render a fake "0" balance for rows beyond the data.
+    qty_produced_col = chr(ord('A') + mo_cols.index("qty_produced"))   # H
+    qty_delivered_col = chr(ord('A') + mo_cols.index("sale_order_line_id.qty_delivered"))  # I
+    balance_col = chr(ord('A') + len(mo_cols))   # J
+    cells[f"{balance_col}{list3_start}"] = "Balance (Produced − Delivered)"
+    cell_styles[f"{balance_col}{list3_start}"] = 4
+    for r in range(1, MO_ROWS + 1):
+        row_n = list3_start + r
+        cells[f"{balance_col}{row_n}"] = (
+            f'=IF({qty_produced_col}{row_n}="","",'
+            f'{qty_produced_col}{row_n}-{qty_delivered_col}{row_n})'
+        )
+        cell_styles[f"{balance_col}{row_n}"] = 5
+
+    table_last_col = chr(ord('A') + len(mo_cols))   # include balance col in the band
     tables.append({
-        "range": f"A{list3_start}:{chr(ord('A') + len(mo_cols) - 1)}{list3_start + MO_ROWS}",
+        "range": f"A{list3_start}:{table_last_col}{list3_start + MO_ROWS}",
         "type": "static",
         "config": {
             "hasFilters": False, "totalRow": False, "firstColumn": False,
@@ -230,15 +254,19 @@ def build_spreadsheet_data():
         "2": {"size": 140},   # Expected Delivery / Description / Sale Line
         "3": {"size": 110},   # Drop PO / Qty Ordered / Product
         "4": {"size": 130},   # Customer PO / Qty Delivered / State
-        "5": {"size": 130},   # Total / Freight / Qty to Produce
-        "6": {"size": 130},   # Salesperson / — / Qty Produced
-        "7": {"size": 140},   # — / — / Date Finished
+        "5": {"size": 130},   # Total / Freight / Date Finished
+        "6": {"size": 130},   # Salesperson / — / Qty to Produce
+        "7": {"size": 130},   # — / — / Qty Produced
+        "8": {"size": 130},   # — / — / Qty Delivered
+        "9": {"size": 150},   # — / — / Balance
     }
 
     sheet = {
         "id": "sheet1",
         "name": "Open Orders",
-        "colNumber": max(len(so_cols), len(line_cols), len(mo_cols)),
+        # +1 to the MO width because we add a computed Balance column after
+        # the list columns.
+        "colNumber": max(len(so_cols), len(line_cols), len(mo_cols) + 1),
         "rowNumber": max(total_rows, 100),
         "cells": cells,
         "rows": rows_sizes,
