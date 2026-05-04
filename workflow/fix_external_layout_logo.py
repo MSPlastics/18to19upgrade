@@ -63,24 +63,22 @@ def connect(target):
 
 
 # An <img ...> tag that has src="/web/image/..." AND data-attachment-id="..."
-# — the Studio-uploaded hardcoded form. Captures the class attribute so we
-# can preserve any extra classes the user (or Studio) added.
+# — the Studio-uploaded hardcoded form.
 _IMG_RE = re.compile(
     r'<img\b[^>]*?\bsrc="/web/image/[^"]*"[^>]*?\bdata-attachment-id="\d+"[^>]*?/?>',
 )
-_CLASS_RE = re.compile(r'class="([^"]*)"')
 
 
 def rewrite(match):
-    classes = "img img-fluid o_we_custom_image"
-    cls = _CLASS_RE.search(match.group(0))
-    if cls:
-        classes = cls.group(1)
+    # Use Odoo's standard company-logo class. Studio's `img img-fluid
+    # o_we_custom_image` blows the logo up to 100% container width,
+    # which looks wrong on a report header — `o_company_logo_big` has
+    # the proper max-height styling.
     return (
-        f'<img t-if="company.logo" '
-        f'class="{classes}" '
-        f't-att-src="image_data_uri(company.logo)" '
-        f'alt="Logo"/>'
+        '<img t-if="company.logo" '
+        'class="o_company_logo_big" '
+        't-att-src="image_data_uri(company.logo)" '
+        'alt="Logo"/>'
     )
 
 
