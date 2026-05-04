@@ -206,7 +206,16 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 </t>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-size:8pt; color:#0A182F; font-style:italic;">
-                                <t t-if="line.x_studio_freight_terms"><t t-out="line.x_studio_freight_terms"/></t>
+                                <t t-if="line.x_studio_freight_terms">
+                                    <div><t t-out="line.x_studio_freight_terms"/></div>
+                                </t>
+                                <t t-if="line.x_studio_item_specific_freight_instructions">
+                                    <t t-foreach="line.x_studio_item_specific_freight_instructions.splitlines()" t-as="instr_line">
+                                        <div style="margin-top:2px; color:#334155; font-style:normal;">
+                                            <t t-out="instr_line"/>
+                                        </div>
+                                    </t>
+                                </t>
                             </td>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt;">
                                 <t t-out="('%g' % line.product_uom_qty)"/>
