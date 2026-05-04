@@ -81,7 +81,11 @@ def build_spreadsheet_data():
             "id": "1",
             "name": "Open Sales Orders by Due Date",
             "model": "sale.order",
-            "domain": [["state", "=", "sale"]],
+            # state=sale is not enough — Odoo doesn't auto-close orders
+            # after delivery, so most state=sale orders are actually fully
+            # shipped. delivery_status != 'full' is the real "open" gate.
+            "domain": [["state", "=", "sale"],
+                       ["delivery_status", "!=", "full"]],
             "context": {},
             "orderBy": [{"name": "commitment_date", "asc": True}],
             "columns": so_cols,
@@ -92,6 +96,7 @@ def build_spreadsheet_data():
             "name": "Open Order Lines",
             "model": "sale.order.line",
             "domain": [["order_id.state", "=", "sale"],
+                       ["order_id.delivery_status", "!=", "full"],
                        ["display_type", "=", False]],
             "context": {},
             "orderBy": [{"name": "order_id", "asc": True}, {"name": "id", "asc": True}],
@@ -100,17 +105,18 @@ def build_spreadsheet_data():
         },
         "3": {
             "id": "3",
-            "name": "Produced — Linked Sales Order Still Open",
+            "name": "Produced — Linked Sales Order Not Yet Fully Shipped",
             "model": "mrp.production",
-            # Production is in progress or complete (state in progress/
-            # to_close/done) AND the linked sales order is still open
-            # (sale_order_id.state = 'sale'). When the SO state flips to
-            # 'done' the order is fully shipped, so the MO drops off the
-            # dashboard. Approximates "produced material not yet shipped".
+            # state in [progress, to_close, done]: production happened or
+            # is happening. sale_order_id.state=sale AND delivery_status
+            # != 'full': linked SO is still pending delivery. When the SO
+            # delivery completes its delivery_status flips to 'full' and
+            # the MO drops off the dashboard.
             "domain": [
                 ["state", "in", ["progress", "to_close", "done"]],
                 ["sale_order_line_id", "!=", False],
                 ["sale_order_id.state", "=", "sale"],
+                ["sale_order_id.delivery_status", "!=", "full"],
             ],
             "context": {},
             "orderBy": [{"name": "sale_order_id", "asc": True},
