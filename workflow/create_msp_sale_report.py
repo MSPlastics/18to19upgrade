@@ -47,6 +47,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
         <t t-set="bill_addr" t-value="doc.partner_invoice_id if doc.partner_invoice_id.street else doc.partner_invoice_id.commercial_partner_id"/>
         <t t-set="ship_addr" t-value="doc.partner_shipping_id if doc.partner_shipping_id.street else doc.partner_shipping_id.commercial_partner_id"/>
         <t t-set="sold_addr" t-value="doc.partner_id if doc.partner_id.street else doc.partner_id.commercial_partner_id"/>
+        <t t-set="ship_instr" t-value="doc.partner_shipping_id.x_studio_shipping_instructions or doc.partner_shipping_id.commercial_partner_id.x_studio_shipping_instructions or ''"/>
         <!-- Currency symbol pulled once; we format amounts manually with a regular space to avoid wkhtmltopdf's NBSP-as-Latin1 corruption -->
         <t t-set="cur_sym" t-value="doc.currency_id.symbol"/>
         <div class="page" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#111; font-size:9pt;">
@@ -124,6 +125,16 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 </td>
                             </tr>
                         </table>
+
+                        <!-- SHIPPING INSTRUCTIONS BAND (spans full width of LEFT cell) -->
+                        <div t-if="ship_instr" style="margin-top:14px; background-color:#f1f5f9; border-left:4px solid #0A182F; padding:10px 14px; border-radius:2px;">
+                            <div style="font-size:7.5pt; font-weight:bold; text-transform:uppercase; color:#0A182F; letter-spacing:0.5px; margin-bottom:5px;">Shipping Instructions</div>
+                            <div style="font-size:9pt; color:#334155; line-height:1.4;">
+                                <t t-foreach="ship_instr.splitlines()" t-as="instr_line">
+                                    <div><t t-out="instr_line"/></div>
+                                </t>
+                            </div>
+                        </div>
                     </td>
 
                     <!-- RIGHT 32%: META PANEL -->
