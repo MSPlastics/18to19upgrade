@@ -65,8 +65,8 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 
 | Repo | Branch | Purpose |
 |---|---|---|
-| **MSPlastics/odoo18** | `msp_production` | Production target — LIVE on v19. Tip moves with deploys (currently `c2c8218` after the 2026-05-06 `msp_packaging` Packaging-tab create() override). |
-| **MSPlastics/odoo18** | `19_upgradetest2` | Staging branch. Tip `8d0f838`; **1 commit ahead of prod** (`67b22e5` vendor of `msppartialMO`, pending staging verification before fast-forward to prod). |
+| **MSPlastics/odoo18** | `msp_production` | Production target — LIVE on v19. Tip moves with deploys (currently `72abe9c` after the 2026-05-07 `eq_cancel_mrp_orders` Reset-to-Draft v19 fixes, cherry-picked from staging). |
+| **MSPlastics/odoo18** | `19_upgradetest2` | Staging branch. Tip `a82afb9`. Diverges from prod via the `67b22e5` msppartialMO vendor (staging-only, pending verification) plus a same-content/different-SHA pairing on the msp_packaging Packaging-tab fix. |
 | **MSPlastics/msppartialMO** | `19_upgrade` | Source-of-truth for the `msppartialMO` addon (commit `1d2264d`). Vendored into `MSPlastics/odoo18` on `19_upgradetest2` for Odoo.sh installable rebuild. |
 | **MSPlastics/18to19upgrade** (this repo) | `main` | Tooling + docs. |
 
@@ -100,6 +100,7 @@ The 2026-05-04 `NewId` fix is the canonical example: the `_calculate_date_by_seq
 - ✅ **Studio repair patchers** (2026-05-04). Three idempotent patchers shipped for v18→v19 Studio damage that surfaces during normal usage: variant-related rewrites on product.template, ksc_partner shipping-instructions view restore, and procurement_group_id rewrites on mrp.production manual computes.
 - ✅ **MSP Open Sales Orders dashboard** (2026-05-05/06). Three live-bound list sections (open SOs, open lines with qty ordered/delivered, MOs with produced + delivered + computed Balance). Built programmatically via XML-RPC in [workflow/create_msp_dashboard.py](workflow/create_msp_dashboard.py).
 - ✅ **`msp_packaging` 19.0.1.4.0** (2026-05-06). `product.packaging.create()` override supplies `product_id` from `product_tmpl_id` for rows added through the product.template Packaging tab. Fixes `ValidationError: Missing required value for the field 'Product'` from the form-side write path.
+- ✅ **`eq_cancel_mrp_orders` 19.0.1.2.0** (2026-05-07). Two `action_reset_to_draft` v19 fixes: (1) workorder state `'pending'` → `'blocked'` (v19 dropped `pending` from the Selection); (2) `_onchange_product_id()` and the six `_compute_*()` calls wrapped in hasattr guards (those fields are no longer computes in v19). Surfaced when resetting WH/MO/01537 to draft after cancel.
 - 🚧 **`msppartialMO` vendor on staging** (2026-05-04). Pending staging verification before fast-forward to prod.
 - **Known deferred items**:
   - ZPL printing (`label_zebra_printer`) — UI loads but print path needs v19 session API migration
