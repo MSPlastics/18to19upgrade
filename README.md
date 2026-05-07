@@ -10,22 +10,64 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [PLAYBOOK.md](PLAYBOOK.md) | Original upgrade runbook (prod prep + cutover steps). |
 | [tools/](tools/) | XML-RPC diagnostic scripts: check module state, force upgrade, uninstall, read logs. |
 | [workflow/](workflow/) | Migration + post-cutover scripts (see below). |
+
+### Cutover tooling (archived — already used 2026-05-03)
+
+| File | Purpose |
+|---|---|
 | [workflow/post_migration_recovery.py](workflow/post_migration_recovery.py) | **Migration-only.** Already used 2026-05-03. Archived — re-running risks clobbering post-cutover Studio edits (Steps 4 + 5). |
 | [workflow/snapshot_v18_data.py](workflow/snapshot_v18_data.py) | Pre-cutover snapshot of v18 prod data (242 packagings + 491 MO Studio qtys). Already captured. |
-| [workflow/fix_qweb_v18_residue.py](workflow/fix_qweb_v18_residue.py) | **Post-cutover patcher.** Targeted, idempotent fix for stale v18 field names in Studio QWeb reports (`product_uom`/`tax_id`/`taxes_id`/`notes`/`has_packages`/`sh_*`). Run with `--target prod --commit` whenever a new v18 residue surfaces. |
-| [workflow/fix_external_layout_logo.py](workflow/fix_external_layout_logo.py) | Restore dynamic `company.logo` binding in Studio-customized external layouts (replaces hardcoded `<img src="/web/image/{id}-..."/>` from old logo uploads). Caps logo at 60px. Idempotent. |
-| [workflow/create_msp_sale_report.py](workflow/create_msp_sale_report.py) | **Custom MSP sale order PDF.** Idempotent — creates or updates `msp.report_saleorder_msp_v1` (ir.ui.view) + "Quotation / Order — MSP" (ir.actions.report). Re-run after editing the embedded QWEB_ARCH constant to push design changes. PDF filename = sale order number (e.g. `S01071.pdf`) via `print_report_name`. |
-| [workflow/set_msp_report_on_email_templates.py](workflow/set_msp_report_on_email_templates.py) | Wire the new MSP report into the four standard sale.order email templates (Send Quotation, Order Confirmation, Order Confirmation copy, Payment Done). Pro Forma left alone. |
-| [workflow/studio_arch/](workflow/studio_arch/) | Saved prod Studio view XML — the recovery script applied these during cutover. |
 | [workflow/snapshots/](workflow/snapshots/) | Pre-cutover JSON dumps of v18 prod data (read by the recovery script). |
+| [workflow/studio_arch/](workflow/studio_arch/) | Saved prod Studio view XML — the recovery script applied these during cutover. |
+
+### v18 residue + external layout patchers (idempotent — re-run as new residue surfaces)
+
+| File | Purpose |
+|---|---|
+| [workflow/fix_qweb_v18_residue.py](workflow/fix_qweb_v18_residue.py) | **Comprehensive patcher.** Idempotent fix for stale v18 field names in Studio QWeb reports (`product_uom`/`tax_id`/`taxes_id`/`notes`/`has_packages`/`sh_*`). Run with `--target prod --commit` whenever a new v18 residue surfaces. |
+| [workflow/fix_qweb_uom_v18_residue.py](workflow/fix_qweb_uom_v18_residue.py) | Older standalone patcher for `line.product_uom` residue. Superseded by `fix_qweb_v18_residue.py`; kept for reference. |
+| [workflow/fix_external_layout_logo.py](workflow/fix_external_layout_logo.py) | Restore dynamic `company.logo` binding in Studio-customized external layouts (replaces hardcoded `<img src="/web/image/{id}-..."/>` from old logo uploads). Caps logo at 60px. Idempotent. |
+
+### Studio repair patchers (idempotent — re-run as new instances surface)
+
+| File | Purpose |
+|---|---|
+| [workflow/fix_studio_variant_related.py](workflow/fix_studio_variant_related.py) | Strip the redundant `product_variant_id.` prefix from Studio related paths on `product.template`. Surfaced when editing customer drop part numbers (`customer_ids.product_name`) — v19's trigger machinery fails on the non-stored variant_id field. |
+| [workflow/recover_partner_shipping_instructions.py](workflow/recover_partner_shipping_instructions.py) | Re-create the inherit view that places `x_studio_shipping_instructions` inside the ksc_partner Delivery Information tab on `res.partner`. Field + 205 partner records survived migration; only the view was deleted. |
+| [workflow/fix_studio_procurement_group_compute.py](workflow/fix_studio_procurement_group_compute.py) | Rewrite `record.procurement_group_id.sale_id` → `record.sale_order_id` in manual computes on `mrp.production` (v19 removed `procurement_group_id`). |
+
+### Custom MSP report builders (idempotent — re-run after editing the embedded QWEB_ARCH constant)
+
+| File | Purpose |
+|---|---|
+| [workflow/create_msp_sale_report.py](workflow/create_msp_sale_report.py) | **Custom MSP sale order PDF.** Creates / updates `msp.report_saleorder_msp_v1` (ir.ui.view) + "Quotation / Order — MSP" (ir.actions.report). PDF filename = sale order number (e.g. `S01071.pdf`) via `print_report_name`. |
+| [workflow/set_msp_report_on_email_templates.py](workflow/set_msp_report_on_email_templates.py) | Wire the MSP sale order report into the four standard sale.order email templates (Send Quotation, Order Confirmation, Order Confirmation copy, Payment Done). Pro Forma left alone. |
+| [workflow/create_msp_invoice.py](workflow/create_msp_invoice.py) | **Custom MSP invoice PDF** on `account.move`. Same brand styling as the sale order report, plus a Lot Number column (comma-joined per invoice line). State-aware title (Invoice / Credit Note / Draft). |
+| [workflow/route_invoice_pdf_to_msp.py](workflow/route_invoice_pdf_to_msp.py) | Replace stock `account.report_invoice_with_payments` with a one-line delegate to the MSP view (the Send Invoice wizard hardcodes that report when caching `invoice_pdf_report_id`). Empties `report_template_ids` on the Invoice / Credit Note send templates so only one MSP attachment goes out per send. `--restore` reverses both. |
+| [workflow/set_msp_invoice_on_email_templates.py](workflow/set_msp_invoice_on_email_templates.py) | Earlier attempt to wire the MSP invoice via `report_template_ids`. **Superseded** by `route_invoice_pdf_to_msp.py` (it produced 2 attachments per send). Kept for reference. |
+| [workflow/create_msp_pick_sheet.py](workflow/create_msp_pick_sheet.py) | **Warehouse pick sheet** on `stock.picking`. Landscape 8-col, one row per `stock.move.line` so multi-lot moves split per-lot. Pallets + Weight blank for write-in. Pick Qty uses `move.quantity`. Coexists with stock Odoo reports. |
+| [workflow/create_msp_delivery_slip.py](workflow/create_msp_delivery_slip.py) | **Customer-facing delivery slip** on `stock.picking`. Portrait 6-col. Bottom POD block: Shipper signature/date + Received By signature/date. Coexists with stock Odoo reports. |
+
+### Dashboard
+
+| File | Purpose |
+|---|---|
+| [workflow/create_msp_dashboard.py](workflow/create_msp_dashboard.py) | Build the **MSP Open Sales Orders** dashboard programmatically (3 list sections: open SOs, open lines with qty ordered/delivered, MOs with produced + delivered + computed Balance column). Live-bound via ODOO.LIST formulas. Idempotent — looks up by name + group. |
+| [workflow/create_dashboard_filters.py](workflow/create_dashboard_filters.py) | Saved favorite `ir.filters` records as starting points for the dashboard's source lists (open orders by due date, open order lines, MOs by origin sale line). |
+
+### Other
+
+| File | Purpose |
+|---|---|
 | [.env.example](.env.example) | Credential template. Copy to `.env` (gitignored), fill in `ODOO_PROD_*` and `ODOO_STAGING_*`. |
 
 ## Where the actual code lives
 
 | Repo | Branch | Purpose |
 |---|---|---|
-| **MSPlastics/odoo18** | `msp_production` | Production target — LIVE on v19. Tip moves with deploys (currently `ac09fbc` after the post-cutover msp_packaging extensions). |
-| **MSPlastics/odoo18** | `19_upgradetest2` | Reference branch tracking the v19 fix work. Same tip as `msp_production`. |
+| **MSPlastics/odoo18** | `msp_production` | Production target — LIVE on v19. Tip moves with deploys (currently `c2c8218` after the 2026-05-06 `msp_packaging` Packaging-tab create() override). |
+| **MSPlastics/odoo18** | `19_upgradetest2` | Staging branch. Tip `8d0f838`; **1 commit ahead of prod** (`67b22e5` vendor of `msppartialMO`, pending staging verification before fast-forward to prod). |
+| **MSPlastics/msppartialMO** | `19_upgrade` | Source-of-truth for the `msppartialMO` addon (commit `1d2264d`). Vendored into `MSPlastics/odoo18` on `19_upgradetest2` for Odoo.sh installable rebuild. |
 | **MSPlastics/18to19upgrade** (this repo) | `main` | Tooling + docs. |
 
 This repo does **not** contain Odoo module code — only the operational scripts and documentation.
@@ -45,13 +87,20 @@ The 2026-05-04 `NewId` fix is the canonical example: the `_calculate_date_by_seq
 ## Quick reference
 
 - **Production URL**: `https://msplastics-odoo18.odoo.com` — live on Odoo 19.0+e since 2026-05-03
-- **msp_packaging version on prod**: `19.0.1.3.0` (sale.order.line + purchase.order.line + stock.move packaging fields)
+- **msp_packaging version on prod**: `19.0.1.4.0` (sale.order.line + purchase.order.line + stock.move packaging fields, plus the 2026-05-06 `product.packaging.create()` override that derives `product_id` from `product_tmpl_id` for the product.template Packaging tab)
+- **Vendored on staging only (not yet on prod)**: `msppartialMO` 19.0.1.0.0 — required by the MES central server (`action_increment_qty_producing` / `action_ship_partial_batch` / `action_close_and_backorder`)
 
 ## Status
 
 - ✅ **Cutover complete** (2026-05-03). 242 packagings + 491 MO Studio qtys restored from snapshot. 164 phantom BOMs flipped back.
 - ✅ **Post-cutover Studio QWeb fixes** (2026-05-04). Sale/purchase/delivery PDFs render — see [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) "Post-cutover fixes" section for the full rule table.
 - ✅ **Custom MSP sale order PDF + email send** (2026-05-04). New report `msp.report_saleorder_msp_v1` deployed on prod, wired into Send-by-email templates (Send Quotation, Order Confirmation, etc.). PDFs named after the order number (`S01071.pdf`). Filename + design + field mapping documented in [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) "Custom MSP sale order report" section.
+- ✅ **Custom MSP invoice PDF + Send-flow rebind** (2026-05-04). `msp.report_invoice_msp_v1` deployed on prod. The stock `account.report_invoice_with_payments` wrapper view now delegates to the MSP view (so the Send Invoice wizard's cached PDF is MSP-styled). Email templates' `report_template_ids` are emptied so only one MSP attachment goes out per send.
+- ✅ **MSP warehouse pick sheet + customer delivery slip** (2026-05-04). Both bound to `stock.picking`, coexist with the stock Odoo reports.
+- ✅ **Studio repair patchers** (2026-05-04). Three idempotent patchers shipped for v18→v19 Studio damage that surfaces during normal usage: variant-related rewrites on product.template, ksc_partner shipping-instructions view restore, and procurement_group_id rewrites on mrp.production manual computes.
+- ✅ **MSP Open Sales Orders dashboard** (2026-05-05/06). Three live-bound list sections (open SOs, open lines with qty ordered/delivered, MOs with produced + delivered + computed Balance). Built programmatically via XML-RPC in [workflow/create_msp_dashboard.py](workflow/create_msp_dashboard.py).
+- ✅ **`msp_packaging` 19.0.1.4.0** (2026-05-06). `product.packaging.create()` override supplies `product_id` from `product_tmpl_id` for rows added through the product.template Packaging tab. Fixes `ValidationError: Missing required value for the field 'Product'` from the form-side write path.
+- 🚧 **`msppartialMO` vendor on staging** (2026-05-04). Pending staging verification before fast-forward to prod.
 - **Known deferred items**:
   - ZPL printing (`label_zebra_printer`) — UI loads but print path needs v19 session API migration
   - View 2442 (`studio_customization` sale order Studio report) references `doc.x_studio_*` fields wiped during migration. Inactive in render path; recreate Studio fields if MSP wants to use that variant
