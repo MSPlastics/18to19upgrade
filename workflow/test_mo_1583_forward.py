@@ -98,7 +98,9 @@ def mes_post_roll(payload):
 
 
 def read_raw_move_lines(uid, models):
-    """Pull every stock.move.line attached to MO 1583's move_raw_ids."""
+    """Pull every stock.move.line attached to MO 1583's move_raw_ids.
+    Returns rows including move_line id so callers can do id-based diffs
+    (avoids false-duplicate matches when re-runs produce identical qty)."""
     mo = models.execute_kw(DB, uid, KEY, "mrp.production", "read", [[MO_ID]],
                            {"fields": ["move_raw_ids"]})[0]
     moves = models.execute_kw(DB, uid, KEY, "stock.move", "read", [mo["move_raw_ids"]],
@@ -111,6 +113,7 @@ def read_raw_move_lines(uid, models):
                                   {"fields": ["product_id", "lot_id", "quantity", "state"]})
         for ln in lines:
             rows.append({
+                "id": ln["id"],
                 "move_id": mv["id"],
                 "product_id": ln["product_id"][0],
                 "product_name": ln["product_id"][1],
@@ -159,10 +162,9 @@ def main():
     new_lines = []
     while time.time() < deadline:
         after = read_raw_move_lines(uid, models)
-        # New lines = any move_line whose id wasn't in the snapshot
-        before_line_ids = {(ln["move_id"], ln["product_id"], ln["quantity"]) for ln in before}
-        new_lines = [ln for ln in after
-                     if (ln["move_id"], ln["product_id"], ln["quantity"]) not in before_line_ids]
+        # New lines = any move_line.id that wasn't in the snapshot.
+        before_line_ids = {ln["id"] for ln in before}
+        new_lines = [ln for ln in after if ln["id"] not in before_line_ids]
         if len(new_lines) >= len(EXPECTED):
             print(f"[wait] +{int(deadline - time.time())}s found {len(new_lines)} new lines")
             break
