@@ -55,6 +55,12 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [workflow/create_msp_dashboard.py](workflow/create_msp_dashboard.py) | Build the **MSP Open Sales Orders** dashboard programmatically (3 list sections: open SOs, open lines with qty ordered/delivered, MOs with produced + delivered + computed Balance column). Live-bound via ODOO.LIST formulas. Idempotent — looks up by name + group. |
 | [workflow/create_dashboard_filters.py](workflow/create_dashboard_filters.py) | Saved favorite `ir.filters` records as starting points for the dashboard's source lists (open orders by due date, open order lines, MOs by origin sale line). |
 
+### Addon install + smoke tests (staging-only)
+
+| File | Purpose |
+|---|---|
+| [workflow/install_and_test_msppartialMO.py](workflow/install_and_test_msppartialMO.py) | Wait for the staging Odoo.sh rebuild → install or upgrade `msppartialMO` to `EXPECTED_VERSION` → smoke-test the two MES-facing methods (`action_increment_qty_producing` exercises the `lot_producing_ids` Many2many fix; `action_ship_partial_batch` exercises the `description_picking` fix). Reads `ODOO_STAGING_*` from `.env`. Bump `EXPECTED_VERSION` each time the addon's manifest version changes. |
+
 ### Other
 
 | File | Purpose |
@@ -66,8 +72,8 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | Repo | Branch | Purpose |
 |---|---|---|
 | **MSPlastics/odoo18** | `msp_production` | Production target — LIVE on v19. Tip moves with deploys (currently `72abe9c` after the 2026-05-07 `eq_cancel_mrp_orders` Reset-to-Draft v19 fixes, cherry-picked from staging). |
-| **MSPlastics/odoo18** | `19_upgradetest2` | Staging branch. Tip `a82afb9`. Diverges from prod via the `67b22e5` msppartialMO vendor (staging-only, pending verification) plus a same-content/different-SHA pairing on the msp_packaging Packaging-tab fix. |
-| **MSPlastics/msppartialMO** | `19_upgrade` | Source-of-truth for the `msppartialMO` addon (commit `1d2264d`). Vendored into `MSPlastics/odoo18` on `19_upgradetest2` for Odoo.sh installable rebuild. |
+| **MSPlastics/odoo18** | `19_upgradetest2` | Staging branch. Tip `8eaf317`. Diverges from prod via the `msppartialMO` vendor at `19.0.1.1.0` (staging-verified 2026-05-09, not yet rolled to prod) plus a same-content/different-SHA pairing on the msp_packaging Packaging-tab fix. |
+| **MSPlastics/msppartialMO** | `19_upgrade` | Source-of-truth for the v19-ported `msppartialMO` addon (commit `15ee20f`, version `19.0.1.1.0`). Vendored into `MSPlastics/odoo18` on `19_upgradetest2` for Odoo.sh installable rebuild. `main` and `testserverv2` still at the v18 source `ce0519d`. |
 | **MSPlastics/18to19upgrade** (this repo) | `main` | Tooling + docs. |
 
 This repo does **not** contain Odoo module code — only the operational scripts and documentation.
@@ -88,7 +94,7 @@ The 2026-05-04 `NewId` fix is the canonical example: the `_calculate_date_by_seq
 
 - **Production URL**: `https://msplastics-odoo18.odoo.com` — live on Odoo 19.0+e since 2026-05-03
 - **msp_packaging version on prod**: `19.0.1.4.0` (sale.order.line + purchase.order.line + stock.move packaging fields, plus the 2026-05-06 `product.packaging.create()` override that derives `product_id` from `product_tmpl_id` for the product.template Packaging tab)
-- **Vendored on staging only (not yet on prod)**: `msppartialMO` 19.0.1.0.0 — required by the MES central server (`action_increment_qty_producing` / `action_ship_partial_batch` / `action_close_and_backorder`)
+- **Vendored on staging only (not yet on prod)**: `msppartialMO` `19.0.1.1.0` — required by the MES central server (`action_increment_qty_producing` / `action_ship_partial_batch` / `action_close_and_backorder`). Both increment + partial-shipment paths smoke-tested against staging on 2026-05-09; close-and-backorder is static-audit-only (its wizards exist on v19 but the path wasn't directly exercised).
 
 ## Status
 
@@ -101,7 +107,7 @@ The 2026-05-04 `NewId` fix is the canonical example: the `_calculate_date_by_seq
 - ✅ **MSP Open Sales Orders dashboard** (2026-05-05/06). Three live-bound list sections (open SOs, open lines with qty ordered/delivered, MOs with produced + delivered + computed Balance). Built programmatically via XML-RPC in [workflow/create_msp_dashboard.py](workflow/create_msp_dashboard.py).
 - ✅ **`msp_packaging` 19.0.1.4.0** (2026-05-06). `product.packaging.create()` override supplies `product_id` from `product_tmpl_id` for rows added through the product.template Packaging tab. Fixes `ValidationError: Missing required value for the field 'Product'` from the form-side write path.
 - ✅ **`eq_cancel_mrp_orders` 19.0.1.2.0** (2026-05-07). Two `action_reset_to_draft` v19 fixes: (1) workorder state `'pending'` → `'blocked'` (v19 dropped `pending` from the Selection); (2) `_onchange_product_id()` and the six `_compute_*()` calls wrapped in hasattr guards (those fields are no longer computes in v19). Surfaced when resetting WH/MO/01537 to draft after cancel.
-- 🚧 **`msppartialMO` vendor on staging** (2026-05-04). Pending staging verification before fast-forward to prod.
+- ✅ **`msppartialMO` 19.0.1.1.0 staging-verified** (2026-05-09). Two v19 ports landed: (1) `mo.lot_producing_id` (Many2one, removed) → `mo.lot_producing_ids[:1]` (Many2many) in `action_ship_partial_batch`; (2) `stock.move.name` (removed in v19, raises `ValueError: Invalid field 'name' in 'stock.move'`) → `description_picking` (the v19 successor Text field for the move's human-readable label) in the create-vals dict. Both `action_increment_qty_producing` and `action_ship_partial_batch` smoke-tested end-to-end against MO `WH/MO/00096` on staging — increment moved state confirmed → progress, ship_partial created `WH/INT/00001` in `state=done` with the right `description_picking` and `quantity`. Pending FF to prod (waiting on explicit user instruction).
 - **Known deferred items**:
   - ZPL printing (`label_zebra_printer`) — UI loads but print path needs v19 session API migration
   - View 2442 (`studio_customization` sale order Studio report) references `doc.x_studio_*` fields wiped during migration. Inactive in render path; recreate Studio fields if MSP wants to use that variant
