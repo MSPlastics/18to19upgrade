@@ -60,6 +60,8 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | File | Purpose |
 |---|---|
 | [workflow/install_and_test_msppartialMO.py](workflow/install_and_test_msppartialMO.py) | Wait for the staging Odoo.sh rebuild → install or upgrade `msppartialMO` to `EXPECTED_VERSION` → smoke-test the two MES-facing methods (`action_increment_qty_producing` exercises the `lot_producing_ids` Many2many fix; `action_ship_partial_batch` exercises the `description_picking` fix). Reads `ODOO_STAGING_*` from `.env`. Bump `EXPECTED_VERSION` each time the addon's manifest version changes. |
+| [workflow/setup_mo_1583_lot_test.py](workflow/setup_mo_1583_lot_test.py) | Seed staging for the MO 1583 / `WH/MO/01479` (5-Layer extrusion) end-to-end lot test: enable lot tracking on each raw material, create a fresh `TEST-2026-MM-DD-...` `stock.lot`, ensure positive `WH/Stock` quants, then load 4 MES silos (Butene1-BF / Frac1-A / Color Repro / Exceed 1012RA) and 3 line-inventory rows on the 5 Layer line (conANTIBLOCK clarity / con-brown1 / conSLIP fast). Idempotent. Reads `ODOO_STAGING_*` and `MES_TEST_*` from `.env`. |
+| [workflow/test_mo_1583_forward.py](workflow/test_mo_1583_forward.py) | Forward-test the operatorUI -> MES -> Odoo consumption flow: POST a 100 lb roll to the cloud test MES `/api/v1/production/roll` (same payload shape operatorUI uses), poll the staging Odoo until the 7 expected `stock.move.line` records appear on the MO's `move_raw_ids`, then verify each material's aggregated qty + lot match the blend ratios. Reads `ODOO_STAGING_*` and `MES_TEST_*` from `.env`. |
 
 ### Other
 
