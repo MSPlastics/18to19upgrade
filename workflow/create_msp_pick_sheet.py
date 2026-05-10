@@ -161,10 +161,16 @@ QWEB_ARCH = '''<t t-call="web.html_container">
 
             <!-- CONSOLIDATED PICK CHECKLIST — one row per pallet (or per
                  unpalletized line). Picker ticks each box as the pallet is
-                 pulled from WH/Stock. -->
+                 pulled from WH/Stock. Pallets are sorted ascending by their
+                 trailing pallet number so the picker reads 1->20 top-down,
+                 and the verbose 'WH/MO/' prefix is stripped from the
+                 displayed pallet ID. -->
             <t t-set="palletized" t-value="doc.move_line_ids.filtered('package_id')"/>
             <t t-set="loose" t-value="doc.move_line_ids.filtered(lambda ml: not ml.package_id)"/>
-            <t t-set="pallets" t-value="palletized.package_id"/>
+            <!-- Sort key: extract trailing -PAL-N from pallet name, fall back
+                 to a large sentinel so non-conforming pallet IDs sink to the
+                 bottom (rare; only synthetic test pallets). -->
+            <t t-set="pallets" t-value="palletized.package_id.sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
             <div style="font-size:10pt; font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:1px; margin:8px 0 6px 0;">
                 Pick Checklist (<t t-out="len(pallets) + len(loose)"/> rows)
             </div>
@@ -172,13 +178,14 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                 <thead>
                     <tr>
                         <th style="width:4%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Picked</th>
-                        <th style="width:20%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
+                        <th style="width:5%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">#</th>
+                        <th style="width:15%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
                         <th style="width:7%;  background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">MSP PN</th>
                         <th style="width:25%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Description</th>
                         <th style="width:13%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Lot</th>
-                        <th style="width:8%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
+                        <th style="width:7%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
                         <th style="width:11%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
-                        <th style="width:12%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
+                        <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -196,14 +203,21 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <t t-set="desc_lines" t-value="desc_src.splitlines() or ['']"/>
                         <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
                         <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
+                        <!-- Parse pallet # for prominent display, strip WH/MO/ prefix from full ID -->
+                        <t t-set="pkg_name" t-value="pkg.name or ''"/>
+                        <t t-set="pallet_num" t-value="pkg_name.rsplit('-PAL-', 1)[-1] if '-PAL-' in pkg_name else '?'"/>
+                        <t t-set="display_id" t-value="pkg_name.replace('WH/MO/', '').replace('WH/', '')"/>
                         <t t-set="row_idx" t-value="row_idx + 1"/>
                         <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
                         <tr t-att-style="'background-color:' + bg + ';'">
                             <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
                                 <span style="display:inline-block; width:18px; height:18px; border:2px solid #0A182F; border-radius:3px; background:#fff;"></span>
                             </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="pkg.name or ''"/>
+                            <td style="padding:14px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:18pt; font-weight:bold; color:#0A182F;">
+                                <t t-out="pallet_num"/>
+                            </td>
+                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
+                                <t t-out="display_id"/>
                             </td>
                             <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold;">
                                 <t t-out="prod.name or ''"/>
@@ -245,6 +259,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
                                 <span style="display:inline-block; width:18px; height:18px; border:2px solid #0A182F; border-radius:3px; background:#fff;"></span>
                             </td>
+                            <td style="padding:14px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; color:#94a3b8;">-</td>
                             <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:9pt; font-style:italic; color:#94a3b8;">
                                 NO PALLET (loose)
                             </td>
@@ -272,7 +287,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" style="padding:10px; text-align:right; font-size:9pt; font-weight:bold; color:#334155; text-transform:uppercase; border-top:2px solid #0A182F;">Totals</td>
+                        <td colspan="6" style="padding:10px; text-align:right; font-size:9pt; font-weight:bold; color:#334155; text-transform:uppercase; border-top:2px solid #0A182F;">Totals</td>
                         <td style="padding:10px; text-align:center; font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F; border-top:2px solid #0A182F;">
                             <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/>
                         </td>
