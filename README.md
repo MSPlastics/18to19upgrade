@@ -7,8 +7,12 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | File / folder | Purpose |
 |---|---|
 | [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) | **Read this first.** Complete fix journal: every v19 break we found, the per-module fixes, the migration-level damage, the recovery process, and the post-cutover patches. |
-| [PALLET_SHIPPING_PLAN.md](PALLET_SHIPPING_PLAN.md) | Pre-implementation plan (drafted 2026-05-09) for adding pallet-based shipping (`stock.quant.package` + new MSP custom module + MES kiosk-scale flow). Architecture, schema, decisions, phased build, open questions. Hasn't been implemented yet — pick up from here next session. |
+| [PALLET_SHIPPING_PLAN.md](PALLET_SHIPPING_PLAN.md) | Pre-implementation plan (drafted 2026-05-09) for pallet-based shipping (`stock.package` + `msp_pallet` addon + MES kiosk-scale flow). Architecture, schema, decisions, phased build, open questions. Built + staging-verified end of "Implementation Status" section. |
 | [PLAYBOOK.md](PLAYBOOK.md) | Original upgrade runbook (prod prep + cutover steps). |
+| [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) | **Post-cutover deployment runbook.** Order-of-operations to move all the staging-verified MSP customizations (msp_pallet addon, msppartialMO v19 port, MES code, 6 QWeb reports, Clear Repro lot fix, MES silo re-binding) onto production. Each phase reversible, gated on prior phase verification. |
+| [AUDIT_PROCEDURE.md](AUDIT_PROCEDURE.md) | End-to-end SO→invoice audit rubric. Drives the `workflow/audit/` pipeline. v19 schema rename cheat sheet + per-phase pass criteria + common gotchas. |
+| [AUDIT_2026-05-09_11158.md](AUDIT_2026-05-09_11158.md) | Original lifecycle audit on product 11158. All 10 stages PASS. Surfaced 8 findings (silo lot drift, reservation strategy, blend expansion, etc.). |
+| [AUDIT_2026-05-10_11158_fixverify.md](AUDIT_2026-05-10_11158_fixverify.md) | Fix-verification audit cycle confirming MES `ac919b1` resolves silo + reservation findings. All 10 stages PASS without manual workarounds. |
 | [tools/](tools/) | XML-RPC diagnostic scripts: check module state, force upgrade, uninstall, read logs. |
 | [workflow/](workflow/) | Migration + post-cutover scripts (see below). |
 
@@ -46,8 +50,9 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [workflow/create_msp_invoice.py](workflow/create_msp_invoice.py) | **Custom MSP invoice PDF** on `account.move`. Same brand styling as the sale order report, plus a Lot Number column (comma-joined per invoice line). State-aware title (Invoice / Credit Note / Draft). |
 | [workflow/route_invoice_pdf_to_msp.py](workflow/route_invoice_pdf_to_msp.py) | Replace stock `account.report_invoice_with_payments` with a one-line delegate to the MSP view (the Send Invoice wizard hardcodes that report when caching `invoice_pdf_report_id`). Empties `report_template_ids` on the Invoice / Credit Note send templates so only one MSP attachment goes out per send. `--restore` reverses both. |
 | [workflow/set_msp_invoice_on_email_templates.py](workflow/set_msp_invoice_on_email_templates.py) | Earlier attempt to wire the MSP invoice via `report_template_ids`. **Superseded** by `route_invoice_pdf_to_msp.py` (it produced 2 attachments per send). Kept for reference. |
-| [workflow/create_msp_pick_sheet.py](workflow/create_msp_pick_sheet.py) | **Warehouse pick sheet** on `stock.picking`. Landscape 8-col, one row per `stock.move.line` so multi-lot moves split per-lot. Pallets + Weight blank for write-in. Pick Qty uses `move.quantity`. Coexists with stock Odoo reports. |
+| [workflow/create_msp_pick_sheet.py](workflow/create_msp_pick_sheet.py) | **Warehouse pick sheet** on `stock.picking`. Unified per-pallet checklist (sorted by `-PAL-N`), contents column shows `product x qty UoM | lot LOT_NAME` per row, packaging-aware UoM conversion (Thousands/Lbs → Roll/Case via product.packaging), Order Summary at bottom matching pick order, Grand Total per-UoM. Iterated heavily during the pallet shipping build. Coexists with stock Odoo reports. |
 | [workflow/create_msp_delivery_slip.py](workflow/create_msp_delivery_slip.py) | **Customer-facing delivery slip** on `stock.picking`. Portrait 6-col. Bottom POD block: Shipper signature/date + Received By signature/date. Coexists with stock Odoo reports. |
+| [workflow/create_msp_pallet_sheet.py](workflow/create_msp_pallet_sheet.py) | **Per-pallet sheet** on `stock.package`. One-page summary: pallet ID + QR, MO + product + dims, gross weight, contents (lot/qty per move_line), finalize timestamp. Phase 6 of `PALLET_SHIPPING_PLAN.md`. Operators print from the package form. |
 
 ### Dashboard
 
@@ -68,6 +73,30 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [workflow/test_mo_93_inline.py](workflow/test_mo_93_inline.py) | Inline single-step test (single workorder = produces FG directly from extrusion). Verifies that the `is_extrusion = (total_steps==1)` path fires, resin gets distributed by hopper percentages, BOX + Label consume in the SAME pass, and the FG block fires (`qty_producing` advances, partial-ship picking created). Flags blend-vs-BOM data drift if certain additives don't match. |
 | [workflow/view_mo_consumption.py](workflow/view_mo_consumption.py) | Backward-verification viewer: given an MO id, prints the full raw-consumption history (move-by-move with timestamps and lots), the `lot_producing_ids` on the MO, the FG move state, and a `Material -> Lot` rollup so you can see exactly which raw lots fed the WO. The "open a work order, see what raw lot was consumed" check. |
 | [workflow/test_mo_1583_outbound.py](workflow/test_mo_1583_outbound.py) | Outbound delivery / shipping verification. Submits N converting rolls (1 Case each) and confirms that as production grows: (a) the FG lot's `stock.quant` rows at WH/Stock grow, (b) the originating sale order's outgoing delivery picking auto-reserves the new stock (Odoo reservation engine), (c) the suggested `move_line.lot_id` on the delivery is the MO's FG lot, and (d) all available on-hand qty is reserved. |
+
+### End-to-end audit pipeline ([workflow/audit/](workflow/audit/))
+
+State-driven SO→MO→production→pick→ship→invoice→trace lifecycle audit. State persists in `audit_state.json` so each script picks up where the prior left off. Read the rubric at [AUDIT_PROCEDURE.md](AUDIT_PROCEDURE.md) before running. Successfully exercised twice on product 11158, ~1 hr per cycle. Reusable for any product category.
+
+| File | Purpose |
+|---|---|
+| [workflow/audit/_common.py](workflow/audit/_common.py) | Shared XMLRPC + MES HTTP helpers, JSON-backed state, timestamped logging |
+| [workflow/audit/probe_product.py](workflow/audit/probe_product.py) | Read-only product / BOM / UoM / packaging / route probe (v19 schema-aware) |
+| [workflow/audit/find_product.py](workflow/audit/find_product.py) | Search Odoo product by partial code / name / barcode |
+| [workflow/audit/setup_silos.py](workflow/audit/setup_silos.py) | Idempotently bind MES silos to **real** Odoo `stock.lot` records (creates Clear Repro lot via inventory adjustment if missing) |
+| [workflow/audit/00_baseline.py](workflow/audit/00_baseline.py) | Lock product baseline + write expected-results block to per-run report |
+| [workflow/audit/01_create_so.py](workflow/audit/01_create_so.py) | Create + confirm SO; auto-trigger MES `/api/sync` so the new MO is visible |
+| [workflow/audit/02_verify_mo_sync.py](workflow/audit/02_verify_mo_sync.py) | Verify Odoo workorders + MES `/api/work-orders` see the MO with right metadata |
+| [workflow/audit/drive_production.py](workflow/audit/drive_production.py) | Subcommands: `extrude` (post N MR rolls) / `advance` (button_finish MR WO) / `convert` (post FG rolls) / `finalize-mo` (mark MO done) / `build-pallets` (post + finalize via API) |
+| [workflow/audit/03_observe_production.py](workflow/audit/03_observe_production.py) | One-shot snapshot, `--watch` polling, or `--finalize` to write Phase 4 PASS/FAIL |
+| [workflow/audit/04_verify_pallets.py](workflow/audit/04_verify_pallets.py) | Verify Odoo `stock.package` records + `msp_*` fields + quants per pallet |
+| [workflow/audit/wire_packages_to_picking.py](workflow/audit/wire_packages_to_picking.py) | **Workaround now obsolete** after MES `ac919b1`: manually re-wire outbound move_lines to packages. Reconcile sync now does this automatically. Kept as fallback. |
+| [workflow/audit/05_verify_pick_sheet.py](workflow/audit/05_verify_pick_sheet.py) | Verify QWeb data the pick sheet would render (PDF render is manual; v19 made `_render_qweb_pdf` private to RPC) |
+| [workflow/audit/06_verify_shipping.py](workflow/audit/06_verify_shipping.py) | `button_validate` outbound + verify FG lot persists, no FIFO substitution, optional backorder |
+| [workflow/audit/07_verify_invoice.py](workflow/audit/07_verify_invoice.py) | Create invoice via `sale.advance.payment.inv` wizard, verify draft (left as draft per audit policy) |
+| [workflow/audit/08_trace_lot.py](workflow/audit/08_trace_lot.py) | Bidirectional lot trace: FG lot → raw lots; raw lot → MO → FG lot → delivery → customer |
+| [workflow/audit/99_finalize_report.py](workflow/audit/99_finalize_report.py) | Append summary section + duration + findings + recommendations |
+| [workflow/audit/reset_audit_state.py](workflow/audit/reset_audit_state.py) | Cancel SO+MO + drop run-specific state keys + strip Phase blocks for clean re-run |
 
 ### Other
 
