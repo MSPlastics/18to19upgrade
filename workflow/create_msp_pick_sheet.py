@@ -191,15 +191,15 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <!-- one row per pallet -->
                     <t t-foreach="all_pkgs_sorted" t-as="pkg">
                         <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id).sorted(key=lambda ml: -ml.quantity)"/>
-                        <!-- Per-pallet Units total: if all lines on this pallet share the
-                             SAME product.packaging (e.g. Roll), display the
-                             packaging-converted total + packaging name. Otherwise fall
-                             back to stock-UoM total (and only label it when all stock
-                             UoMs match too — rare mixed-product edge). -->
-                        <t t-set="pkg_pkg_ids" t-value="set([ml.move_id.product_packaging_id.id for ml in pkg_lines])"/>
-                        <t t-set="all_share_packaging" t-value="len(pkg_pkg_ids) == 1 and pkg_pkg_ids != {False}"/>
+                        <!-- Per-pallet Units total. EFFECTIVE packaging per line is
+                             the move's selected packaging if any, falling back to the
+                             product's default (first) packaging — so the picker always
+                             sees Roll/Case rather than the raw sale UoM (lb/Thousands)
+                             when the product has any packaging defined. -->
+                        <t t-set="pkg_eff_ids" t-value="set([(ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]).id for ml in pkg_lines])"/>
+                        <t t-set="all_share_packaging" t-value="len(pkg_eff_ids) == 1 and pkg_eff_ids != {False}"/>
                         <t t-if="all_share_packaging">
-                            <t t-set="the_pkg" t-value="pkg_lines[0].move_id.product_packaging_id"/>
+                            <t t-set="the_pkg" t-value="pkg_lines[0].move_id.product_packaging_id or pkg_lines[0].product_id.packaging_ids[:1]"/>
                             <t t-set="case_count" t-value="sum((ml.quantity / the_pkg.qty) for ml in pkg_lines if the_pkg.qty)"/>
                             <t t-set="pkg_uom_label" t-value="the_pkg.name or ''"/>
                         </t>
@@ -222,9 +222,10 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
                                 <t t-foreach="pkg_lines" t-as="ml">
-                                    <!-- Per-line: prefer packaging-converted (Roll/Case)
-                                         if defined; fall back to raw stock UoM. -->
-                                    <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id"/>
+                                    <!-- Per-line: convert to packaging units (Roll/Case)
+                                         using move's packaging or product's default,
+                                         else fall back to stock UoM. -->
+                                    <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]"/>
                                     <t t-set="line_qty" t-value="(ml.quantity / line_pkg.qty) if (line_pkg and line_pkg.qty) else ml.quantity"/>
                                     <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
                                     <div style="font-size:9pt; line-height:1.3;">
@@ -252,7 +253,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <t t-foreach="loose" t-as="ml">
                         <t t-set="row_idx" t-value="row_idx + 1"/>
                         <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
-                        <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id"/>
+                        <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]"/>
                         <t t-set="line_qty" t-value="(ml.quantity / line_pkg.qty) if (line_pkg and line_pkg.qty) else ml.quantity"/>
                         <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
                         <tr t-att-style="'background-color:' + bg + ';'">
@@ -345,8 +346,10 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <t t-set="s_desc_src" t-value="(s_move.sale_line_id.name if s_move.sale_line_id else False) or s_prod.display_name or ''"/>
                             <t t-set="s_desc_lines" t-value="s_desc_src.splitlines() or ['']"/>
                             <!-- Packaging conversion: all lines in this group share
-                                 the same product, so same packaging if defined. -->
-                            <t t-set="s_pkg_pkg" t-value="s_first.move_id.product_packaging_id"/>
+                                 the same product. Try move-level packaging first;
+                                 fall back to product's default packaging so we
+                                 always show Roll/Case rather than the raw lb/Thousands. -->
+                            <t t-set="s_pkg_pkg" t-value="s_first.move_id.product_packaging_id or s_prod.packaging_ids[:1]"/>
                             <t t-if="s_pkg_pkg and s_pkg_pkg.qty">
                                 <t t-set="s_total_cases" t-value="sum((ml.quantity / s_pkg_pkg.qty) for ml in s_lines)"/>
                                 <t t-set="s_uom" t-value="s_pkg_pkg.name or ''"/>
