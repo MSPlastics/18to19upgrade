@@ -41,6 +41,35 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | [workflow/recover_partner_shipping_instructions.py](workflow/recover_partner_shipping_instructions.py) | Re-create the inherit view that places `x_studio_shipping_instructions` inside the ksc_partner Delivery Information tab on `res.partner`. Field + 205 partner records survived migration; only the view was deleted. |
 | [workflow/fix_studio_procurement_group_compute.py](workflow/fix_studio_procurement_group_compute.py) | Rewrite `record.procurement_group_id.sale_id` → `record.sale_order_id` in manual computes on `mrp.production` (v19 removed `procurement_group_id`). |
 
+### Snapshot + drift safety net for MSP reports
+
+The `create_msp_*.py` upserters embed `QWEB_ARCH` as a Python string constant — the **scripts in this repo are the source of truth for the QWeb arch**. But Odoo.sh treats staging branches as throw-away, so if someone hand-edits a view via Studio / dev mode on staging and forgets to mirror the change back into the script, that edit is lost when the staging branch dies.
+
+Two tools mitigate this risk:
+
+| File | Purpose |
+|---|---|
+| [workflow/snapshot_msp_reports.py](workflow/snapshot_msp_reports.py) | Pull the as-deployed `ir.ui.view` arch + `ir.actions.report` config for all 5 MSP reports from a target Odoo and write them to `workflow/snapshots/qweb_reports/<target>/`. Commit the JSON files — they're the disaster-recovery copy if Odoo.sh deletes the branch. Run `--target staging` after any deploy; run `--target prod` after each prod rollout. |
+| [workflow/diff_msp_reports.py](workflow/diff_msp_reports.py) | Compare the script's `QWEB_ARCH` constant vs the live Odoo `ir.ui.view.arch_db` for each report. Uses lxml to canonicalize XML before comparing so it ignores benign Odoo serializer noise (`>` vs `&gt;`, `<x></x>` vs `<x/>`, attribute quote style). Flags REAL semantic drift only. Run before any deploy with `--target staging` to catch divergence. |
+
+Workflow:
+
+```bash
+# Before deploying to prod, confirm staging matches our scripts:
+python workflow/diff_msp_reports.py --target staging --summary-only
+# If "no drift" -> safe to push scripts to prod.
+# If drift -> someone hand-edited staging; either reconcile back into the script
+#   or accept the live arch by snapshotting + manually copying into the script's
+#   QWEB_ARCH constant before deploying.
+
+# After a deploy, snapshot the new state:
+python workflow/snapshot_msp_reports.py --target staging
+git add workflow/snapshots/qweb_reports/
+git commit -m "snapshot: MSP reports as-deployed on staging YYYY-MM-DD"
+```
+
+The snapshots also serve as a static fallback: if the `create_msp_*.py` script ever has a bug and corrupts the QWEB_ARCH, the snapshot JSON has the last-good arch you can paste back.
+
 ### Custom MSP report builders (idempotent — re-run after editing the embedded QWEB_ARCH constant)
 
 | File | Purpose |

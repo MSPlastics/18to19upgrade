@@ -1,0 +1,62 @@
+{
+  "msp.report_delivery_slip_v1": {
+    "attachment": false,
+    "attachment_use": false,
+    "binding_model_id": "Transfer",
+    "binding_type": "report",
+    "model": "stock.picking",
+    "name": "Delivery Slip \u2014 MSP",
+    "paperformat_id": "US Letter",
+    "print_report_name": "(object.name or 'DeliverySlip').replace('/', '-')",
+    "report_name": "msp.report_delivery_slip_v1",
+    "report_type": "qweb-pdf"
+  },
+  "msp.report_invoice_msp_v1": {
+    "attachment": false,
+    "attachment_use": false,
+    "binding_model_id": "Journal Entry",
+    "binding_type": "report",
+    "model": "account.move",
+    "name": "Invoice \u2014 MSP",
+    "paperformat_id": "US Letter",
+    "print_report_name": "(object.name or 'Invoice').replace('/', '-')",
+    "report_name": "msp.report_invoice_msp_v1",
+    "report_type": "qweb-pdf"
+  },
+  "msp.report_pallet_sheet_v1": {
+    "attachment": false,
+    "attachment_use": false,
+    "binding_model_id": "Package",
+    "binding_type": "report",
+    "model": "stock.package",
+    "name": "Pallet Sheet \u2014 MSP",
+    "paperformat_id": "US Letter",
+    "print_report_name": "(object.name or 'PalletSheet').replace('/', '-')",
+    "report_name": "msp.report_pallet_sheet_v1",
+    "report_type": "qweb-pdf"
+  },
+  "msp.report_pick_sheet_v1": {
+    "attachment": false,
+    "attachment_use": false,
+    "binding_model_id": "Transfer",
+    "binding_type": "report",
+    "model": "stock.picking",
+    "name": "Warehouse Pick Sheet \u2014 MSP",
+    "paperformat_id": "US Letter LANDSCAPE",
+    "print_report_name": "(object.name or 'PickSheet').replace('/', '-')",
+    "report_name": "msp.report_pick_sheet_v1",
+    "report_type": "qweb-pdf"
+  },
+  "msp.report_saleorder_msp_v1": {
+    "attachment": false,
+    "attachment_use": false,
+    "binding_model_id": "Sales Order",
+    "binding_type": "report",
+    "model": "sale.order",
+    "name": "Quotation / Order \u2014 MSP",
+    "paperformat_id": "US Letter",
+    "print_report_name": "object.name",
+    "report_name": "msp.report_saleorder_msp_v1",
+    "report_type": "qweb-pdf"
+  }
+}

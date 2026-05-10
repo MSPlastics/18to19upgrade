@@ -173,10 +173,29 @@ All 6 upserters in `workflow/create_msp_*.py` are idempotent and follow the same
 
 ```bash
 cd 18to19upgrade
-# Always dry-run first (no --commit) to see what would change:
+
+# 0. PRE-FLIGHT: drift check against staging - did anyone hand-edit a view?
+python workflow/diff_msp_reports.py --target staging --summary-only
+# Expected: "no drift". If drift detected, decide whether to:
+#   (a) accept live arch into the script's QWEB_ARCH constant (replace the source), OR
+#   (b) revert the live edit on staging by re-running the upserter against staging
+# Either way, resolve drift BEFORE pushing to prod.
+
+# 1. Snapshot pre-deploy state (audit trail):
+python workflow/snapshot_msp_reports.py --target prod
+git add workflow/snapshots/qweb_reports/prod/
+git commit -m "snapshot: prod MSP reports pre-deploy YYYY-MM-DD"
+
+# 2. Always dry-run first (no --commit) to see what would change:
 python workflow/create_msp_sale_report.py --target prod
-# Then commit:
+
+# 3. Then commit:
 python workflow/create_msp_sale_report.py --target prod --commit
+
+# 4. Post-deploy snapshot for the audit trail + DR backup:
+python workflow/snapshot_msp_reports.py --target prod
+git add workflow/snapshots/qweb_reports/prod/
+git commit -m "snapshot: prod MSP reports post-deploy YYYY-MM-DD"
 ```
 
 Each script:
