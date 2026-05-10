@@ -179,10 +179,10 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <tr>
                         <th style="width:5%;  background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pick</th>
                         <th style="width:18%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
-                        <th style="width:42%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Contents (Product x cases | Lot)</th>
-                        <th style="width:8%;  background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
-                        <th style="width:13%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
-                        <th style="width:14%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
+                        <th style="width:42%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Contents (Product x qty | Lot)</th>
+                        <th style="width:10%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Units</th>
+                        <th style="width:12%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
+                        <th style="width:13%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -191,7 +191,23 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <!-- one row per pallet -->
                     <t t-foreach="all_pkgs_sorted" t-as="pkg">
                         <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id).sorted(key=lambda ml: -ml.quantity)"/>
-                        <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
+                        <!-- Per-pallet Units total: if all lines on this pallet share the
+                             SAME product.packaging (e.g. Roll), display the
+                             packaging-converted total + packaging name. Otherwise fall
+                             back to stock-UoM total (and only label it when all stock
+                             UoMs match too — rare mixed-product edge). -->
+                        <t t-set="pkg_pkg_ids" t-value="set([ml.move_id.product_packaging_id.id for ml in pkg_lines])"/>
+                        <t t-set="all_share_packaging" t-value="len(pkg_pkg_ids) == 1 and pkg_pkg_ids != {False}"/>
+                        <t t-if="all_share_packaging">
+                            <t t-set="the_pkg" t-value="pkg_lines[0].move_id.product_packaging_id"/>
+                            <t t-set="case_count" t-value="sum((ml.quantity / the_pkg.qty) for ml in pkg_lines if the_pkg.qty)"/>
+                            <t t-set="pkg_uom_label" t-value="the_pkg.name or ''"/>
+                        </t>
+                        <t t-else="">
+                            <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
+                            <t t-set="stock_uoms" t-value="set(pkg_lines.mapped('product_uom_id.name'))"/>
+                            <t t-set="pkg_uom_label" t-value="next(iter(stock_uoms)) if len(stock_uoms) == 1 else ''"/>
+                        </t>
                         <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
                         <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
                         <t t-set="display_id" t-value="(pkg.name or '').replace('WH/MO/', '').replace('WH/', '')"/>
@@ -206,15 +222,20 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
                                 <t t-foreach="pkg_lines" t-as="ml">
+                                    <!-- Per-line: prefer packaging-converted (Roll/Case)
+                                         if defined; fall back to raw stock UoM. -->
+                                    <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id"/>
+                                    <t t-set="line_qty" t-value="(ml.quantity / line_pkg.qty) if (line_pkg and line_pkg.qty) else ml.quantity"/>
+                                    <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
                                     <div style="font-size:9pt; line-height:1.3;">
                                         <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
-                                        <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(ml.quantity)"/></span>
+                                        <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/></span>
                                         <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
                                     </div>
                                 </t>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="'{:g}'.format(case_count)"/>
+                                <t t-out="'{:g}'.format(case_count)"/> <t t-out="pkg_uom_label"/>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
                                 <t t-if="dims" t-out="dims"/>
@@ -231,6 +252,9 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <t t-foreach="loose" t-as="ml">
                         <t t-set="row_idx" t-value="row_idx + 1"/>
                         <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
+                        <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id"/>
+                        <t t-set="line_qty" t-value="(ml.quantity / line_pkg.qty) if (line_pkg and line_pkg.qty) else ml.quantity"/>
+                        <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
                         <tr t-att-style="'background-color:' + bg + ';'">
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
                                 <span style="display:inline-block; width:14px; height:14px; border:2px solid #0A182F; border-radius:2px; background:#fff;"></span>
@@ -241,12 +265,12 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
                                 <div style="font-size:9pt; line-height:1.3;">
                                     <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
-                                    <span style="font-family:monospace; color:#0A182F;"> × <t t-out="'{:g}'.format(ml.quantity)"/></span>
+                                    <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/></span>
                                     <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
                                 </div>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="'{:g}'.format(ml.quantity)"/>
+                                <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; color:#94a3b8;">-</td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; color:#94a3b8;">-</td>
@@ -256,14 +280,18 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </table>
 
             <!-- GRAND TOTAL — pallet count uses distinct packages so mixed
-                 pallets aren't double-counted; cases is the full move_line
-                 sum; weight is per-pallet summed once. -->
+                 pallets aren't double-counted; units = full move_line sum
+                 with shared UoM label when all lines on the picking share
+                 one UoM, otherwise just 'units'; weight is per-pallet
+                 summed once. -->
+            <t t-set="grand_uoms" t-value="set(doc.move_line_ids.mapped('product_uom_id.name'))"/>
+            <t t-set="grand_uom_label" t-value="next(iter(grand_uoms)) if len(grand_uoms) == 1 else 'units'"/>
             <table style="width:100%; border-collapse:collapse; background:#0A182F; color:white; margin-top:10px;" cellspacing="0">
                 <tr>
                     <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Grand Total</td>
                     <td style="padding:10px 14px; font-family:monospace; font-size:13pt; font-weight:bold; text-align:right;">
                         <t t-out="len(palletized.package_id)"/> pallets
-                        | <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> cases
+                        | <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> <t t-out="grand_uom_label"/>
                         | <t t-out="'{:.1f}'.format(sum((p.msp_gross_weight_lb or 0) for p in palletized.package_id if 'msp_gross_weight_lb' in p._fields))"/> lb
                     </td>
                 </tr>
@@ -302,7 +330,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <th style="width:10%; background:#0A182F; color:white; text-align:left;   padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">MSP PN</th>
                             <th style="width:48%; background:#0A182F; color:white; text-align:left;   padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Description</th>
                             <th style="width:18%; background:#0A182F; color:white; text-align:left;   padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Lot</th>
-                            <th style="width:12%; background:#0A182F; color:white; text-align:center; padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Total Cases</th>
+                            <th style="width:12%; background:#0A182F; color:white; text-align:center; padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Total Units</th>
                             <th style="width:12%; background:#0A182F; color:white; text-align:center; padding:7px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">On Pallets</th>
                         </tr>
                     </thead>
@@ -316,7 +344,17 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <t t-set="s_move" t-value="s_first.move_id"/>
                             <t t-set="s_desc_src" t-value="(s_move.sale_line_id.name if s_move.sale_line_id else False) or s_prod.display_name or ''"/>
                             <t t-set="s_desc_lines" t-value="s_desc_src.splitlines() or ['']"/>
-                            <t t-set="s_total_cases" t-value="sum(s_lines.mapped('quantity'))"/>
+                            <!-- Packaging conversion: all lines in this group share
+                                 the same product, so same packaging if defined. -->
+                            <t t-set="s_pkg_pkg" t-value="s_first.move_id.product_packaging_id"/>
+                            <t t-if="s_pkg_pkg and s_pkg_pkg.qty">
+                                <t t-set="s_total_cases" t-value="sum((ml.quantity / s_pkg_pkg.qty) for ml in s_lines)"/>
+                                <t t-set="s_uom" t-value="s_pkg_pkg.name or ''"/>
+                            </t>
+                            <t t-else="">
+                                <t t-set="s_total_cases" t-value="sum(s_lines.mapped('quantity'))"/>
+                                <t t-set="s_uom" t-value="s_first.product_uom_id.name or ''"/>
+                            </t>
                             <t t-set="s_pallet_count" t-value="len(s_lines.filtered('package_id').package_id)"/>
                             <t t-set="s_idx" t-value="s_idx + 1"/>
                             <t t-set="bg" t-value="brand_zebra if (s_idx % 2 == 0) else '#ffffff'"/>
@@ -336,7 +374,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                     <t t-out="s_lot.name if s_lot else '-'"/>
                                 </td>
                                 <td style="padding:8px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F;">
-                                    <t t-out="'{:g}'.format(s_total_cases)"/>
+                                    <t t-out="'{:g}'.format(s_total_cases)"/> <span style="font-size:9pt; font-weight:normal; color:#334155;"><t t-out="s_uom"/></span>
                                 </td>
                                 <td style="padding:8px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; color:#334155;">
                                     <t t-out="s_pallet_count"/>
