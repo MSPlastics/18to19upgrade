@@ -206,7 +206,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <t t-else="">
                             <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
                             <t t-set="stock_uoms" t-value="set(pkg_lines.mapped('product_uom_id.name'))"/>
-                            <t t-set="pkg_uom_label" t-value="next(iter(stock_uoms)) if len(stock_uoms) == 1 else ''"/>
+                            <t t-set="pkg_uom_label" t-value="list(stock_uoms)[0] if len(stock_uoms) == 1 else ''"/>
                         </t>
                         <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
                         <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
@@ -285,7 +285,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                  one UoM, otherwise just 'units'; weight is per-pallet
                  summed once. -->
             <t t-set="grand_uoms" t-value="set(doc.move_line_ids.mapped('product_uom_id.name'))"/>
-            <t t-set="grand_uom_label" t-value="next(iter(grand_uoms)) if len(grand_uoms) == 1 else 'units'"/>
+            <t t-set="grand_uom_label" t-value="list(grand_uoms)[0] if len(grand_uoms) == 1 else 'units'"/>
             <table style="width:100%; border-collapse:collapse; background:#0A182F; color:white; margin-top:10px;" cellspacing="0">
                 <tr>
                     <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Grand Total</td>
