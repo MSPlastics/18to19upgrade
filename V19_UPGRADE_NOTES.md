@@ -207,6 +207,43 @@ While building `fix_qweb_v18_residue.py` we noticed several QWeb references that
 
 ---
 
+## MES sync-path lot-tracking fixes (2026-05-09)
+
+Four defects in the MES → Odoo outbound sync path surfaced while testing end-to-end lot consumption on the rebuilt v19 staging. All four are fixed in `MSPlastics/MESv1.0:master`. They sit on top of the `msppartialMO` 19.0.1.1.0 vendor that was already verified earlier in the day.
+
+| Order | Commit | What was wrong |
+|---|---|---|
+| 1 | `71998a8` | Three related fixes: (a) `sync_production_to_odoo`'s outermost `try/except` swallowed every exception, so `process_sync_queue`'s contract (raise → invalidate cache → retry) was broken; cached `OdooDataManager` pointing at a defunct staging URL survived forever, every roll silently no-op'd against a dead host. (b) `/api/settings` POST didn't invalidate `sync_engine._cached_odoo`, so URL changes never took effect for the worker. (c) FG-attach path wrote `{'lot_producing_id': fg_lot_id}` (v18 Many2one, removed in v19) — fault was being hidden by defect (a). |
+| 2 | `67d81c5` | Architecture rule: master rolls produced in the **extrusion step** of a multi-step MO are **WIP, not finished goods**. They must NOT advance `qty_producing` or trigger a partial shipment. Calling `action_increment_qty_producing(MO, 1.0)` on a Case-UOM MO at extrusion-time triggered Odoo's `_set_qty_producing` inverse, which rebalances raw `move_line.quantity` per BOM-demand-per-Case ratio — overwriting the per-roll values MES had just computed from `case_weight × layer × hopper_percent`. Now the FG block is gated on `is_last_step or not is_multi_step`. Also: `picked=True` is set on every raw move after consumption write, defending against future _set_qty_producing triggers via other code paths. |
+| 3 | `98b5362` | The matching loop in `sync_production_to_odoo` summed `consumed_qty` per material across `consumed_lots[]` entries but **threw away the `lot_number`** on every entry. The lot lookup then fell through to `_get_or_create_lot(pid, lot_name=None)` which returns the first FIFO-positive lot Odoo finds — usually a pre-existing lot unrelated to what the operator actually loaded into the silo or line. Now the loop captures `matched_lot_name` from the first matched entry and the lot lookup prefers it. Result: the lot the operator put into the silo / line on the MES `/resin` page lands on `stock.move.line.lot_id`, matching the actual material that physically went into the roll. |
+| 4 | `6a5bf3d` | For **single-step Inline orders**, the FG block does need to fire (so `qty_producing` advances and a partial-shipment is generated), but `_set_qty_producing`'s rebalance was still overwriting the per-roll resin/additive quantities we'd written. `picked=True` on the move preserves the lot but does NOT prevent the qty rebalance. Fix: track every move_line written during raw consumption, then after the FG block runs, restore the original quantities. If `_set_qty_producing` deleted any of them outright, recreate with the saved vals. |
+
+### End-to-end verification on staging (2026-05-09)
+
+Tested both flow shapes with reproducible scripts in `workflow/`:
+
+**Multi-step MO** `WH/MO/01479` (5-Layer extrusion, BOM `[MSPL 4MILBRN]`):
+- Step 1 extrusion: 100 lb roll → 7 raw materials consumed at correct `case_weight × layer × hopper%` qty (Butene1-BF 50.40, Frac1-A 6.00, Color Repro 38.00, Exceed 1012RA 1.00, conANTIBLOCK clarity 0.60, con-brown1 2.00, conSLIP fast 2.00 = 100.00 lb total). Each `stock.move.line` carries the silo / line-inventory lot (`TEST-2026-05-09-<material>-001`). No FG sequencing (master rolls = WIP). Reproducible: `workflow/test_mo_1583_forward.py`.
+- Step 2 converting: BOX + Label consumed (1 unit each per Case), `qty_producing` advances by 1, `msppartialMO.action_ship_partial_batch` creates an internal transfer (`Partial Shipment: WH/MO/01479` → done) moving the FG to `WH/Stock` under the MO-level lot `MO/01479-001`. Reproducible: `workflow/test_mo_1583_converting.py`.
+- Backward verification: `workflow/view_mo_consumption.py` prints the full raw-lot lineage per move for the MO, plus a `Material → Lot` rollup. The "open a work order, see what raw lot was consumed" view.
+
+**Single-step Inline MO** `WH/MO/00094` (Line 6 6" Davis):
+- 100 lb roll → resin distributed by hopper percentages (Butene1-BF 83.00, Frac1-A 15.00 with TEST lots), BOX + Label consumed in the same pass (qty=1 each), FG block fires (qty_producing 0→1, partial-ship `WH/INT/00006` done). Reproducible: `workflow/test_mo_93_inline.py`.
+
+**Outbound chain** (FG → delivery, including split deliveries):
+- Producing N Cases against MO `WH/MO/01479` → SO `S01029`'s outgoing delivery `WH/OUT/01241` auto-reserved each Case as it arrived in `WH/Stock`, suggested lot `MO/01479-001` (the MO-level lot, NOT a FIFO pick from any other lot). Validated: 7 Cases shipped done, backorder `WH/OUT/01336` created for 65 remaining. Producing 3 more Cases auto-reserved them on the backorder (state confirmed → assigned, qty 0 → 3, lot still `MO/01479-001`). Reproducible: `workflow/test_mo_1583_outbound.py` and `test_mo_1583_backorder.py`.
+
+### Known issue surfaced during testing (Odoo data-side, not code)
+
+**Blend ↔ BOM data drift in Odoo Studio.** Some blend recipes (`x_blends` records read by MES into `WorkOrder.hoppers_json`) reference legacy combined products that the BOM has since split into multiple modern products. Example: blend `4001 - CLR - 73/25` lists `con-Antiblock/slip` (product 579) at 2%, but the BOM splits this into `conANTIBLOCK clarity` (40) + `conSLIP slow` (42) at 1% each. MES `record_roll` builds `consumed_lots` from the hoppers JSON (= legacy product), so the substring-match in `sync_production_to_odoo` fails against the BOM products, and the "MES provided blend but resin not in it" gate skips them. **Fix is on the Odoo side** — refresh blend recipes to match the current BOM products. Surfaced on `WH/MO/00094` during today's inline test; likely affects more MOs whose blend recipe predates the additive split.
+
+### Other open items (2026-05-09)
+
+- `action_close_and_backorder` (the third `msppartialMO` method) is still **static-audit-only** — its wizards exist on v19 but the path itself wasn't directly exercised. To exercise: bring an MO close to its target, then call `action_close_and_backorder` and confirm a backorder MO is created with the residual qty.
+- **Customer-paperwork PDFs** (delivery slip, pick sheet) — the data is correct (verified via XML-RPC), but the actual PDF rendering wasn't visually printed on staging post-test. Worth a quick render of `WH/OUT/01241` and `WH/OUT/01336` to confirm the layout shows the FG lot cleanly and doesn't leak raw lots.
+
+---
+
 ## Custom MSP sale order report (post-cutover, 2026-05-04)
 
 Built and shipped a fully custom modern QWeb sale order report. Lives entirely in DB records (ir.ui.view + ir.actions.report) created via XML-RPC — not a module. The script `workflow/create_msp_sale_report.py` is idempotent and can be re-run to update the design in place.
