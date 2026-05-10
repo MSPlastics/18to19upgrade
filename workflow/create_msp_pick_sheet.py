@@ -191,22 +191,22 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <!-- one row per pallet -->
                     <t t-foreach="all_pkgs_sorted" t-as="pkg">
                         <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id).sorted(key=lambda ml: -ml.quantity)"/>
-                        <!-- Per-pallet Units total. EFFECTIVE packaging per line is
-                             the move's selected packaging if any, falling back to the
-                             product's default (first) packaging — so the picker always
-                             sees Roll/Case rather than the raw sale UoM (lb/Thousands)
-                             when the product has any packaging defined. -->
-                        <t t-set="pkg_eff_ids" t-value="set([(ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]).id for ml in pkg_lines])"/>
-                        <t t-set="all_share_packaging" t-value="len(pkg_eff_ids) == 1 and pkg_eff_ids != {False}"/>
-                        <t t-if="all_share_packaging">
-                            <t t-set="the_pkg" t-value="pkg_lines[0].move_id.product_packaging_id or pkg_lines[0].product_id.packaging_ids[:1]"/>
-                            <t t-set="case_count" t-value="sum((ml.quantity / the_pkg.qty) for ml in pkg_lines if the_pkg.qty)"/>
-                            <t t-set="pkg_uom_label" t-value="the_pkg.name or ''"/>
+                        <!-- Per-pallet Units total. Per-line we apply the packaging
+                             conversion (move's packaging, then product's default),
+                             then accumulate into a (UoM -> total) breakdown. Mixed
+                             pallets get one sub-line per UoM; pure pallets get one. -->
+                        <t t-set="pkg_pairs" t-value="[]"/>
+                        <t t-foreach="pkg_lines" t-as="_ml">
+                            <t t-set="_p" t-value="_ml.move_id.product_packaging_id or _ml.product_id.packaging_ids[:1]"/>
+                            <t t-set="_q" t-value="(_ml.quantity / _p.qty) if (_p and _p.qty) else _ml.quantity"/>
+                            <t t-set="_u" t-value="_p.name if _p else (_ml.product_uom_id.name or '')"/>
+                            <t t-set="pkg_pairs" t-value="pkg_pairs + [(_u, _q)]"/>
                         </t>
-                        <t t-else="">
-                            <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
-                            <t t-set="stock_uoms" t-value="set(pkg_lines.mapped('product_uom_id.name'))"/>
-                            <t t-set="pkg_uom_label" t-value="list(stock_uoms)[0] if len(stock_uoms) == 1 else ''"/>
+                        <t t-set="pkg_uom_order" t-value="[]"/>
+                        <t t-foreach="pkg_pairs" t-as="_pair">
+                            <t t-if="_pair[0] not in pkg_uom_order">
+                                <t t-set="pkg_uom_order" t-value="pkg_uom_order + [_pair[0]]"/>
+                            </t>
                         </t>
                         <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
                         <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
@@ -236,7 +236,10 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 </t>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="'{:g}'.format(case_count)"/> <t t-out="pkg_uom_label"/>
+                                <t t-foreach="pkg_uom_order" t-as="u">
+                                    <t t-set="u_total" t-value="sum(pair[1] for pair in pkg_pairs if pair[0] == u)"/>
+                                    <div><t t-out="'{:g}'.format(u_total)"/> <t t-out="u"/></div>
+                                </t>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
                                 <t t-if="dims" t-out="dims"/>
@@ -281,18 +284,32 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </table>
 
             <!-- GRAND TOTAL — pallet count uses distinct packages so mixed
-                 pallets aren't double-counted; units = full move_line sum
-                 with shared UoM label when all lines on the picking share
-                 one UoM, otherwise just 'units'; weight is per-pallet
-                 summed once. -->
-            <t t-set="grand_uoms" t-value="set(doc.move_line_ids.mapped('product_uom_id.name'))"/>
-            <t t-set="grand_uom_label" t-value="list(grand_uoms)[0] if len(grand_uoms) == 1 else 'units'"/>
+                 pallets aren't double-counted. Units use the same packaging
+                 conversion as per-pallet rows: aggregate by UoM so e.g.
+                 '312 Roll | 768 Case' rather than '548 units'. Weight is
+                 per-pallet summed once. -->
+            <t t-set="grand_pairs" t-value="[]"/>
+            <t t-foreach="doc.move_line_ids" t-as="_ml">
+                <t t-set="_p" t-value="_ml.move_id.product_packaging_id or _ml.product_id.packaging_ids[:1]"/>
+                <t t-set="_q" t-value="(_ml.quantity / _p.qty) if (_p and _p.qty) else _ml.quantity"/>
+                <t t-set="_u" t-value="_p.name if _p else (_ml.product_uom_id.name or '')"/>
+                <t t-set="grand_pairs" t-value="grand_pairs + [(_u, _q)]"/>
+            </t>
+            <t t-set="grand_uom_order" t-value="[]"/>
+            <t t-foreach="grand_pairs" t-as="_pair">
+                <t t-if="_pair[0] not in grand_uom_order">
+                    <t t-set="grand_uom_order" t-value="grand_uom_order + [_pair[0]]"/>
+                </t>
+            </t>
             <table style="width:100%; border-collapse:collapse; background:#0A182F; color:white; margin-top:10px;" cellspacing="0">
                 <tr>
-                    <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Grand Total</td>
-                    <td style="padding:10px 14px; font-family:monospace; font-size:13pt; font-weight:bold; text-align:right;">
+                    <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px; vertical-align:middle;">Grand Total</td>
+                    <td style="padding:10px 14px; font-family:monospace; font-size:13pt; font-weight:bold; text-align:right; vertical-align:middle;">
                         <t t-out="len(palletized.package_id)"/> pallets
-                        | <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> <t t-out="grand_uom_label"/>
+                        <t t-foreach="grand_uom_order" t-as="u">
+                            <t t-set="u_total" t-value="sum(pair[1] for pair in grand_pairs if pair[0] == u)"/>
+                            | <t t-out="'{:g}'.format(u_total)"/> <t t-out="u"/>
+                        </t>
                         | <t t-out="'{:.1f}'.format(sum((p.msp_gross_weight_lb or 0) for p in palletized.package_id if 'msp_gross_weight_lb' in p._fields))"/> lb
                     </td>
                 </tr>
