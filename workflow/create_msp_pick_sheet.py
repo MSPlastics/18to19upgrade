@@ -159,137 +159,174 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                 </tr>
             </table>
 
-            <!-- CONSOLIDATED PICK CHECKLIST — one row per pallet (or per
-                 unpalletized line). Picker ticks each box as the pallet is
-                 pulled from WH/Stock. Pallets are sorted ascending by their
-                 trailing pallet number so the picker reads 1->20 top-down,
-                 and the verbose 'WH/MO/' prefix is stripped from the
-                 displayed pallet ID. -->
+            <!-- GROUPED PICK CHECKLIST — for orders with many pallets per
+                 product. Renders one product/lot HEADER BAND (with all the
+                 shared info: MSP PN, description, lot, dims, subtotals) then
+                 a tight pallet list below it where each row is just:
+                 ☐ Pallet ID | Cases | Weight. Multi-product orders get one
+                 band per (product, lot) group. -->
             <t t-set="palletized" t-value="doc.move_line_ids.filtered('package_id')"/>
             <t t-set="loose" t-value="doc.move_line_ids.filtered(lambda ml: not ml.package_id)"/>
-            <!-- Sort key: extract trailing -PAL-N from pallet name, fall back
-                 to a large sentinel so non-conforming pallet IDs sink to the
-                 bottom (rare; only synthetic test pallets). -->
-            <t t-set="pallets" t-value="palletized.package_id.sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
+
+            <!-- Build distinct (product_id, lot_id) groups across palletized lines.
+                 Use IDs (hashable) and look up the records inside the loop. -->
+            <t t-set="group_keys" t-value="sorted({(ml.product_id.id, ml.lot_id.id or 0) for ml in palletized})"/>
+
+            <t t-set="total_pallets" t-value="len(palletized.package_id) + len(loose)"/>
             <div style="font-size:10pt; font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:1px; margin:8px 0 6px 0;">
-                Pick Checklist (<t t-out="len(pallets) + len(loose)"/> rows)
+                Pick Checklist (<t t-out="total_pallets"/> rows)
             </div>
-            <table style="width:100%; border-collapse:collapse; margin-bottom:25px;" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th style="width:4%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Picked</th>
-                        <th style="width:18%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
-                        <th style="width:7%;  background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">MSP PN</th>
-                        <th style="width:27%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Description</th>
-                        <th style="width:13%; background-color:#0A182F; color:white; text-align:left;   padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Lot</th>
-                        <th style="width:7%;  background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
-                        <th style="width:11%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
-                        <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <t t-set="row_idx" t-value="0"/>
 
-                    <!-- one row per packaged pallet -->
-                    <t t-foreach="pallets" t-as="pkg">
-                        <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id)"/>
-                        <t t-set="ml_first" t-value="pkg_lines[0]"/>
-                        <t t-set="move" t-value="ml_first.move_id"/>
-                        <t t-set="prod" t-value="ml_first.product_id"/>
-                        <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
-                        <t t-set="lot_str" t-value="', '.join(pkg_lines.mapped('lot_id.name'))"/>
-                        <t t-set="desc_src" t-value="(move.sale_line_id.name if move.sale_line_id else False) or prod.display_name or ''"/>
-                        <t t-set="desc_lines" t-value="desc_src.splitlines() or ['']"/>
-                        <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
-                        <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
-                        <!-- Strip WH/MO/ prefix from full ID for cleaner display -->
-                        <t t-set="display_id" t-value="(pkg.name or '').replace('WH/MO/', '').replace('WH/', '')"/>
-                        <t t-set="row_idx" t-value="row_idx + 1"/>
-                        <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
-                        <tr t-att-style="'background-color:' + bg + ';'">
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
-                                <span style="display:inline-block; width:18px; height:18px; border:2px solid #0A182F; border-radius:3px; background:#fff;"></span>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="display_id"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold;">
-                                <t t-out="prod.name or ''"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
-                                <div style="font-weight:bold; font-size:9.5pt; color:#0A182F;"><t t-out="desc_lines[0]"/></div>
-                                <t t-if="len(desc_lines) > 1">
-                                    <div style="color:#334155; font-size:8pt; margin-top:3px; font-weight:500; line-height:1.3;">
-                                        <t t-foreach="desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
-                                    </div>
-                                </t>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; color:#0A182F;">
-                                <t t-out="lot_str"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:12pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="'{:g}'.format(case_count)"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9.5pt; color:#334155;">
-                                <t t-if="dims" t-out="dims"/>
-                                <t t-if="not dims">-</t>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:10pt; color:#334155;">
-                                <t t-if="gross_lb" t-out="'{:.1f}'.format(gross_lb)"/>
-                                <t t-if="not gross_lb">-</t>
-                            </td>
-                        </tr>
-                    </t>
+            <t t-foreach="group_keys" t-as="g">
+                <t t-set="grp_lines" t-value="palletized.filtered(lambda ml: ml.product_id.id == g[0] and (ml.lot_id.id or 0) == g[1])"/>
+                <t t-set="grp_pallets" t-value="grp_lines.package_id.sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
+                <t t-set="g_first" t-value="grp_lines[0]"/>
+                <t t-set="g_prod" t-value="g_first.product_id"/>
+                <t t-set="g_lot" t-value="g_first.lot_id"/>
+                <t t-set="g_move" t-value="g_first.move_id"/>
+                <t t-set="g_desc_src" t-value="(g_move.sale_line_id.name if g_move.sale_line_id else False) or g_prod.display_name or ''"/>
+                <t t-set="g_desc_lines" t-value="g_desc_src.splitlines() or ['']"/>
+                <t t-set="g_dims_set" t-value="set([(p.msp_dimensions_display if 'msp_dimensions_display' in p._fields else '') or '' for p in grp_pallets])"/>
+                <t t-set="g_dims_str" t-value="next(iter(g_dims_set)) if len(g_dims_set) == 1 else 'varies'"/>
+                <t t-set="g_total_cases" t-value="sum(grp_lines.mapped('quantity'))"/>
+                <t t-set="g_total_wt" t-value="sum((p.msp_gross_weight_lb or 0) for p in grp_pallets if 'msp_gross_weight_lb' in p._fields)"/>
 
-                    <!-- unpalletized lines (special-order items, partial-pallet picks) -->
-                    <t t-foreach="loose" t-as="ml">
-                        <t t-set="move" t-value="ml.move_id"/>
-                        <t t-set="prod" t-value="ml.product_id"/>
-                        <t t-set="desc_src" t-value="(move.sale_line_id.name if move.sale_line_id else False) or prod.display_name or ''"/>
-                        <t t-set="desc_lines" t-value="desc_src.splitlines() or ['']"/>
-                        <t t-set="row_idx" t-value="row_idx + 1"/>
-                        <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
-                        <tr t-att-style="'background-color:' + bg + ';'">
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
-                                <span style="display:inline-block; width:18px; height:18px; border:2px solid #0A182F; border-radius:3px; background:#fff;"></span>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:9pt; font-style:italic; color:#94a3b8;">
-                                NO PALLET (loose)
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold;">
-                                <t t-out="prod.name or ''"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
-                                <div style="font-weight:bold; font-size:9.5pt; color:#0A182F;"><t t-out="desc_lines[0]"/></div>
-                                <t t-if="len(desc_lines) > 1">
-                                    <div style="color:#334155; font-size:8pt; margin-top:3px; font-weight:500; line-height:1.3;">
-                                        <t t-foreach="desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
-                                    </div>
-                                </t>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; color:#0A182F;">
-                                <t t-out="(ml.lot_id.name if ml.lot_id else '-')"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:12pt; font-weight:bold; color:#0A182F;">
-                                <t t-out="'{:g}'.format(ml.quantity)"/>
-                            </td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; color:#94a3b8;">-</td>
-                            <td style="padding:14px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; color:#94a3b8;">-</td>
-                        </tr>
-                    </t>
-                </tbody>
-                <tfoot>
+                <!-- HEADER BAND -->
+                <table style="width:100%; border-collapse:collapse; background:#f1f5f9; border-left:5px solid #0A182F; margin:14px 0 0 0; page-break-inside:avoid;" cellspacing="0">
                     <tr>
-                        <td colspan="5" style="padding:10px; text-align:right; font-size:9pt; font-weight:bold; color:#334155; text-transform:uppercase; border-top:2px solid #0A182F;">Totals</td>
-                        <td style="padding:10px; text-align:center; font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F; border-top:2px solid #0A182F;">
-                            <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/>
+                        <td style="padding:9px 14px; vertical-align:top; width:62%;">
+                            <div>
+                                <span style="font-size:7pt; font-weight:bold; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">Product</span>
+                                <span style="font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F; margin-left:8px;"><t t-out="g_prod.name or ''"/></span>
+                                <span style="font-size:9pt; color:#0A182F; margin-left:10px; font-weight:600;"><t t-out="g_desc_lines[0]"/></span>
+                            </div>
+                            <t t-if="len(g_desc_lines) > 1">
+                                <div style="font-size:8pt; color:#334155; margin-top:2px; line-height:1.3;">
+                                    <t t-foreach="g_desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
+                                </div>
+                            </t>
+                            <div style="margin-top:5px;">
+                                <span style="font-size:7pt; font-weight:bold; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">Lot</span>
+                                <span style="font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F; margin-left:8px;"><t t-out="g_lot.name if g_lot else '-'"/></span>
+                                <span style="font-size:7pt; font-weight:bold; color:#334155; text-transform:uppercase; letter-spacing:0.5px; margin-left:18px;">Dims</span>
+                                <span style="font-family:monospace; font-size:10pt; color:#0A182F; margin-left:8px;"><t t-out="g_dims_str or '-'"/></span>
+                            </div>
                         </td>
-                        <td style="padding:10px; text-align:center; font-size:8pt; color:#334155; border-top:2px solid #0A182F;">cases</td>
-                        <td style="padding:10px; text-align:center; font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F; border-top:2px solid #0A182F;">
-                            <t t-out="'{:.1f}'.format(sum(p.msp_gross_weight_lb or 0 for p in pallets if 'msp_gross_weight_lb' in p._fields))"/> lb
+                        <td style="padding:9px 14px; vertical-align:middle; text-align:right; width:38%; border-left:1px solid #cbd5e1;">
+                            <div style="font-size:7pt; font-weight:bold; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">Subtotal</div>
+                            <div style="font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F; margin-top:2px;">
+                                <t t-out="len(grp_pallets)"/> pallets
+                                · <t t-out="'{:g}'.format(g_total_cases)"/> cases
+                                · <t t-out="'{:.1f}'.format(g_total_wt)"/> lb
+                            </div>
                         </td>
                     </tr>
-                </tfoot>
+                </table>
+
+                <!-- COMPACT PALLET ROWS for this group -->
+                <table style="width:100%; border-collapse:collapse; margin:0 0 6px 0;" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width:6%;  background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pick</th>
+                            <th style="width:38%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
+                            <th style="width:18%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
+                            <th style="width:19%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
+                            <th style="width:19%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="grp_row_idx" t-value="0"/>
+                        <t t-foreach="grp_pallets" t-as="pkg">
+                            <t t-set="pkg_lines" t-value="grp_lines.filtered(lambda ml: ml.package_id.id == pkg.id)"/>
+                            <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
+                            <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
+                            <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
+                            <t t-set="display_id" t-value="(pkg.name or '').replace('WH/MO/', '').replace('WH/', '')"/>
+                            <t t-set="grp_row_idx" t-value="grp_row_idx + 1"/>
+                            <t t-set="bg" t-value="brand_zebra if (grp_row_idx % 2 == 0) else '#ffffff'"/>
+                            <tr t-att-style="'background-color:' + bg + ';'">
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
+                                    <span style="display:inline-block; width:14px; height:14px; border:2px solid #0A182F; border-radius:2px; background:#fff;"></span>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
+                                    <t t-out="display_id"/>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
+                                    <t t-out="'{:g}'.format(case_count)"/>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
+                                    <t t-if="dims" t-out="dims"/>
+                                    <t t-if="not dims">-</t>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
+                                    <t t-if="gross_lb" t-out="'{:.1f}'.format(gross_lb)"/>
+                                    <t t-if="not gross_lb">-</t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- LOOSE (unpalletized) lines — rare; rendered as their own group at the end -->
+            <t t-if="loose">
+                <table style="width:100%; border-collapse:collapse; background:#fef3c7; border-left:5px solid #f59e0b; margin:14px 0 0 0;" cellspacing="0">
+                    <tr>
+                        <td style="padding:9px 14px;">
+                            <span style="font-size:7pt; font-weight:bold; color:#92400e; text-transform:uppercase; letter-spacing:0.5px;">Loose / Unpalletized</span>
+                            <span style="font-size:9pt; color:#0A182F; margin-left:10px;"><t t-out="len(loose)"/> line(s) without a pallet</span>
+                        </td>
+                    </tr>
+                </table>
+                <table style="width:100%; border-collapse:collapse; margin:0 0 6px 0;" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width:6%;  background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pick</th>
+                            <th style="width:14%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">MSP PN</th>
+                            <th style="width:42%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Description</th>
+                            <th style="width:18%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Lot</th>
+                            <th style="width:20%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Qty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="lr_idx" t-value="0"/>
+                        <t t-foreach="loose" t-as="ml">
+                            <t t-set="lr_idx" t-value="lr_idx + 1"/>
+                            <t t-set="bg" t-value="brand_zebra if (lr_idx % 2 == 0) else '#ffffff'"/>
+                            <t t-set="m" t-value="ml.move_id"/>
+                            <t t-set="ds" t-value="(m.sale_line_id.name if m.sale_line_id else False) or ml.product_id.display_name or ''"/>
+                            <tr t-att-style="'background-color:' + bg + ';'">
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
+                                    <span style="display:inline-block; width:14px; height:14px; border:2px solid #0A182F; border-radius:2px; background:#fff;"></span>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:9pt; font-weight:bold;">
+                                    <t t-out="ml.product_id.name or ''"/>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-size:8.5pt;">
+                                    <t t-out="ds.splitlines()[0] if ds else ''"/>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:9pt; color:#0A182F;">
+                                    <t t-out="(ml.lot_id.name if ml.lot_id else '-')"/>
+                                </td>
+                                <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
+                                    <t t-out="'{:g}'.format(ml.quantity)"/> <t t-out="ml.product_uom_id.name or ''"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- GRAND TOTAL -->
+            <table style="width:100%; border-collapse:collapse; background:#0A182F; color:white; margin-top:10px;" cellspacing="0">
+                <tr>
+                    <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Grand Total</td>
+                    <td style="padding:10px 14px; font-family:monospace; font-size:13pt; font-weight:bold; text-align:right;">
+                        <t t-out="len(palletized.package_id)"/> pallets
+                        · <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> cases
+                        · <t t-out="'{:.1f}'.format(sum((p.msp_gross_weight_lb or 0) for p in palletized.package_id if 'msp_gross_weight_lb' in p._fields))"/> lb
+                    </td>
+                </tr>
             </table>
 
             <!-- SIGN-OFF (right-aligned, mirrors the design) -->
