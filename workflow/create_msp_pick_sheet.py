@@ -167,18 +167,27 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                  band per (product, lot) group. -->
             <t t-set="palletized" t-value="doc.move_line_ids.filtered('package_id')"/>
             <t t-set="loose" t-value="doc.move_line_ids.filtered(lambda ml: not ml.package_id)"/>
+            <t t-set="all_pkgs" t-value="palletized.package_id"/>
 
-            <!-- Build distinct (product_id, lot_id) groups across palletized lines.
-                 Use IDs (hashable) and look up the records inside the loop. -->
-            <t t-set="group_keys" t-value="sorted({(ml.product_id.id, ml.lot_id.id or 0) for ml in palletized})"/>
+            <!-- A pallet is "mixed" when its move_lines span more than one
+                 (product, lot) key. Mixed pallets are pulled OUT of the
+                 per-product groups (so weight isn't double-counted and the
+                 picker doesn't see the same pallet listed twice) and
+                 rendered separately at the bottom in a Mixed Pallets band
+                 with a contents-breakdown column. -->
+            <t t-set="mixed_pkg_ids" t-value="[p.id for p in all_pkgs if len({(ml.product_id.id, ml.lot_id.id or 0) for ml in palletized if ml.package_id.id == p.id}) > 1]"/>
+            <t t-set="pure_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id not in mixed_pkg_ids)"/>
 
-            <t t-set="total_pallets" t-value="len(palletized.package_id) + len(loose)"/>
+            <!-- Per-product groups built from PURE pallets only -->
+            <t t-set="group_keys" t-value="sorted({(ml.product_id.id, ml.lot_id.id or 0) for ml in pure_lines})"/>
+
+            <t t-set="total_pallets" t-value="len(all_pkgs) + len(loose)"/>
             <div style="font-size:10pt; font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:1px; margin:8px 0 6px 0;">
                 Pick Checklist (<t t-out="total_pallets"/> rows)
             </div>
 
             <t t-foreach="group_keys" t-as="g">
-                <t t-set="grp_lines" t-value="palletized.filtered(lambda ml: ml.product_id.id == g[0] and (ml.lot_id.id or 0) == g[1])"/>
+                <t t-set="grp_lines" t-value="pure_lines.filtered(lambda ml: ml.product_id.id == g[0] and (ml.lot_id.id or 0) == g[1])"/>
                 <t t-set="grp_pallets" t-value="grp_lines.package_id.sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
                 <t t-set="g_first" t-value="grp_lines[0]"/>
                 <t t-set="g_prod" t-value="g_first.product_id"/>
@@ -259,6 +268,84 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                     <t t-if="not dims">-</t>
                                 </td>
                                 <td style="padding:5px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
+                                    <t t-if="gross_lb" t-out="'{:.1f}'.format(gross_lb)"/>
+                                    <t t-if="not gross_lb">-</t>
+                                </td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </t>
+
+            <!-- MIXED PALLETS — pallets whose contents span more than one
+                 (product, lot) key. Listed once each with a per-product
+                 contents breakdown so the picker sees the full mix and the
+                 weight is counted only once across the page. -->
+            <t t-if="mixed_pkg_ids">
+                <t t-set="mixed_pkgs" t-value="all_pkgs.filtered(lambda p: p.id in mixed_pkg_ids).sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
+                <t t-set="mixed_total_cases" t-value="sum(palletized.filtered(lambda ml: ml.package_id.id in mixed_pkg_ids).mapped('quantity'))"/>
+                <t t-set="mixed_total_wt" t-value="sum((p.msp_gross_weight_lb or 0) for p in mixed_pkgs if 'msp_gross_weight_lb' in p._fields)"/>
+                <table style="width:100%; border-collapse:collapse; background:#ede9fe; border-left:5px solid #6d28d9; margin:14px 0 0 0; page-break-inside:avoid;" cellspacing="0">
+                    <tr>
+                        <td style="padding:9px 14px; vertical-align:middle;">
+                            <span style="font-size:7pt; font-weight:bold; color:#5b21b6; text-transform:uppercase; letter-spacing:0.5px;">Mixed Pallets</span>
+                            <span style="font-size:9pt; color:#0A182F; margin-left:10px; font-weight:600;">contains multiple products / lots</span>
+                        </td>
+                        <td style="padding:9px 14px; vertical-align:middle; text-align:right; border-left:1px solid #cbd5e1;">
+                            <div style="font-size:7pt; font-weight:bold; color:#334155; text-transform:uppercase; letter-spacing:0.5px;">Subtotal</div>
+                            <div style="font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F; margin-top:2px;">
+                                <t t-out="len(mixed_pkgs)"/> pallets
+                                · <t t-out="'{:g}'.format(mixed_total_cases)"/> cases
+                                · <t t-out="'{:.1f}'.format(mixed_total_wt)"/> lb
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <table style="width:100%; border-collapse:collapse; margin:0 0 6px 0;" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th style="width:6%;  background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pick</th>
+                            <th style="width:20%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
+                            <th style="width:38%; background:#0A182F; color:white; text-align:left;   padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Contents (Product × cases · Lot)</th>
+                            <th style="width:10%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
+                            <th style="width:13%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
+                            <th style="width:13%; background:#0A182F; color:white; text-align:center; padding:5px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-set="m_idx" t-value="0"/>
+                        <t t-foreach="mixed_pkgs" t-as="pkg">
+                            <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id).sorted(key=lambda ml: -ml.quantity)"/>
+                            <t t-set="case_count" t-value="sum(pkg_lines.mapped('quantity'))"/>
+                            <t t-set="dims" t-value="(pkg.msp_dimensions_display if 'msp_dimensions_display' in pkg._fields else '') or ''"/>
+                            <t t-set="gross_lb" t-value="(pkg.msp_gross_weight_lb if 'msp_gross_weight_lb' in pkg._fields else 0) or 0"/>
+                            <t t-set="display_id" t-value="(pkg.name or '').replace('WH/MO/', '').replace('WH/', '')"/>
+                            <t t-set="m_idx" t-value="m_idx + 1"/>
+                            <t t-set="bg" t-value="brand_zebra if (m_idx % 2 == 0) else '#ffffff'"/>
+                            <tr t-att-style="'background-color:' + bg + ';'">
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
+                                    <span style="display:inline-block; width:14px; height:14px; border:2px solid #0A182F; border-radius:2px; background:#fff;"></span>
+                                </td>
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
+                                    <t t-out="display_id"/>
+                                </td>
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
+                                    <t t-foreach="pkg_lines" t-as="ml">
+                                        <div style="font-size:9pt; line-height:1.35;">
+                                            <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
+                                            <span style="font-family:monospace; color:#0A182F;"> × <t t-out="'{:g}'.format(ml.quantity)"/></span>
+                                            <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
+                                        </div>
+                                    </t>
+                                </td>
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
+                                    <t t-out="'{:g}'.format(case_count)"/>
+                                </td>
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
+                                    <t t-if="dims" t-out="dims"/>
+                                    <t t-if="not dims">-</t>
+                                </td>
+                                <td style="padding:7px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:9pt; color:#334155;">
                                     <t t-if="gross_lb" t-out="'{:.1f}'.format(gross_lb)"/>
                                     <t t-if="not gross_lb">-</t>
                                 </td>
