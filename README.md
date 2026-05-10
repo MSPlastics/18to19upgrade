@@ -7,6 +7,7 @@ Documentation + tooling for migrating MSPlastics' Odoo Online instance from v18 
 | File / folder | Purpose |
 |---|---|
 | [V19_UPGRADE_NOTES.md](V19_UPGRADE_NOTES.md) | **Read this first.** Complete fix journal: every v19 break we found, the per-module fixes, the migration-level damage, the recovery process, and the post-cutover patches. |
+| [PALLET_SHIPPING_PLAN.md](PALLET_SHIPPING_PLAN.md) | Pre-implementation plan (drafted 2026-05-09) for adding pallet-based shipping (`stock.quant.package` + new MSP custom module + MES kiosk-scale flow). Architecture, schema, decisions, phased build, open questions. Hasn't been implemented yet — pick up from here next session. |
 | [PLAYBOOK.md](PLAYBOOK.md) | Original upgrade runbook (prod prep + cutover steps). |
 | [tools/](tools/) | XML-RPC diagnostic scripts: check module state, force upgrade, uninstall, read logs. |
 | [workflow/](workflow/) | Migration + post-cutover scripts (see below). |
