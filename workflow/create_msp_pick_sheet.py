@@ -160,7 +160,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </table>
 
             <!-- UNIFIED PICK CHECKLIST — every pallet rendered with the
-                 contents-breakdown style (product × cases · lot per move_line,
+                 contents-breakdown style (product x cases | lot per move_line,
                  stacked when there are multiple). Pure pallets show one line
                  in the contents cell, mixed pallets show several. Sorted by
                  trailing pallet number ASC so the picker reads 1->N top-down.
@@ -179,7 +179,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <tr>
                         <th style="width:5%;  background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pick</th>
                         <th style="width:18%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Pallet ID</th>
-                        <th style="width:42%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Contents (Product × cases · Lot)</th>
+                        <th style="width:42%; background:#0A182F; color:white; text-align:left;   padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Contents (Product x cases | Lot)</th>
                         <th style="width:8%;  background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Cases</th>
                         <th style="width:13%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Dims (in)</th>
                         <th style="width:14%; background:#0A182F; color:white; text-align:center; padding:6px; font-size:7pt; text-transform:uppercase; letter-spacing:0.5px;">Weight (lb)</th>
@@ -208,7 +208,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <t t-foreach="pkg_lines" t-as="ml">
                                     <div style="font-size:9pt; line-height:1.3;">
                                         <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
-                                        <span style="font-family:monospace; color:#0A182F;"> × <t t-out="'{:g}'.format(ml.quantity)"/></span>
+                                        <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(ml.quantity)"/></span>
                                         <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
                                     </div>
                                 </t>
@@ -263,8 +263,8 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <td style="padding:10px 14px; font-size:8pt; font-weight:bold; text-transform:uppercase; letter-spacing:0.5px;">Grand Total</td>
                     <td style="padding:10px 14px; font-family:monospace; font-size:13pt; font-weight:bold; text-align:right;">
                         <t t-out="len(palletized.package_id)"/> pallets
-                        · <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> cases
-                        · <t t-out="'{:.1f}'.format(sum((p.msp_gross_weight_lb or 0) for p in palletized.package_id if 'msp_gross_weight_lb' in p._fields))"/> lb
+                        | <t t-out="'{:g}'.format(sum(doc.move_line_ids.mapped('quantity')))"/> cases
+                        | <t t-out="'{:.1f}'.format(sum((p.msp_gross_weight_lb or 0) for p in palletized.package_id if 'msp_gross_weight_lb' in p._fields))"/> lb
                     </td>
                 </tr>
             </table>
@@ -272,9 +272,26 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             <!-- ORDER SUMMARY (BOTTOM) — per-product/lot recap. Each row
                  aggregates across all pallets (pure or mixed) plus any loose
                  lines with the same product/lot. Picker uses this for a final
-                 cross-check that the full order is accounted for. -->
+                 cross-check that the full order is accounted for. Order
+                 follows the Pick Checklist above (first-appearance per
+                 sorted pallet) so summary row N matches the first pallet
+                 of product N as the picker sees it. -->
             <t t-set="all_lines" t-value="doc.move_line_ids"/>
-            <t t-set="summary_keys" t-value="sorted({(ml.product_id.id, ml.lot_id.id or 0) for ml in all_lines})"/>
+            <t t-set="summary_keys" t-value="[]"/>
+            <t t-foreach="all_pkgs_sorted" t-as="_pkg">
+                <t t-foreach="palletized.filtered(lambda ml: ml.package_id.id == _pkg.id).sorted(key=lambda ml: -ml.quantity)" t-as="_ml">
+                    <t t-set="_k" t-value="(_ml.product_id.id, _ml.lot_id.id or 0)"/>
+                    <t t-if="_k not in summary_keys">
+                        <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
+                    </t>
+                </t>
+            </t>
+            <t t-foreach="loose" t-as="_ml">
+                <t t-set="_k" t-value="(_ml.product_id.id, _ml.lot_id.id or 0)"/>
+                <t t-if="_k not in summary_keys">
+                    <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
+                </t>
+            </t>
             <t t-if="summary_keys">
                 <div style="font-size:10pt; font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:1px; margin:25px 0 6px 0;">
                     Order Summary
