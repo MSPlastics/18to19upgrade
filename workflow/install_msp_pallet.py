@@ -14,7 +14,7 @@ import time
 import xmlrpc.client
 from pathlib import Path
 
-EXPECTED_VERSION = '19.0.1.0.2'
+EXPECTED_VERSION = '19.0.1.0.3'
 ADDON = 'msp_pallet'
 
 POLL_INTERVAL_S = 30
