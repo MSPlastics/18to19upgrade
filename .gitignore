@@ -23,3 +23,7 @@ Thumbs.db
 
 # Local agent state (Claude Code)
 .claude/
+
+# Audit pipeline run-state (per-execution; per-run reports AUDIT_*.md ARE committed)
+workflow/audit/audit_state.json
+workflow/audit/audit_state_phase4.json
