@@ -19,71 +19,110 @@ s = C.staging
 # (silo_name, material_name, preferred_lot_or_None)
 # preferred_lot is the Odoo lot we want; if None we pick FIFO from positive-free.
 DESIRED = [
-    ("SILO-BUTENE",    "Butene1-BF",            "5615421-01"),
-    ("SILO-CLR-REPRO", "Clear Repro",           None),                                    # see special handling
-    ("SILO-FRAC",      "Frac1-A",               "22508010A"),
-    ("SILO-EXEED",     "Exeed 1018.RA",         "M26010164A"),
-    ("SILO-CONSLIP",   "conSLIP fast",          "TEST-2026-05-09-conSLIP-fast-001"),
-    ("SILO-CONANTI",   "conANTIBLOCK clarity",  "TEST-2026-05-09-conANTIBLOCK-clarity-001"),
+    ("SILO-BUTENE",      "Butene1-BF",            "5615421-01"),
+    ("SILO-CLR-REPRO",   "Clear Repro",           None),    # bootstrap: see ensure_inventory_lot
+    ("SILO-FRAC",        "Frac1-A",               "12508040A"),
+    ("SILO-EXEED",       "Exeed 1018.RA",         "M26010164A"),
+    ("SILO-CONSLIP",     "conSLIP fast",          "TEST-2026-05-09-conSLIP-fast-001"),
+    ("SILO-CONANTI",     "conANTIBLOCK clarity",  "TEST-2026-05-09-conANTIBLOCK-clarity-001"),
+    ("SILO-ENABLE",      "Enable 4002",           "M25120010A"),
+    ("SILO-CONANTISTAT", "conANTISTAT-1",         None),    # bootstrap: see ensure_inventory_lot
+]
+
+# Materials that lack a real lot+inventory in WH/Stock on staging — the
+# audit needs to bootstrap them via inventory adjustment. Each tuple is
+# (product_name, lot_name_to_create, qty_to_seed_lb).
+NEED_BOOTSTRAP = [
+    ("Clear Repro",    "CLR-REPRO-AUDIT-001",   None),    # already has 166k existing untracked qty to reassign
+    ("conANTISTAT-1",  "CONANTISTAT-AUDIT-001", 2000.0),  # no qty exists; seed 2000 lb
 ]
 
 
-def ensure_clear_repro_lot():
-    """Clear Repro has 166k lb in WH/Stock but no stock.lot. Create one + assign quants."""
-    prods = s.search_read("product.product", [("name","=","Clear Repro")], ["id","tracking"])
+def ensure_inventory_lot(material, lot_name, seed_qty=None):
+    """Make sure `material` has a stock.lot named `lot_name` with positive
+    inventory in WH/Stock. If the product has untracked positive quants
+    in WH/Stock, reassign them to the new lot. If still no positive qty
+    and seed_qty is provided, do an inventory adjustment to add it.
+
+    Returns the lot name (== input lot_name) on success.
+    """
+    prods = s.search_read("product.product", [("name","=",material)], ["id","tracking"])
     if not prods:
-        raise SystemExit("Clear Repro product not found on staging")
+        raise SystemExit(f"{material!r} product not found on staging")
     pid = prods[0]["id"]
     tracking = prods[0]["tracking"]
-    print(f"  Clear Repro product id={pid}, tracking={tracking}")
+    print(f"  {material} (id {pid}, tracking={tracking}) -> ensure lot {lot_name}")
 
-    if tracking == "none":
-        # Lot tracking is disabled at the product level - we need to enable it,
-        # but flipping product.tracking from 'none' to 'lot' is a heavy schema change.
-        # For now, check if there's still an option (Odoo may allow lot on tracked moves).
-        print(f"  WARN: Clear Repro tracking='none' - Odoo will not enforce lots even if we provide them.")
-        print(f"        Consumption sync will still try to write lot_id, which Odoo accepts but doesn't audit.")
-
-    LOT_NAME = "CLR-REPRO-AUDIT-001"
-    existing = s.search_read("stock.lot", [("name","=",LOT_NAME), ("product_id","=",pid)],
-                              ["id","name"])
+    # Create lot if missing
+    existing = s.search_read("stock.lot", [("name","=",lot_name), ("product_id","=",pid)], ["id"])
     if existing:
         lot_id = existing[0]["id"]
-        print(f"  lot {LOT_NAME} already exists (id {lot_id})")
+        print(f"    lot exists (id {lot_id})")
     else:
-        lot_id = s.call("stock.lot", "create", [{"name": LOT_NAME, "product_id": pid, "company_id": 1}])
-        print(f"  created stock.lot {LOT_NAME} -> id {lot_id}")
+        lot_id = s.call("stock.lot", "create", [{"name": lot_name, "product_id": pid, "company_id": 1}])
+        print(f"    created stock.lot -> id {lot_id}")
 
-    # Find no-lot quants of Clear Repro in WH/Stock and assign to this lot
+    # Reassign any no-lot positive quants in WH/Stock to this lot
     no_lot_quants = s.search_read("stock.quant",
         [("product_id","=",pid), ("location_id.name","=","Stock"),
          ("lot_id","=",False), ("quantity",">",0)],
-        ["id","quantity","reserved_quantity","location_id"])
+        ["id","quantity"])
     if no_lot_quants:
         total = sum(q["quantity"] for q in no_lot_quants)
-        print(f"  found {len(no_lot_quants)} no-lot quant(s) totaling {total:.2f} lb - assigning to {LOT_NAME}")
+        print(f"    reassigning {len(no_lot_quants)} no-lot quant(s) totaling {total:.2f} -> {lot_name}")
         for q in no_lot_quants:
             try:
                 s.call("stock.quant", "write", [[q["id"]], {"lot_id": lot_id}])
-                print(f"    quant id={q['id']} ({q['quantity']:.2f} lb) -> lot {lot_id}")
             except Exception as e:
-                print(f"    quant id={q['id']} write FAILED: {e}")
-    else:
-        # Maybe it's already assigned. Check.
-        with_lot = s.search_read("stock.quant",
-            [("product_id","=",pid), ("location_id.name","=","Stock"),
-             ("lot_id","=",lot_id)],
-            ["quantity","reserved_quantity"])
-        total = sum(q["quantity"] for q in with_lot)
-        print(f"  no untracked quants found; quants already on lot {LOT_NAME} total {total:.2f} lb")
+                print(f"      quant id={q['id']} write FAILED: {e}")
 
-    return LOT_NAME
+    # Confirm we have positive WH/Stock qty on the lot
+    with_lot = s.search_read("stock.quant",
+        [("product_id","=",pid), ("location_id.name","=","Stock"), ("lot_id","=",lot_id)],
+        ["id","quantity"])
+    have_qty = sum(q["quantity"] for q in with_lot)
+    print(f"    WH/Stock qty on lot: {have_qty:.2f}")
+
+    if have_qty <= 0 and seed_qty:
+        # Seed inventory: find or create WH/Stock quant, set quantity via
+        # inventory adjustment workflow.
+        wh_stock = s.search("stock.location", [("name","=","Stock"),("usage","=","internal")], limit=1)
+        if not wh_stock:
+            raise SystemExit("Cannot find WH/Stock location")
+        loc_id = wh_stock[0]
+        # Find existing quant in WH/Stock with this lot, or create
+        existing_q = s.search("stock.quant",
+            [("product_id","=",pid), ("location_id","=",loc_id), ("lot_id","=",lot_id)],
+            limit=1)
+        if existing_q:
+            qid = existing_q[0]
+        else:
+            qid = s.call("stock.quant", "create", [{
+                "product_id": pid, "location_id": loc_id, "lot_id": lot_id,
+                "quantity": 0.0,
+            }])
+            print(f"    created stock.quant id={qid}")
+        try:
+            s.call("stock.quant", "write", [[qid], {"inventory_quantity": float(seed_qty)}])
+            s.call_void("stock.quant", "action_apply_inventory", [[qid]])
+            print(f"    seeded {seed_qty} via inventory adjustment")
+        except Exception as e:
+            # Fallback: direct write
+            s.call("stock.quant", "write", [[qid], {"quantity": float(seed_qty)}])
+            print(f"    seeded {seed_qty} via direct write (adjustment fallback: {e})")
+    return lot_name
 
 
 def main():
-    # Special-case Clear Repro
-    clr_lot = ensure_clear_repro_lot()
-    DESIRED[1] = ("SILO-CLR-REPRO", "Clear Repro", clr_lot)
+    # Bootstrap any materials that need a real lot + WH/Stock inventory first.
+    bootstrap_lots = {}
+    for material, lot_name, seed_qty in NEED_BOOTSTRAP:
+        bootstrap_lots[material] = ensure_inventory_lot(material, lot_name, seed_qty)
+
+    # Patch DESIRED entries with None preferred_lot to use the bootstrapped lot
+    for i, (silo_name, material, preferred_lot) in enumerate(DESIRED):
+        if preferred_lot is None and material in bootstrap_lots:
+            DESIRED[i] = (silo_name, material, bootstrap_lots[material])
 
     silos = C.mes.get("/api/resin/silos")
     if isinstance(silos, dict) and "_error" in silos:

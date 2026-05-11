@@ -68,7 +68,9 @@ KEEP_KEYS = {"target_product_id","target_product_name","target_product_token",
              "target_qty","target_uom_id","target_uom_name",
              "target_partner_id","target_partner_name","target_partner_shipping_id",
              "target_per_pallet","target_expected_pallets",
-             "bom_id","multistep","last_step_name","fg_step_name",
+             "bom_id","multistep",
+             "first_step_name","first_step_wc","last_step_name","last_step_wc","fg_step_name",
+             "fg_per_roll","fg_per_roll_uom","fg_roll_count","total_resin_lb",
              "audit_started_at","report_path"}
 all_keys = set(state.all().keys())
 for k in all_keys - KEEP_KEYS:

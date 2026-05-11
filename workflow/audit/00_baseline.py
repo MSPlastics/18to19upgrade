@@ -45,7 +45,7 @@ PROD_ID = prod["id"]
 PROD_NAME = prod["name"]
 QTY = args.qty if args.qty is not None else 50.0
 PER_PALLET = args.per_pallet if args.per_pallet is not None else 25
-EXPECTED_PALLETS = int(-(-QTY // PER_PALLET))   # ceil division
+# EXPECTED_PALLETS is computed AFTER we know FG_ROLL_COUNT (post-packaging math below).
 
 # routes
 routes = s.call("stock.route", "read", [prod["route_ids"]], {"fields":["id","name"]}) if prod["route_ids"] else []
@@ -103,8 +103,41 @@ if prior2:
 
 # Multi-step?
 MULTISTEP = len(ops) >= 2
-LAST_STEP_NAME = ops[-1]["name"] if ops else "(none)"
-FG_STEP_NAME = LAST_STEP_NAME if MULTISTEP else (ops[0]["name"] if ops else "(none)")
+FIRST_STEP = ops[0] if ops else None
+LAST_STEP = ops[-1] if ops else None
+FIRST_STEP_NAME = FIRST_STEP["name"] if FIRST_STEP else "(none)"
+FIRST_STEP_WC = FIRST_STEP["workcenter_id"][1] if FIRST_STEP and FIRST_STEP.get("workcenter_id") else "(none)"
+LAST_STEP_NAME = LAST_STEP["name"] if LAST_STEP else "(none)"
+LAST_STEP_WC = LAST_STEP["workcenter_id"][1] if LAST_STEP and LAST_STEP.get("workcenter_id") else "(none)"
+FG_STEP_NAME = LAST_STEP_NAME if MULTISTEP else FIRST_STEP_NAME
+
+# Compute total resin + FG roll count + per-roll weight from BOM/packaging.
+# Works for both Roll-stocked (e.g. 11158, packaging.qty=1) and Lb-stocked
+# products (e.g. 10083, packaging.qty=70).
+TOTAL_RESIN_LB = 0.0   # sum of resin/blend component demand in lb at order qty
+ROLL_PACKAGING = next((p for p in packs if (p.get("name","") or "").lower() == "roll"), None)
+if ROLL_PACKAGING and ROLL_PACKAGING.get("qty"):
+    FG_PER_ROLL = float(ROLL_PACKAGING["qty"])
+    FG_ROLL_COUNT = int(QTY // FG_PER_ROLL)
+    FG_PER_ROLL_UOM = ROLL_PACKAGING["product_uom_id"][1] if ROLL_PACKAGING.get("product_uom_id") else prod["uom_id"][1]
+else:
+    # No Roll packaging => the stock UoM is already Roll
+    FG_PER_ROLL = 1.0
+    FG_ROLL_COUNT = int(QTY)
+    FG_PER_ROLL_UOM = prod["uom_id"][1]
+
+# Pallets pack ROLLS not stock-UoM-units, so compute pallet count from FG_ROLL_COUNT.
+EXPECTED_PALLETS = int(-(-FG_ROLL_COUNT // PER_PALLET))   # ceil division
+
+# Resin total: BOM `product_qty` is the FG output per BOM unit, lines have
+# `product_qty` per BOM unit. Total resin lb = sum(line.qty WHERE uom=lb) *
+# (order_qty / bom_product_qty).
+bom_unit_qty = float(bom["product_qty"] or 1.0)
+scale = QTY / bom_unit_qty if bom_unit_qty else 1.0
+for ln in lines:
+    uomn = ln["product_uom_id"][1] if ln["product_uom_id"] else ""
+    if uomn.lower() in ("lb", "lbs", "pound", "pounds"):
+        TOTAL_RESIN_LB += float(ln["product_qty"] or 0.0) * scale
 
 # --- write state ---
 token = (prod["code"] or prod["barcode"] or prod["name"] or str(PROD_ID)).strip().replace("/", "_").replace(" ", "_")
@@ -122,8 +155,15 @@ state.update(
     target_expected_pallets=EXPECTED_PALLETS,
     bom_id=bom["id"],
     multistep=MULTISTEP,
+    first_step_name=FIRST_STEP_NAME,
+    first_step_wc=FIRST_STEP_WC,
     last_step_name=LAST_STEP_NAME,
+    last_step_wc=LAST_STEP_WC,
     fg_step_name=FG_STEP_NAME,
+    fg_per_roll=FG_PER_ROLL,
+    fg_per_roll_uom=FG_PER_ROLL_UOM,
+    fg_roll_count=FG_ROLL_COUNT,
+    total_resin_lb=TOTAL_RESIN_LB,
     audit_started_at=_dt.datetime.now().isoformat(timespec="seconds"),
 )
 

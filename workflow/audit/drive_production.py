@@ -19,8 +19,14 @@ state = C.state
 MO_NAME = state["mo_names"][0]
 MO_ID = state["mo_ids"][0]
 PROD_NAME = state["target_product_name"]
-QTY = int(state["target_qty"])
+QTY = float(state["target_qty"])
 PER_PALLET = state["target_per_pallet"]
+# Product-agnostic baseline values written by 00_baseline.py
+FG_ROLL_COUNT = int(state.get("fg_roll_count") or QTY)
+FG_PER_ROLL = float(state.get("fg_per_roll") or 1.0)
+TOTAL_RESIN_LB = float(state.get("total_resin_lb") or (46.28 * FG_ROLL_COUNT))
+FIRST_STEP_NAME = state.get("first_step_name", "")
+LAST_STEP_NAME = state.get("last_step_name", "")
 
 
 def _wos():
@@ -44,18 +50,28 @@ def _wait_until(label, condition_fn, max_seconds=120, interval=3):
 
 
 def cmd_extrude(args):
-    """Create N master rolls of total ~target weight."""
+    """Create N master rolls of total ~target weight on the first step WO."""
     wos = _wos()
     mr_wo = wos[0]
-    if mr_wo["operation_id"] and "MR" not in mr_wo["operation_id"][1]:
-        raise SystemExit(f"first WO is {mr_wo['operation_id']}, expected MR")
-    C.log(f"=== EXTRUDE: {args.count} master roll(s) on {mr_wo['name']} (WO id {mr_wo['id']}) ===")
+    op_name = mr_wo["operation_id"][1] if mr_wo["operation_id"] else "(unnamed)"
+    if FIRST_STEP_NAME and FIRST_STEP_NAME not in op_name:
+        # Soft warn rather than hard fail — operation names sometimes vary.
+        C.log(f"  NOTE: first WO operation is {op_name!r}, baseline expected {FIRST_STEP_NAME!r}")
+    C.log(f"=== EXTRUDE: {args.count} master roll(s) on {op_name} (WO id {mr_wo['id']}) ===")
 
-    # Total resin = ~46.28 lb/roll * 50 rolls = 2,314 lb
-    total_resin = 46.28 * QTY
-    per_mr = total_resin / args.count
-    # Approximate length: target_feet for whole MO is ~9270 ft. Per MR = 9270 / count.
-    total_feet = 9270.83
+    # Use baseline-computed totals from 00_baseline.py
+    per_mr = TOTAL_RESIN_LB / args.count
+    # Try to read target_feet from MES WO detail for an accurate per-MR length;
+    # fall back to a rough estimate if unavailable.
+    total_feet = 0.0
+    try:
+        detail = C.mes.get(f"/api/work-orders/{MO_NAME}?wc={mr_wo['workcenter_id'][1]}")
+        if isinstance(detail, dict) and "_error" not in detail:
+            total_feet = float(detail.get("target_feet") or 0)
+    except Exception:
+        pass
+    if total_feet <= 0:
+        total_feet = 9270.83  # legacy fallback
     per_ft = total_feet / args.count
 
     if state.get("mr_roll_ids") and not args.force:
@@ -126,13 +142,14 @@ def cmd_advance(args):
 
 
 def cmd_convert(args):
-    """Create the finished rolls (one per FG unit), referencing MR rolls as source."""
+    """Create the finished rolls (one per FG roll), referencing MR rolls as source."""
     wos = _wos()
     conv_wo = wos[-1]
-    if conv_wo["operation_id"] and "Conversion" not in conv_wo["operation_id"][1]:
-        raise SystemExit(f"last WO is {conv_wo['operation_id']}, expected Conversion")
+    op_name = conv_wo["operation_id"][1] if conv_wo["operation_id"] else "(unnamed)"
+    if LAST_STEP_NAME and LAST_STEP_NAME not in op_name:
+        C.log(f"  NOTE: last WO operation is {op_name!r}, baseline expected {LAST_STEP_NAME!r}")
     if conv_wo["state"] not in ("ready", "progress"):
-        raise SystemExit(f"Conversion WO is {conv_wo['state']}; need to advance MR first")
+        raise SystemExit(f"last WO is {conv_wo['state']}; need to advance previous step first")
 
     mr_rolls = state.get("mr_roll_ids") or []
     if not mr_rolls:
@@ -142,10 +159,12 @@ def cmd_convert(args):
         C.log(f"  state already has FG rolls (count {len(state['fg_roll_ids'])}). Re-run with --force.")
         return
 
-    C.log(f"=== CONVERT: {QTY} finished rolls on {conv_wo['name']} (WO id {conv_wo['id']}) ===")
+    n_rolls = FG_ROLL_COUNT
+    weight_per_roll = FG_PER_ROLL  # lb/Roll for lb-stocked, or 1 for Roll-stocked
+    C.log(f"=== CONVERT: {n_rolls} finished rolls @ {weight_per_roll} per roll on {op_name} (WO id {conv_wo['id']}) ===")
     # Distribute FG rolls across MR rolls round-robin
-    fg_per_mr = QTY // len(mr_rolls)
-    extras = QTY - fg_per_mr * len(mr_rolls)
+    fg_per_mr = n_rolls // len(mr_rolls)
+    extras = n_rolls - fg_per_mr * len(mr_rolls)
 
     created = []
     unit_no = 1
@@ -153,13 +172,12 @@ def cmd_convert(args):
         n_for_this_mr = fg_per_mr + (1 if mr_idx < extras else 0)
         for j in range(n_for_this_mr):
             fg_roll_id = f"AUDIT-{MO_NAME.split('/')[-1]}-FG-{unit_no:03d}"
-            weight = 46.28
             payload = {
                 "wo_number": MO_NAME,
                 "work_order_id": str(conv_wo["id"]),
                 "current_step_seq": 2,
                 "roll_id": fg_roll_id,
-                "weight_lbs": weight,
+                "weight_lbs": weight_per_roll,
                 "length_ft": 185.4,
                 "source_roll_id": mr_roll_id,
                 "unit_number": unit_no,
@@ -175,8 +193,8 @@ def cmd_convert(args):
             time.sleep(0.2)
     state["fg_roll_ids"] = created
     C.log(f"  created {len(created)} FG rolls")
-    # Wait until MO qty_producing == QTY (each FG roll bumps it by 1 via
-    # action_increment_qty_producing in the Odoo sync handler).
+    # Target qty_producing depends on MO UoM: if MO is in lb, each FG roll
+    # bumps by `weight_per_roll`; if in Roll, by 1. QTY is the total target.
     def _check():
         mo = s.read_one("mrp.production", MO_ID, ["qty_producing","state"])
         return (abs((mo["qty_producing"] or 0) - QTY) < 0.001,
@@ -217,8 +235,8 @@ def cmd_build_pallets(args):
     Uses the converter step's WO and the FG roll IDs from state.
     """
     fg = state.get("fg_roll_ids") or []
-    if len(fg) != QTY:
-        raise SystemExit(f"expected {QTY} FG rolls in state, found {len(fg)}")
+    if len(fg) != FG_ROLL_COUNT:
+        raise SystemExit(f"expected {FG_ROLL_COUNT} FG rolls in state, found {len(fg)}")
     wos = _wos()
     conv_wo = wos[-1]
 
@@ -252,8 +270,9 @@ def cmd_build_pallets(args):
     state["pallet_ids"] = created
 
     # Now finalize each (set gross weight)
-    # 25 rolls × 46.28 lb = 1157 lb + 50 lb tare = 1207 lb gross
-    gross = round(PER_PALLET * 46.28 + 50.0, 1)
+    # Per-roll weight from baseline (lb-stocked: real weight; Roll-stocked: rough 46.28)
+    per_roll_weight = FG_PER_ROLL if FG_PER_ROLL > 1 else 46.28
+    gross = round(PER_PALLET * per_roll_weight + 50.0, 1)
     for pallet_id in created:
         C.log(f"  POST /api/v1/production/pallet/finalize: {pallet_id} gross={gross} lb")
         r = C.mes.post("/api/v1/production/pallet/finalize",

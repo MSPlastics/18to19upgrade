@@ -15,6 +15,11 @@ PROD_ID = state["target_product_id"]
 PER_PALLET = state["target_per_pallet"]
 PALLET_NAMES = state["pallet_ids"]
 FG_LOT_NAME = state["fg_lot_name"]
+# For weight-tracked products (lb/kg) the picking move_line.quantity is in
+# stock UoM, not roll count. PER_PALLET is roll count; multiply by per-roll
+# weight to get the stock-UoM qty per pallet.
+FG_PER_ROLL = float(state.get("fg_per_roll") or 1.0)
+QTY_PER_PALLET = PER_PALLET * FG_PER_ROLL
 
 # Resolve FG lot id
 lot_id = s.search_read("stock.lot", [("name","=",FG_LOT_NAME),("product_id","=",PROD_ID)],
@@ -41,7 +46,7 @@ already_wired = (
     len(existing) == len(PALLET_NAMES) and
     all(ml.get("package_id") and ml["package_id"][1] in PALLET_NAMES for ml in existing) and
     all(ml.get("result_package_id") and ml["result_package_id"][1] in PALLET_NAMES for ml in existing) and
-    all(abs(ml["quantity"] - PER_PALLET) < 0.001 for ml in existing)
+    all(abs(ml["quantity"] - QTY_PER_PALLET) < 0.001 for ml in existing)
 )
 if already_wired:
     print("  already wired to packages, no-op")
@@ -74,12 +79,12 @@ for name in PALLET_NAMES:
         "lot_id": lot_id,
         "package_id": pkg_id,           # source package (in WH/Stock)
         "result_package_id": pkg_id,    # destination package (pallet stays assembled to customer)
-        "quantity": float(PER_PALLET),
+        "quantity": float(QTY_PER_PALLET),
         "location_id": fg_move["location_id"][0],
         "location_dest_id": fg_move["location_dest_id"][0],
     }
     new_id = s.call("stock.move.line", "create", [line_vals])
-    print(f"  + move_line id={new_id} qty={PER_PALLET} pkg={name} lot={FG_LOT_NAME}")
+    print(f"  + move_line id={new_id} qty={QTY_PER_PALLET} pkg={name} lot={FG_LOT_NAME}")
 
 # Re-read state
 pick2 = s.read_one("stock.picking", PICK_ID, ["state","move_line_ids"])

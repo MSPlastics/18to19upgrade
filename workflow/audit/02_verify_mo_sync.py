@@ -81,8 +81,16 @@ checks = []
 checks.append(("MO has 2 workorders (multi-step BOM)", len(wos) == 2, f"actual {len(wos)}"))
 if len(wos) >= 2:
     w0, w1 = wos[0], wos[-1]
-    checks.append((f"Step 1 is 'MR' on '3-Layer'", w0["operation_id"] and "MR" in w0["operation_id"][1] and w0["workcenter_id"] and "3-Layer" in w0["workcenter_id"][1], f"got op={w0['operation_id']}, wc={w0['workcenter_id']}"))
-    checks.append((f"Step 2 is '{LAST_STEP}'", w1["operation_id"] and LAST_STEP in w1["operation_id"][1], f"got {w1['operation_id']}"))
+    first_step_name = state.get("first_step_name", "")
+    first_step_wc = state.get("first_step_wc", "")
+    checks.append(
+        (f"Step 1 is {first_step_name!r} on {first_step_wc!r}",
+         (w0["operation_id"] and (not first_step_name or first_step_name in w0["operation_id"][1]))
+         and (w0["workcenter_id"] and (not first_step_wc or first_step_wc in w0["workcenter_id"][1])),
+         f"got op={w0['operation_id']}, wc={w0['workcenter_id']}"))
+    checks.append((f"Step 2 is {LAST_STEP!r}",
+                   w1["operation_id"] and (not LAST_STEP or LAST_STEP in w1["operation_id"][1]),
+                   f"got {w1['operation_id']}"))
     checks.append(("Step 1 is state=ready (active)", w0["state"] == "ready", f"actual {w0['state']}"))
     checks.append(("Step 2 is state=blocked (waiting on step 1)", w1["state"] == "blocked", f"actual {w1['state']}"))
 
@@ -105,15 +113,24 @@ if fg_moves:
 # MES side
 checks.append((f"MES /api/work-orders shows {mo_name}", mes_wo is not None, f"got {len(mes_wos)} WO entries"))
 if mes_wo:
-    checks.append(("MES WO operation == 'MR'", mes_wo.get("operation") == "MR", f"actual {mes_wo.get('operation')}"))
-    checks.append(("MES WO work_center == '3-Layer'", mes_wo.get("work_center") == "3-Layer", f"actual {mes_wo.get('work_center')}"))
+    first_step_name = state.get("first_step_name", "")
+    first_step_wc = state.get("first_step_wc", "")
+    checks.append((f"MES WO operation == {first_step_name!r}",
+                   not first_step_name or mes_wo.get("operation") == first_step_name,
+                   f"actual {mes_wo.get('operation')}"))
+    checks.append((f"MES WO work_center == {first_step_wc!r}",
+                   not first_step_wc or mes_wo.get("work_center") == first_step_wc,
+                   f"actual {mes_wo.get('work_center')}"))
     checks.append((f"MES WO target_qty == {QTY}", abs(float(mes_wo.get('target_qty', 0)) - QTY) < 0.001, f"actual {mes_wo.get('target_qty')}"))
     checks.append((f"MES WO uom == '{UOM_NAME}'", mes_wo.get("uom") == UOM_NAME, f"actual {mes_wo.get('uom')}"))
     lc = mes_wo.get("label_context", {})
     checks.append((f"MES sees customer == '{PARTNER_NAME}'", lc.get("customer") == PARTNER_NAME, f"actual {lc.get('customer')}"))
     checks.append((f"MES sees customer_po == '{SO_NAME}'", lc.get("customer_po") == SO_NAME, f"actual {lc.get('customer_po')}"))
 if mes_wo_detail:
-    checks.append((f"MES count_per_unit == {PER_PALLET}", str(mes_wo_detail.get("count_per_unit")) == str(PER_PALLET), f"actual {mes_wo_detail.get('count_per_unit')}"))
+    expected_rolls = int(state.get("fg_roll_count") or QTY)
+    checks.append((f"MES total_rolls_ordered == {expected_rolls}",
+                   abs(float(mes_wo_detail.get("total_rolls_ordered") or 0) - expected_rolls) < 0.001,
+                   f"actual {mes_wo_detail.get('total_rolls_ordered')}"))
 
 # --- update report ---
 ts = _dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
