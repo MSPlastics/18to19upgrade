@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-14 — Claude (Anthony's session).
+**Last updated:** 2026-05-19 — Claude (Anthony's session) — rebased lanes branches onto current `master`/`main`; test VM reset to new HEAD.
 
 ---
 
@@ -13,12 +13,12 @@
 - **Staging** (`19_upgradetest2` branch on Odoo.sh): `https://msplastics-odoo18-19-upgradetest2-32113137.dev.odoo.com/`. Has vendored `msppartialMO` v19.0.1.2.0. This is what the cloud test MES talks to.
 
 ### MES
-- **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch. **Untouched by all in-flight branch work.**
-- **Cloud test** (https://35.194.23.98.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `c1e649e`. See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+- **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
+- **Cloud test** (https://35.194.23.98.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `c4543b7` (rebased onto current `master` 2026-05-19). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
 
 ### operatorUI
-- **Each operator station** runs its own local Flask via .bat installer. Currently on whatever the most-recent installer build picked up from `main`.
-- **Local dev** (Anthony's box): `lanes-per-master-fix` @ `ab558f6`, points at cloud test MES. See [../operatorUI/HANDOFF.md](../operatorUI/HANDOFF.md).
+- **Each operator station** runs its own local Flask via .bat installer. Currently on whatever the most-recent installer build picked up from `main` @ `e6612e4`.
+- **Local dev** (Anthony's box): `lanes-per-master-fix` @ `b1d8da5`, points at cloud test MES. See [../operatorUI/HANDOFF.md](../operatorUI/HANDOFF.md).
 
 ### msppartialMO
 - `19_upgrade` branch @ `b101030` — v19.0.1.2.0. Source of truth for the addon.
@@ -31,13 +31,13 @@
 
 | Repo | Branch | HEAD | What's on it |
 |---|---|---|---|
-| `MESv1.0` | `lanes-per-master-fix` | `c1e649e` | Lane split, Odoo auth precedence fix |
-| `MESv1.0` | `master` | `fb3c393` | Heather's cleanup + v19 staging Odoo repoint |
-| `operatorUI` | `lanes-per-master-fix` | `ab558f6` | Stitch tracker uses lanes_per_master_roll |
-| `operatorUI` | `main` | `38df0e8` | Heather's recent UX/print work |
+| `MESv1.0` | `lanes-per-master-fix` | `c4543b7` | Lane split, Odoo auth precedence fix — rebased onto current `master` 2026-05-19 |
+| `MESv1.0` | `master` | `81c7779` | Heather's cleanup + v19 staging Odoo repoint + 2026-05-19 recursion fix |
+| `operatorUI` | `lanes-per-master-fix` | `b1d8da5` | Stitch tracker uses `lanes_per_master_roll` — rebased onto current `main` 2026-05-19 |
+| `operatorUI` | `main` | `e6612e4` | Heather's ft-conversion + 2026-05-19 progress/station/timeout fixes |
 | `msppartialMO` | `19_upgrade` | `b101030` | v19.0.1.2.0 — button_mark_done override |
 | `odoo18` | `19_upgradetest2` | `a1a4759` | Vendored msppartialMO for staging |
-| `18to19upgrade` | `main` | `67d6cf4` | Audit pipeline + per-run reports |
+| `18to19upgrade` | `main` | `a69f158` | Audit pipeline + per-run reports + umbrella HANDOFF |
 
 Cmd to refresh all five at once:
 ```bash
