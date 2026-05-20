@@ -15,7 +15,7 @@ def _load_dotenv():
         os.environ.setdefault(k.strip(), v.strip())
 _load_dotenv()
 
-MES_URL = os.environ.get("MES_TEST_URL", "https://35.194.23.98.nip.io")
+MES_URL = os.environ.get("MES_TEST_URL", "https://34.67.173.228.nip.io")
 MES_KEY = os.environ["MES_TEST_API_KEY"]
 PALLET_ID = sys.argv[1] if len(sys.argv) > 1 else "WH/MO/01206-PAL-9"
 

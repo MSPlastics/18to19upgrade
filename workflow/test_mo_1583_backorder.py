@@ -34,7 +34,7 @@ _load_dotenv()
 URL = os.environ["ODOO_STAGING_URL"]; DB = os.environ["ODOO_STAGING_DB"]
 USER = os.environ.get("ODOO_STAGING_USER", "admin@mountainstatesplastics.com")
 KEY = os.environ["ODOO_STAGING_API_KEY"]
-MES_URL = os.environ.get("MES_TEST_URL", "https://35.194.23.98.nip.io")
+MES_URL = os.environ.get("MES_TEST_URL", "https://34.67.173.228.nip.io")
 MES_KEY = os.environ["MES_TEST_API_KEY"]
 
 WO_NUMBER = "WH/MO/01479"
