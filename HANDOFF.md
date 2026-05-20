@@ -14,7 +14,7 @@
 
 ### MES
 - **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
-- **Cloud test** (https://35.194.23.98.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `c4543b7` (rebased onto current `master` 2026-05-19). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+- **Cloud test** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `c4543b7` (rebased onto current `master` 2026-05-19). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
 
 ### operatorUI
 - **Each operator station** runs its own local Flask via .bat installer. Currently on whatever the most-recent installer build picked up from `main` @ `e6612e4`.
@@ -94,8 +94,8 @@ When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phas
 
 | Service | URL |
 |---|---|
-| Cloud test MES | https://35.194.23.98.nip.io |
-| Cloud test MES health | https://35.194.23.98.nip.io/api/health |
+| Cloud test MES | https://34.67.173.228.nip.io |
+| Cloud test MES health | https://34.67.173.228.nip.io/api/health |
 | Staging Odoo | https://msplastics-odoo18-19-upgradetest2-32113137.dev.odoo.com/ |
 | Production Odoo | (live v19 instance — confirm URL before any contact) |
 | Local operatorUI dev | http://127.0.0.1:5010 (when `python app.py` is running) |
