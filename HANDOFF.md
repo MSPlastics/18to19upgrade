@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-19 — Claude (Anthony's session) — rebased lanes branches onto current `master`/`main`; test VM reset to new HEAD.
+**Last updated:** 2026-05-22 — Claude (Anthony's session) — pallet-qty UoM fix landed on staging (MESv1.0 `125869b` + `msp_pallet 19.0.1.0.4` in odoo18 `b8b454c`). Verified live on 01483 PAL-5: quant went from 35 Thousands (= 35,000 bags) to 1.05 Thousands (= 1,050 bags). New `msp_unit_count` Integer on stock.package now exposes the operator-facing roll count alongside the sales-UoM quant.
 
 ---
 
@@ -14,16 +14,20 @@
 
 ### MES
 - **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
-- **Cloud test** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `c4543b7` (rebased onto current `master` 2026-05-19). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+- **Cloud test** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `125869b` (latest: pallet-qty UoM fix 2026-05-22). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
 
 ### operatorUI
 - **Each operator station** runs its own local Flask via .bat installer. Currently on whatever the most-recent installer build picked up from `main` @ `e6612e4`.
 - **Local dev** (Anthony's box): `lanes-per-master-fix` @ `b1d8da5`, points at cloud test MES. See [../operatorUI/HANDOFF.md](../operatorUI/HANDOFF.md).
 
 ### msppartialMO
-- `19_upgrade` branch @ `b101030` — v19.0.1.2.0. Source of truth for the addon.
+- `19_upgrade` branch @ `d0583c8` — v19.0.1.3.0 (BOM auto-fill cleanup in `action_increment_qty_producing` on top of `button_mark_done` override). Source of truth for the addon.
 - Vendored into `odoo18` repo's `19_upgradetest2` branch for Odoo.sh staging install.
 - **NOT on production yet.** Production cut over to v19 without this addon. Will need install + module upgrade as part of staging→prod rollout.
+
+### msp_pallet (in odoo18)
+- Lives in `odoo18/msp_pallet/`, currently at `19.0.1.0.4` (b8b454c, 2026-05-22 — added `msp_unit_count` Integer field on `stock.package`).
+- **NOT on production yet.** Whole module ships with the v19-staging cutover.
 
 ---
 
@@ -31,13 +35,13 @@
 
 | Repo | Branch | HEAD | What's on it |
 |---|---|---|---|
-| `MESv1.0` | `lanes-per-master-fix` | `c4543b7` | Lane split, Odoo auth precedence fix — rebased onto current `master` 2026-05-19 |
+| `MESv1.0` | `lanes-per-master-fix` | `125869b` | Lane split, auth precedence, dashboard perf, nav partial, UoM=Thousands consumption + **pallet-qty UoM (2026-05-22)** |
 | `MESv1.0` | `master` | `81c7779` | Heather's cleanup + v19 staging Odoo repoint + 2026-05-19 recursion fix |
-| `operatorUI` | `lanes-per-master-fix` | `b1d8da5` | Stitch tracker uses `lanes_per_master_roll` — rebased onto current `main` 2026-05-19 |
-| `operatorUI` | `main` | `e6612e4` | Heather's ft-conversion + 2026-05-19 progress/station/timeout fixes |
-| `msppartialMO` | `19_upgrade` | `b101030` | v19.0.1.2.0 — button_mark_done override |
-| `odoo18` | `19_upgradetest2` | `a1a4759` | Vendored msppartialMO for staging |
-| `18to19upgrade` | `main` | `a69f158` | Audit pipeline + per-run reports + umbrella HANDOFF |
+| `operatorUI` | `lanes-per-master-fix` | `a51eec6` | Stitch tracker uses `lanes_per_master_roll`. Heather's `8d5da85` (Expected Wt UI) is on `main` — pick up via rebase when convenient. |
+| `operatorUI` | `main` | `8d5da85` | Heather 2026-05-21: Expected master roll weight on stitch tracker for two-step orders |
+| `msppartialMO` | `19_upgrade` | `d0583c8` | v19.0.1.3.0 — button_mark_done + BOM auto-fill cleanup |
+| `odoo18` | `19_upgradetest2` | `b8b454c` | Vendored msppartialMO 19.0.1.3.0 + msp_pallet 19.0.1.0.4 (msp_unit_count) |
+| `18to19upgrade` | `main` | `fa39c35` | Audit pipeline + per-run reports + umbrella HANDOFF |
 
 Cmd to refresh all five at once:
 ```bash
@@ -76,10 +80,13 @@ State-driven Odoo SO → MO → roll → pallet → invoice test pipeline. Produ
 - [ ] `08_trace_lot.py`: hardcodes 11158's resin set + seed lot. Read from `state['blend_recipe']`.
 
 ### Production rollout (pending staging-validation finish)
-The 2026-05-10 + 2026-05-14 fixes are all staging-verified or in-flight:
+The 2026-05-10 → 2026-05-22 fixes are all staging-verified or in-flight:
 - Silo lot validation, pallet rewire, FG zero-out + cancel handling, UoM-aware pack qty (2026-05-10)
 - `msppartialMO` v19.0.1.2.0 `button_mark_done` override (2026-05-10)
 - `lanes_per_master_roll` + `masters_per_doff` schema split, slitter cap, Odoo auth precedence (2026-05-14)
+- Dashboard perf (cached_property + batch pre-fetch + pre-warm), nav partial, DR docs, VM-IP recovery (2026-05-19)
+- UoM=Thousands consumption fix + msppartialMO `19.0.1.3.0` BOM auto-fill cleanup (2026-05-21)
+- **Pallet-qty UoM fix + msp_pallet `19.0.1.0.4` (msp_unit_count field) (2026-05-22)**
 
 When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phase 0 dry-run first.
 
