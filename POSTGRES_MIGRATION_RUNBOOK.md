@@ -87,6 +87,39 @@ gcloud compute scp anthony@mes-testing:/tmp/pre_flight_report.md \
 
 **Gate**: Phase 1 doesn't start until the audit report is reviewed and each blocker has a remediation plan.
 
+### Phase 0 audit findings — 2026-05-24 run against `mes-testing` VM
+
+Report archived as `pre_flight_report_2026-05-24.md`. Summary:
+
+| DB | Tables | Rows | Pragmas | Disposition |
+|---|---|---|---|---|
+| `data/mes_data.db` | 18 | 5,379 | WAL, busy_timeout=5000 | **Source of truth** — migrate as-is |
+| `data/local_db.sqlite` | 0 | 0 | delete | **Deprecated** — empty file, ignore in migration |
+| `data/mes_schedule.db` | 6 | 732 | delete | **Consolidate** — `work_order_sorting` table (732 rows) is the only live data here; merge into main Postgres schema |
+
+Tables that exist in both `mes_data.db` and `mes_schedule.db`:
+
+| Table | mes_data.db rows | mes_schedule.db rows | Source of truth |
+|---|---|---|---|
+| `master_rolls` | 1,155 | 0 | mes_data.db |
+| `pallets` | 82 | 0 | mes_data.db |
+| `qc_records` | 0 | 0 | mes_data.db |
+| `qc_reports` | 0 | 0 | mes_data.db |
+
+Decision: keep `mes_data.db` as the source of truth for these. The empty duplicates in `mes_schedule.db` are leftover from an older schema layout and get dropped during migration. The only thing we actually pull from `mes_schedule.db` is `work_order_sorting`.
+
+**Blockers to remediate before Phase 3 bulk load** (2 total):
+
+1. `master_rolls.work_order_id` → `work_orders.id`: **3 orphan rows** would fail Postgres FK enforcement.
+   - Remediation options (decide before Phase 3): (a) backfill the referenced work_order rows, (b) NULL the FK on the 3 orphans, (c) delete the 3 orphan roll rows. Likely (b) since rolls are append-only operator data we don't want to lose.
+
+2. `master_rolls.length_ft` declared `INTEGER` but actually stores `REAL` values (e.g. `1333.333333`).
+   - Remediation: declare the Postgres column as `DOUBLE PRECISION` (Float in SQLAlchemy). One-line change in `db_models.py` before Phase 2's `create_all()`.
+
+**Warnings (not blockers, fix opportunistically):**
+
+- `work_orders.date_deadline` has mixed format strings (some `date_only`, some `unknown`/empty). Normalize during migration script or accept NULLs on the unparseable ones.
+
 ---
 
 ## Phase 1 — Provision Cloud SQL + new VM (~1 day)
