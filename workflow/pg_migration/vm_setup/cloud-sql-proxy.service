@@ -1,0 +1,33 @@
+[Unit]
+Description=Cloud SQL Auth Proxy (mes-pg-staging)
+Documentation=https://cloud.google.com/sql/docs/postgres/sql-proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=cloudsqlproxy
+Group=cloudsqlproxy
+WorkingDirectory=/opt/cloud-sql-proxy
+# --private-ip forces the proxy to use the VPC private IP path we set up
+# with VPC peering, NOT the public internet. The proxy still mediates IAM
+# auth + encryption — we get connection-string-style ergonomics
+# (psql -h 127.0.0.1 -p 5432) without exposing Postgres on a public IP.
+ExecStart=/opt/cloud-sql-proxy/cloud-sql-proxy \
+    --address=127.0.0.1 \
+    --port=5432 \
+    --private-ip \
+    superb-metric-492315-r5:us-central1:mes-pg-staging
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

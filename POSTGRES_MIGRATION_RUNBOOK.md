@@ -139,8 +139,13 @@ Decision: keep `mes_data.db` as the source of truth for these. The empty duplica
 
 ```bash
 # 1.1 — Cloud SQL HA instance
+# NOTE: --edition=ENTERPRISE is REQUIRED. Cloud SQL defaults new project
+# instances to Enterprise Plus (which uses db-perf-optimized-N-* tiers,
+# ~2x cost). Verified 2026-05-24: without this flag, the API rejects
+# db-custom-* tiers with "Invalid Tier ... for (ENTERPRISE_PLUS) Edition".
 gcloud sql instances create mes-pg-staging \
   --database-version=POSTGRES_16 \
+  --edition=ENTERPRISE \
   --tier=db-custom-2-7680 \
   --region=us-central1 \
   --availability-type=REGIONAL \
@@ -148,7 +153,11 @@ gcloud sql instances create mes-pg-staging \
   --enable-point-in-time-recovery \
   --network=default \
   --no-assign-ip \
-  --storage-auto-increase
+  --storage-auto-increase \
+  --storage-size=20GB \
+  --storage-type=SSD \
+  --maintenance-window-day=SUN \
+  --maintenance-window-hour=06
 
 # 1.2 — Create database + app user
 gcloud sql databases create mes --instance=mes-pg-staging
