@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-22 — Claude (Anthony's session) — pallet-qty UoM fix landed on staging (MESv1.0 `125869b` + `msp_pallet 19.0.1.0.4` in odoo18 `b8b454c`). Verified live on 01483 PAL-5: quant went from 35 Thousands (= 35,000 bags) to 1.05 Thousands (= 1,050 bags). New `msp_unit_count` Integer on stock.package now exposes the operator-facing roll count alongside the sales-UoM quant.
+**Last updated:** 2026-05-24 — Claude (Anthony's session) — fresh status check after a quiet weekend (no commits since 2026-05-22). Diagnosed SQLite DB-locked errors on `mes-testing` (4 incidents across 5/22–5/23 under heavier load: 122 rolls/day Friday). Root cause: periodic inbound sync holds a single write transaction for 20-25s while operators try to POST rolls; SQLite `busy_timeout=5000ms` runs out. Decision: SQLite → Cloud SQL for PostgreSQL HA migration. Migration plan + script suite drafted at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) and [`workflow/pg_migration/`](workflow/pg_migration/). Tier 1 SQLite patches ship this week as a stopgap; full Postgres migration scoped for ~4 weeks calendar on test VM first, prod cutover separately later.
 
 ---
 
@@ -90,10 +90,23 @@ The 2026-05-10 → 2026-05-22 fixes are all staging-verified or in-flight:
 
 When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phase 0 dry-run first.
 
+### SQLite → Postgres migration (planned, ~4 weeks calendar from kickoff)
+Full plan at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) — Cloud SQL HA for PostgreSQL on a parallel `mes-testing-pg` VM, with the existing SQLite stack staying live through cutover. Script suite at [`workflow/pg_migration/`](workflow/pg_migration/):
+- `pre_flight_audit.py` — Phase 0 data audit on existing SQLite (FK orphans, type mismatches, datetime format inconsistencies)
+- `sqlite_to_pg_migrate.py` — Phase 3 one-shot bulk load
+- `sqlite_pg_replicator.py` — Phase 4 delta replication daemon (SQLite → Postgres every 60s)
+- `sqlite_pg_verifier.py` — Phase 4 parity verifier (row counts + checksums, drift alerts)
+- `render_compare.py` — Phase 5 endpoint diff harness
+
+Gates: Phase 1 starts only after Phase 0 audit returns 0 blockers; Phase 6 cutover starts only after Phase 5 shows 7 consecutive days of zero drift.
+
+Tier 1 SQLite stopgap patches (per-phase commits in inbound sync + busy_timeout 5000→30000ms + WAL on `local_db.sqlite` + `mes_schedule.db`) ship separately this week, before any Postgres work begins. They become irrelevant after cutover.
+
 ### Future work mentioned in conversation
 - Operator-set lane override on extrusion setup screen.
 - Ft-based progress in LBS + Unit trackers (today they're lbs-based; the data is there but not displayed).
 - 3rd-product audit (Thousands-sold inline single-step) — was on the original audit plan.
+- Machine status / telemetry ingestion (the driver for Postgres + future TimescaleDB or partitioned tables).
 
 ---
 
