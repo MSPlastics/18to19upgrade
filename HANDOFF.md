@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-24 — Claude (Anthony's session) — fresh status check after a quiet weekend (no commits since 2026-05-22). Diagnosed SQLite DB-locked errors on `mes-testing` (4 incidents across 5/22–5/23 under heavier load: 122 rolls/day Friday). Root cause: periodic inbound sync holds a single write transaction for 20-25s while operators try to POST rolls; SQLite `busy_timeout=5000ms` runs out. Decision: SQLite → Cloud SQL for PostgreSQL HA migration. Migration plan + script suite drafted at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) and [`workflow/pg_migration/`](workflow/pg_migration/). Tier 1 SQLite patches ship this week as a stopgap; full Postgres migration scoped for ~4 weeks calendar on test VM first, prod cutover separately later.
+**Last updated:** 2026-05-24 (late evening) — Claude (Anthony's session) — **Postgres migration Phases 0-3 COMPLETE on test environment**. Cloud SQL `mes-pg-staging` HA instance is RUNNABLE with 5,379 rows loaded across 18 tables matching SQLite source exactly. New `mes-testing-pg` VM has Auth Proxy + MES code + env file + backup cron all wired. Tier 1 SQLite patches (per-phase commits + busy_timeout 30s + WAL on mes_schedule.db) also deployed and verified on the old `mes-testing` VM. Old SQLite stack untouched; operators continue using it. Phase 4 (continuous replication daemons) is the next step — see `project_resume_2026_05_24.md` memory file for full state + Phase 4 starting point.
 
 ---
 
@@ -14,7 +14,15 @@
 
 ### MES
 - **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
-- **Cloud test** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `125869b` (latest: pallet-qty UoM fix 2026-05-22). See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+- **Cloud test, SQLite stack** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `56d82fd` (Tier 1 patches + DATABASE_URL env support + length_ft Float). Operators use this URL. See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+- **Cloud test, Postgres stack** (`mes-testing-pg` GCP VM, internal 10.128.0.4, external 34.57.35.195): same `lanes-per-master-fix` @ `56d82fd` code, connects to Cloud SQL `mes-pg-staging` via Auth Proxy on `127.0.0.1:5432`. **Not operator-facing** — Phase 4 replication daemons not yet running.
+
+### Cloud SQL Postgres (new)
+- `mes-pg-staging` in `us-central1`, ENTERPRISE edition Postgres 16.13, HA (sync standby in us-central1-b), PITR + 7-day backups
+- Private IP `10.82.240.2`, peered with default VPC via `mes-pg-vpc-range` (`10.82.240.0/20`)
+- Database `mes`, user `mes_app`, password in Secret Manager `mes-pg-app-password` v1
+- pg_dump cron → `gs://msp-mes-backups/postgres/` every 15 min (mirrors SQLite backup cadence)
+- 5,379 rows loaded across 18 tables (2026-05-24). Schema match with SQLite verified.
 
 ### operatorUI
 - **Each operator station** runs its own local Flask via .bat installer. Currently on whatever the most-recent installer build picked up from `main` @ `e6612e4`.
@@ -90,17 +98,19 @@ The 2026-05-10 → 2026-05-22 fixes are all staging-verified or in-flight:
 
 When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phase 0 dry-run first.
 
-### SQLite → Postgres migration (planned, ~4 weeks calendar from kickoff)
-Full plan at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) — Cloud SQL HA for PostgreSQL on a parallel `mes-testing-pg` VM, with the existing SQLite stack staying live through cutover. Script suite at [`workflow/pg_migration/`](workflow/pg_migration/):
-- `pre_flight_audit.py` — Phase 0 data audit on existing SQLite (FK orphans, type mismatches, datetime format inconsistencies)
-- `sqlite_to_pg_migrate.py` — Phase 3 one-shot bulk load
-- `sqlite_pg_replicator.py` — Phase 4 delta replication daemon (SQLite → Postgres every 60s)
-- `sqlite_pg_verifier.py` — Phase 4 parity verifier (row counts + checksums, drift alerts)
-- `render_compare.py` — Phase 5 endpoint diff harness
+### SQLite → Postgres migration — PHASES 0-3 COMPLETE on test, Phase 4 next
+Full plan at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md). Script suite at [`workflow/pg_migration/`](workflow/pg_migration/). Status as of 2026-05-24:
 
-Gates: Phase 1 starts only after Phase 0 audit returns 0 blockers; Phase 6 cutover starts only after Phase 5 shows 7 consecutive days of zero drift.
+- ✅ **Phase 0** — pre_flight_audit ran; 2 blockers found, both fixed (3 FK orphans NULLed, length_ft Integer→Float)
+- ✅ **Phase 1** — Cloud SQL HA provisioned, new VM `mes-testing-pg` built, Auth Proxy + IAM + backups all working
+- ✅ **Phase 2** — `Base.metadata.create_all()` ran clean; 18 tables, schema parity with SQLite verified
+- ✅ **Phase 3** — bulk load via `sqlite_to_pg_migrate.py` (fixed to use topological order); 5,379 rows loaded clean, row counts match SQLite exactly
+- ⏳ **Phase 4** (NEXT) — wire up `sqlite_pg_replicator.py` + `sqlite_pg_verifier.py` as systemd services on `mes-testing-pg`. Needs SQLite-access mechanism decision (recommend 60s cron pulling `.backup` snapshot from `mes-testing` to `/tmp/mes_data_snapshot.db` on `mes-testing-pg`).
+- ⏳ Phase 5 (read parity validation) and Phase 6 (cutover) follow Phase 4.
 
-Tier 1 SQLite stopgap patches (per-phase commits in inbound sync + busy_timeout 5000→30000ms + WAL on `local_db.sqlite` + `mes_schedule.db`) ship separately this week, before any Postgres work begins. They become irrelevant after cutover.
+See [`project_resume_2026_05_24.md`](../../../.claude/projects/c--Users-Anthony-Desktop-mes-and-operator-ui/memory/project_resume_2026_05_24.md) memory for the detailed Phase 4 starting plan.
+
+Tier 1 SQLite stopgap patches DEPLOYED 2026-05-24 on `mes-testing` (`MESv1.0/bf36be6`): per-phase commits + busy_timeout 5000→30000ms + WAL on mes_schedule.db. Operators no longer see DB-locked 500s. Stays in place until Postgres cutover; then removed.
 
 ### Future work mentioned in conversation
 - Operator-set lane override on extrusion setup screen.
