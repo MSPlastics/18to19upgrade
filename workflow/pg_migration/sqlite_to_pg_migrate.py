@@ -196,16 +196,20 @@ def migrate_one_sqlite(sqlite_path: str, pg_engine: Engine,
     md.reflect(bind=pg_engine)
 
     stats: dict[str, dict[str, Any]] = {}
-    tables = _list_source_tables(sqlite_conn)
+    source_tables = set(_list_source_tables(sqlite_conn))
 
-    for table in tables:
+    # Iterate in TOPOLOGICAL order (parents before children) so FK
+    # constraints don't fire mid-load. SQLAlchemy's metadata.sorted_tables
+    # respects the ForeignKey relationships declared in db_models.py and
+    # gives us a safe load order. Tables NOT in the source SQLite get
+    # skipped here; tables in source but not declared in Postgres metadata
+    # get reported as errors at the bottom.
+    pg_tables_sorted = [t.name for t in md.sorted_tables]
+    load_order = [t for t in pg_tables_sorted if t in source_tables]
+    extras_in_source = sorted(source_tables - set(pg_tables_sorted))
+
+    for table in load_order:
         stats[table] = {"copied": 0, "errors": []}
-        if table not in md.tables:
-            stats[table]["errors"].append(
-                f"table {table!r} does not exist in Postgres dest — "
-                "create it via Base.metadata.create_all() first (Phase 2)"
-            )
-            continue
         dest = md.tables[table]
         start = time.time()
         try:
@@ -221,6 +225,16 @@ def migrate_one_sqlite(sqlite_path: str, pg_engine: Engine,
         stats[table]["elapsed_s"] = round(elapsed, 2)
         print(f"  - {table}: {stats[table]['copied']:>7,} rows in "
               f"{elapsed:>6.2f}s  {'ERR: ' + stats[table]['errors'][0][:80] if stats[table]['errors'] else 'OK'}")
+
+    # Source-only tables (in SQLite but not in Postgres metadata): report
+    # without failing. Common cause is intentionally deprecated tables we
+    # decided not to migrate (see Phase 0.3/0.4 in the runbook).
+    for table in extras_in_source:
+        stats[table] = {"copied": 0, "errors": [
+            f"table {table!r} exists in SQLite source but not in Postgres dest — "
+            "skipped (intentionally deprecated, or missing from Phase 2 create_all)"
+        ]}
+        print(f"  - {table}: SKIPPED (not in Postgres dest)")
 
     sqlite_conn.close()
     return stats

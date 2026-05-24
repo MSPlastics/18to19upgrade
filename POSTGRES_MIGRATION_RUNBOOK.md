@@ -197,12 +197,22 @@ The full provisioning script is at `workflow/pg_migration/provision.sh` (not yet
 
 | Step | What | Check |
 |---|---|---|
-| 3.1 | Take SQLite backup from current VM (point-in-time snapshot) | `.tar.gz` of 3 DB files in GCS, verified non-empty |
-| 3.2 | Run `sqlite_to_pg_migrate.py` (SQLAlchemy with source+dest engines, batched copy, explicit type coercion). pgloader as fallback if our custom script chokes on something. | Migration completes with no errors |
+| 3.1 | Take SQLite snapshot via `sqlite3 db '.backup /tmp/snap.db'` (NOT raw `cp` — WAL siblings make raw copy inconsistent) | Snapshot file exists, opens cleanly |
+| 3.2 | Run `sqlite_to_pg_migrate.py` (SQLAlchemy with source+dest engines, batched copy, explicit type coercion, **topological table order via `metadata.sorted_tables`**). pgloader as fallback. | Migration completes with no errors |
 | 3.3 | Per-table row count verification | All deltas = 0 |
 | 3.4 | Sample record diff: 10 random rows per table, all columns | Zero column mismatches |
 | 3.5 | Sequence reset: `ALTER SEQUENCE` for every autoincrement column | Test insert produces expected next ID |
 | 3.6 | FK constraint verification | `SELECT count(*) FROM ... WHERE foreign_id NOT IN ...` returns 0 for every relationship |
+
+### Phase 3 gotchas (learned the hard way 2026-05-24)
+
+1. **Always use `sqlite3 .backup`, never `cp`/`scp` directly.** SQLite in WAL mode keeps recent writes in a sibling `-wal` file. A raw copy of just the `.db` produces a snapshot missing those writes; subsequent writes against the copy fail with "attempt to write a readonly database". The `.backup` command produces a consistent, fully checkpointed snapshot.
+
+2. **The bulk loader MUST iterate tables in topological order, not alphabetically.** SQLAlchemy's `metadata.sorted_tables` gives parents-before-children order based on FK relationships. Loading alphabetically means `master_rolls` (M) gets inserted before `work_orders` (W), and every row hits an FK violation. Fixed in `sqlite_to_pg_migrate.py` 2026-05-24.
+
+3. **SQLite snapshot may not have orphans even when Postgres rejects rows.** If load order is right, there shouldn't be orphans. If you DO see orphans after fixing load order, run `vm_setup/null_fk_orphans.py` against the snapshot — it walks SQLite's `PRAGMA foreign_key_list` and NULLs any rows whose FK column points at a non-existent parent. (See also the periodic-sync re-ID issue: the inbound sync truncates+reinserts `work_orders` with new auto-IDs every 5 min, which transiently orphans child rows — but they're usually re-paired by the next sync.)
+
+4. **`vm_setup/reset_pg_schema.py --confirm`** drops + recreates the entire schema for clean re-load attempts. Refuses to run unless DATABASE_URL points at a staging-looking host (`127.0.0.1` or hostname containing `staging`). Don't bypass that guard on prod.
 
 ```bash
 # Run on mes-testing-pg VM
