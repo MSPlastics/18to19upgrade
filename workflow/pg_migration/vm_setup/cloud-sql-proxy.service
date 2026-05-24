@@ -8,7 +8,13 @@ Wants=network-online.target
 Type=simple
 User=cloudsqlproxy
 Group=cloudsqlproxy
-WorkingDirectory=/opt/cloud-sql-proxy
+WorkingDirectory=/home/cloudsqlproxy
+# The Go-based proxy reads several gcloud SDK config files under
+# /home/$USER/.config/gcloud and /home/$USER/.secureConnect via Go
+# stdlib os/user (which resolves via getpwuid + a hardcoded /home/$USER
+# fallback) — Environment=HOME does NOT redirect those reads. Easiest
+# fix is to provision the home dir for real (install.sh does this) and
+# leave ProtectHome off so the proxy can reach it.
 # --private-ip forces the proxy to use the VPC private IP path we set up
 # with VPC peering, NOT the public internet. The proxy still mediates IAM
 # auth + encryption — we get connection-string-style ergonomics
@@ -23,10 +29,11 @@ RestartSec=5
 StandardOutput=journal
 StandardError=journal
 
-# Security hardening
+# Security hardening. ProtectHome dropped — see comment above.
+# ProtectSystem=full keeps /usr /boot /etc read-only but allows /var, /tmp,
+# and /home (which is what we need).
 NoNewPrivileges=true
-ProtectSystem=strict
-ProtectHome=true
+ProtectSystem=full
 PrivateTmp=true
 
 [Install]

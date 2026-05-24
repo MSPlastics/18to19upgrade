@@ -30,13 +30,26 @@ MES_BRANCH="lanes-per-master-fix"
 # ---------------------------------------------------------------------------
 echo "==> [1/6] apt + system deps"
 apt-get update -qq
+# pycairo (a transitive dep of xhtml2pdf via reportlab) builds from source
+# during pip install and requires libcairo2-dev + pkg-config. The existing
+# mes-testing VM has these installed (verified 2026-05-24); mirror them
+# so the MES pip install succeeds on a fresh box.
 DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
-    git python3-venv python3-pip postgresql-client curl ca-certificates jq
+    git python3-venv python3-pip python3-dev \
+    postgresql-client curl ca-certificates jq \
+    pkg-config libcairo2-dev libpixman-1-dev \
+    build-essential
 
 # ---------------------------------------------------------------------------
 echo "==> [2/6] Cloud SQL Auth Proxy"
-id -u cloudsqlproxy &>/dev/null || useradd --system --no-create-home cloudsqlproxy
+# Real /home/cloudsqlproxy so the proxy's stdlib home-dir lookups work.
+# (See cloud-sql-proxy.service for why we can't redirect via HOME env var.)
+id -u cloudsqlproxy &>/dev/null || useradd --system --shell /bin/false \
+    --home-dir /home/cloudsqlproxy --create-home cloudsqlproxy
 install -d -o cloudsqlproxy -g cloudsqlproxy /opt/cloud-sql-proxy
+# Pre-create the config + secureConnect dirs the proxy reads on startup
+install -d -m 0750 -o cloudsqlproxy -g cloudsqlproxy /home/cloudsqlproxy/.config /home/cloudsqlproxy/.config/gcloud
+install -d -m 0750 -o cloudsqlproxy -g cloudsqlproxy /home/cloudsqlproxy/.secureConnect
 
 if [[ ! -x /opt/cloud-sql-proxy/cloud-sql-proxy ]]; then
     curl -sSLo /opt/cloud-sql-proxy/cloud-sql-proxy \
