@@ -1,0 +1,19 @@
+[Unit]
+Description=MES Production Server (Postgres-backed test stack)
+After=network.target cloud-sql-proxy.service
+Requires=cloud-sql-proxy.service
+
+[Service]
+User=root
+WorkingDirectory=/opt/mes
+EnvironmentFile=/etc/mes.env
+EnvironmentFile=/etc/mes-pg.env
+ExecStart=/opt/mes/venv/bin/gunicorn -c gunicorn.conf.py app:app
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mes
+
+[Install]
+WantedBy=multi-user.target

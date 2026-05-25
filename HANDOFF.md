@@ -99,7 +99,14 @@ The 2026-05-10 → 2026-05-22 fixes are all staging-verified or in-flight:
 When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phase 0 dry-run first.
 
 ### SQLite → Postgres migration — PHASES 0-4 WIRED on test, in 7-day soak before Phase 5
-Full plan at [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md). Script suite at [`workflow/pg_migration/`](workflow/pg_migration/). Status as of 2026-05-24:
+
+**Documentation set:**
+- [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) — the one-time migration plan, phase-by-phase
+- [`NEW_STAGING_RUNBOOK.md`](NEW_STAGING_RUNBOOK.md) — **repeatable recipe** for spinning up another Postgres-backed env from scratch
+- [`OPS_RUNBOOK.md`](OPS_RUNBOOK.md) — daily/weekly checks, PITR + backup procedures, failure modes, cost
+- Script suite at [`workflow/pg_migration/`](workflow/pg_migration/)
+
+Status as of 2026-05-24:
 
 - ✅ **Phase 0** — pre_flight_audit ran; 2 blockers found, both fixed (3 FK orphans NULLed, length_ft Integer→Float)
 - ✅ **Phase 1** — Cloud SQL HA provisioned, new VM `mes-testing-pg` built, Auth Proxy + IAM + backups all working
