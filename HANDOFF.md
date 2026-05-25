@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-25 (early morning) — Claude (Anthony's session) — **Postgres + SQLite stacks now DISCONNECTED.** Phase 5 soak was cancelled early; Anthony declared migration validated and moved dev/test to the Postgres stack. Replicator + verifier daemons stopped and disabled, snapshot crons removed from both VMs, `READ_ONLY_MODE` cleared on `mes-testing-pg` so it runs its own Odoo sync. Two stacks now operate independently against the same staging Odoo. Operators continue on SQLite URL; all new dev/test work goes through the Postgres URL.
+**Last updated:** 2026-05-25 (late evening) — Claude (Anthony's session) — full session focused on the Postgres stack, **SQLite VM (`mes-testing`) formally retired** (root has no GitHub creds; can't pull). Six MES + operatorUI fixes shipped end-to-end (commit → push → `sudo git pull` + `systemctl restart` on `mes-testing-pg`) — see [`../MESv1.0/HANDOFF.md`](../MESv1.0/HANDOFF.md) and [`../operatorUI/HANDOFF.md`](../operatorUI/HANDOFF.md) for per-repo detail. Highlights: MES winder calc (MO 01557) now prefers fewer-master asymmetric layouts; Postgres-strict FK violation on `master_rolls_pallet_id_fkey` fixed by reordering record_roll; `/api/work-orders` now hides done/cancelled WOs so partial-shipment originals (`WH/MO/00976` vs active `-002` backorder) stop appearing as selectable; operatorUI stitch tracker got Edit + type-DELETE-to-confirm + 4-layer gusset clickable + complementary blue/amber gusset palette. **Earlier (morning):** Postgres + SQLite stacks DISCONNECTED, Phase 5 soak cancelled; Anthony declared migration validated.
 
 ---
 
@@ -43,17 +43,17 @@
 
 | Repo | Branch | HEAD | What's on it |
 |---|---|---|---|
-| `MESv1.0` | `lanes-per-master-fix` | `125869b` | Lane split, auth precedence, dashboard perf, nav partial, UoM=Thousands consumption + **pallet-qty UoM (2026-05-22)** |
-| `MESv1.0` | `master` | `81c7779` | Heather's cleanup + v19 staging Odoo repoint + 2026-05-19 recursion fix |
-| `operatorUI` | `lanes-per-master-fix` | `a51eec6` | Stitch tracker uses `lanes_per_master_roll`. Heather's `8d5da85` (Expected Wt UI) is on `main` — pick up via rebase when convenient. |
-| `operatorUI` | `main` | `8d5da85` | Heather 2026-05-21: Expected master roll weight on stitch tracker for two-step orders |
-| `msppartialMO` | `19_upgrade` | `d0583c8` | v19.0.1.3.0 — button_mark_done + BOM auto-fill cleanup |
-| `odoo18` | `19_upgradetest2` | `b8b454c` | Vendored msppartialMO 19.0.1.3.0 + msp_pallet 19.0.1.0.4 (msp_unit_count) |
-| `18to19upgrade` | `main` | `fa39c35` | Audit pipeline + per-run reports + umbrella HANDOFF |
+| `MESv1.0` | `lanes-per-master-fix` | `93798fa` | + 2026-05-25 evening: Health/OEE + LineEvent table; + 2026-05-25 late evening: winder calc asymmetric layouts (`a891f51`), Postgres-strict FK ordering fix in record_roll (`ff28d7b`), `/api/work-orders` excludes done/cancel (`93798fa`). Deployed to `mes-testing-pg`. |
+| `MESv1.0` | `master` | `81c7779` | Dormant. Heather's cleanup + v19 staging Odoo repoint + 2026-05-19 recursion fix. Operators are NOT on this — they run whatever `lanes-per-master-fix` is at on `mes-testing-pg`. |
+| `operatorUI` | `lanes-per-master-fix` | `b9b1e44` | + 2026-05-25 late evening: installer config.txt default → Postgres URL (`bb6b6a1`), 4-layer gusset master roll clickable (`084ee16`), stitch tracker Edit + type-DELETE-to-confirm (`2fbcf06`/`4102718`), gusset visual high-contrast blue+amber (`a8855f4`/`b9b1e44`). Local `C:\OperatorUI` refreshed. Installer NOT rebuilt for plant-floor stations. |
+| `operatorUI` | `main` | `8d5da85` | Heather 2026-05-21: Expected master roll weight on stitch tracker for two-step orders. Has not picked up today's `lanes-per-master-fix` work yet. |
+| `msppartialMO` | `19_upgrade` | `d0583c8` | v19.0.1.3.0 — button_mark_done + BOM auto-fill cleanup. (No change today.) |
+| `odoo18` | `19_upgradetest2` | `b8b454c` | Vendored msppartialMO 19.0.1.3.0 + msp_pallet 19.0.1.0.4 (msp_unit_count). (No change today.) |
+| `18to19upgrade` | `main` | `fa39c35` | Audit pipeline + per-run reports + umbrella HANDOFF. (This file.) |
 
-Cmd to refresh all five at once:
+Cmd to refresh all five at once (workspace path renamed 2026-05-25 — was `mes and operator ui`, now `mes and ui`):
 ```bash
-cd "c:\Users\Anthony\Desktop\mes and operator ui"
+cd "c:\Users\antho\Desktop\mes and ui"
 for r in MESv1.0 operatorUI msppartialMO odoo18 18to19upgrade; do
   echo "=== $r ===" && (cd $r && git fetch --all --quiet && \
   echo "  branch: $(git rev-parse --abbrev-ref HEAD), HEAD: $(git rev-parse --short HEAD)" && \
