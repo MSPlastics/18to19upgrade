@@ -40,6 +40,7 @@ Operational notes:
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import signal
 import sqlite3
@@ -216,11 +217,29 @@ def _replicate_table(sqlite_path: str, pg_engine: Engine, md: MetaData,
 
 def _flush_batch(pg_engine: Engine, dest: Table, batch: list[dict],
                  pk: str, conflict_policy: str) -> None:
-    # Filter to only columns that exist in dest
+    # Filter to only columns that exist in dest, and parse JSON strings.
+    # SQLite stores JSON columns as TEXT; passing the raw string to a
+    # Postgres JSON/JSONB column stores it as a JSON string scalar instead
+    # of the intended list/dict. Templates iterating over wo.layers then
+    # see characters instead of layer dicts.
     dest_cols = set(dest.c.keys())
+    json_cols = {c.name for c in dest.c if "json" in str(c.type).lower()}
     cleaned = []
     for row in batch:
-        cleaned.append({k: v for k, v in row.items() if k in dest_cols})
+        out = {}
+        for k, v in row.items():
+            if k not in dest_cols:
+                continue
+            if k in json_cols and isinstance(v, str) and v != "":
+                try:
+                    out[k] = json.loads(v)
+                except (json.JSONDecodeError, ValueError):
+                    out[k] = v  # malformed source — preserve raw string
+            elif k in json_cols and v == "":
+                out[k] = None
+            else:
+                out[k] = v
+        cleaned.append(out)
 
     if not cleaned:
         return

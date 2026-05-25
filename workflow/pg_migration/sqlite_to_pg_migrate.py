@@ -48,6 +48,7 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sqlite3
 import sys
@@ -101,6 +102,11 @@ def _coerce_row(row: dict, dest_table: Table) -> dict:
       - datetime stored as string -> datetime object
       - 0/1 stored as int in a boolean column -> True/False
       - empty string in a numeric column -> None
+      - JSON stored as string in SQLite (TEXT) -> parsed Python obj for
+        Postgres JSON/JSONB columns. Without this, SQLAlchemy stores the
+        string literal as a JSON string scalar instead of the intended
+        list/dict, and templates iterating over wo.layers see characters
+        instead of layer dicts.
     """
     out = {}
     for col_name, value in row.items():
@@ -110,13 +116,25 @@ def _coerce_row(row: dict, dest_table: Table) -> dict:
             continue
         col = dest_table.c[col_name]
         py_type = col.type.python_type if hasattr(col.type, "python_type") else None
+        is_json_col = "json" in str(col.type).lower()
 
         if value is None:
             out[col_name] = None
             continue
 
         try:
-            if py_type is bool:
+            if is_json_col and isinstance(value, str):
+                if value == "":
+                    out[col_name] = None
+                else:
+                    try:
+                        out[col_name] = json.loads(value)
+                    except (json.JSONDecodeError, ValueError):
+                        # Malformed JSON in source — preserve raw string;
+                        # Postgres will store it as a JSON string scalar
+                        # (existing broken behavior, but visible at least).
+                        out[col_name] = value
+            elif py_type is bool:
                 out[col_name] = bool(value)
             elif py_type in (datetime, date) and isinstance(value, str):
                 parsed = _parse_dt(value)
