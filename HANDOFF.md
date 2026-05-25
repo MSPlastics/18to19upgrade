@@ -15,7 +15,7 @@
 ### MES
 - **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
 - **Cloud test, SQLite stack** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `56d82fd` (Tier 1 patches + DATABASE_URL env support + length_ft Float). Operators use this URL. See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
-- **Cloud test, Postgres stack** (`mes-testing-pg` GCP VM, internal 10.128.0.4, external 34.57.35.195): same `lanes-per-master-fix` @ `56d82fd` code, connects to Cloud SQL `mes-pg-staging` via Auth Proxy on `127.0.0.1:5432`. **Not operator-facing.** Phase 4 daemons live: `mes-pg-replicator.service` (60s) + `mes-pg-verifier.service` (300s, /health on :5001). SQLite snapshots flow via GCS (`gs://msp-mes-backups/snapshots/mes_data_snapshot.db`) — 60s push cron on `mes-testing`, 60s pull cron on `mes-testing-pg`. Verifier reporting `green` across all 17 tables.
+- **Cloud test, Postgres stack** (`mes-testing-pg` GCP VM, internal 10.128.0.4, external 34.57.35.195, **public URL https://34.57.35.195.nip.io**): `lanes-per-master-fix` @ `a81a209`, connects to Cloud SQL `mes-pg-staging` via Auth Proxy on `127.0.0.1:5432`. **Passive read-only replica** — runs with `READ_ONLY_MODE=1` so the MES sync workers are disabled; the replicator is the sole Postgres writer. **Not operator-facing.** Phase 4 daemons live: `mes-pg-replicator.service` (60s) + `mes-pg-verifier.service` (300s, /health on :5001). SQLite snapshots flow via GCS (`gs://msp-mes-backups/snapshots/mes_data_snapshot.db`) — 60s push cron on `mes-testing`, 60s pull cron on `mes-testing-pg`. Verifier reporting `green` across all 17 tables.
 
 ### Cloud SQL Postgres (new)
 - `mes-pg-staging` in `us-central1`, ENTERPRISE edition Postgres 16.13, HA (sync standby in us-central1-b), PITR + 7-day backups
@@ -131,8 +131,10 @@ Tier 1 SQLite stopgap patches DEPLOYED 2026-05-24 on `mes-testing` (`MESv1.0/bf3
 
 | Service | URL |
 |---|---|
-| Cloud test MES | https://34.67.173.228.nip.io |
-| Cloud test MES health | https://34.67.173.228.nip.io/api/health |
+| Cloud test MES (SQLite, operators) | https://34.67.173.228.nip.io |
+| Cloud test MES (SQLite) health | https://34.67.173.228.nip.io/api/health |
+| Cloud test MES (Postgres, validation) | https://34.57.35.195.nip.io |
+| Cloud test MES (Postgres) health | https://34.57.35.195.nip.io/api/health |
 | Staging Odoo | https://msplastics-odoo18-19-upgradetest2-32113137.dev.odoo.com/ |
 | Production Odoo | (live v19 instance — confirm URL before any contact) |
 | Local operatorUI dev | http://127.0.0.1:5010 (when `python app.py` is running) |
