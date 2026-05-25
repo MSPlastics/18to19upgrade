@@ -2,7 +2,7 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-24 (very late evening) — Claude (Anthony's session) — **Postgres migration Phases 0-4 WIRED on test environment**. Phase 4 daemons (`mes-pg-replicator` + `mes-pg-verifier`) are running as systemd services on `mes-testing-pg` reading from GCS-mediated SQLite snapshots; verifier reports `green` across all 17 replicated tables. Now in the ≥7-day zero-drift soak before Phase 5 gate. Old SQLite stack untouched; operators continue using it.
+**Last updated:** 2026-05-25 (early morning) — Claude (Anthony's session) — **Postgres + SQLite stacks now DISCONNECTED.** Phase 5 soak was cancelled early; Anthony declared migration validated and moved dev/test to the Postgres stack. Replicator + verifier daemons stopped and disabled, snapshot crons removed from both VMs, `READ_ONLY_MODE` cleared on `mes-testing-pg` so it runs its own Odoo sync. Two stacks now operate independently against the same staging Odoo. Operators continue on SQLite URL; all new dev/test work goes through the Postgres URL.
 
 ---
 
@@ -15,7 +15,7 @@
 ### MES
 - **Production** (https://mes.mountainstatesplastics.com or similar — confirm before touching): `master` branch @ `81c7779`. **Untouched by all in-flight branch work.**
 - **Cloud test, SQLite stack** (https://34.67.173.228.nip.io, `mes-testing` GCP VM): `lanes-per-master-fix` @ `56d82fd` (Tier 1 patches + DATABASE_URL env support + length_ft Float). Operators use this URL. See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
-- **Cloud test, Postgres stack** (`mes-testing-pg` GCP VM, internal 10.128.0.4, external 34.57.35.195, **public URL https://34.57.35.195.nip.io**): `lanes-per-master-fix` @ `a81a209`, connects to Cloud SQL `mes-pg-staging` via Auth Proxy on `127.0.0.1:5432`. **Passive read-only replica** — runs with `READ_ONLY_MODE=1` so the MES sync workers are disabled; the replicator is the sole Postgres writer. **Not operator-facing.** Phase 4 daemons live: `mes-pg-replicator.service` (60s) + `mes-pg-verifier.service` (300s, /health on :5001). SQLite snapshots flow via GCS (`gs://msp-mes-backups/snapshots/mes_data_snapshot.db`) — 60s push cron on `mes-testing`, 60s pull cron on `mes-testing-pg`. Verifier reporting `green` across all 17 tables.
+- **Cloud test, Postgres stack** (`mes-testing-pg` GCP VM, internal 10.128.0.4, external 34.57.35.195, **public URL https://34.57.35.195.nip.io**): `lanes-per-master-fix` @ `2a6f7fb`, connects to Cloud SQL `mes-pg-staging` via Auth Proxy on `127.0.0.1:5432`. **Now fully independent** — runs its own Offline Sync Worker + Periodic Inbound Sync against the same staging Odoo. **This is the dev/test stack going forward.** Replicator + verifier daemons stopped and disabled 2026-05-25 ~01:22 UTC. Snapshot push/pull crons removed. `READ_ONLY_MODE` no longer set in `/etc/mes-pg.env`. Cloud SQL backups (HA + PITR + pg_dump cron → GCS every 15 min) remain active.
 
 ### Cloud SQL Postgres (new)
 - `mes-pg-staging` in `us-central1`, ENTERPRISE edition Postgres 16.13, HA (sync standby in us-central1-b), PITR + 7-day backups
@@ -98,29 +98,41 @@ The 2026-05-10 → 2026-05-22 fixes are all staging-verified or in-flight:
 
 When ready: follow [STAGING_TO_PROD_RUNBOOK.md](STAGING_TO_PROD_RUNBOOK.md) Phase 0 dry-run first.
 
-### SQLite → Postgres migration — PHASES 0-4 WIRED on test, in 7-day soak before Phase 5
+### SQLite → Postgres migration — DISCONNECTED (early Phase 6, soft cutover for dev/test)
 
 **Documentation set:**
-- [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) — the one-time migration plan, phase-by-phase
+- [`POSTGRES_MIGRATION_RUNBOOK.md`](POSTGRES_MIGRATION_RUNBOOK.md) — the one-time migration plan, phase-by-phase (historical)
 - [`NEW_STAGING_RUNBOOK.md`](NEW_STAGING_RUNBOOK.md) — **repeatable recipe** for spinning up another Postgres-backed env from scratch
 - [`OPS_RUNBOOK.md`](OPS_RUNBOOK.md) — daily/weekly checks, PITR + backup procedures, failure modes, cost
 - Script suite at [`workflow/pg_migration/`](workflow/pg_migration/)
 
-Status as of 2026-05-24:
+Final state as of 2026-05-25 ~01:22 UTC:
 
-- ✅ **Phase 0** — pre_flight_audit ran; 2 blockers found, both fixed (3 FK orphans NULLed, length_ft Integer→Float)
-- ✅ **Phase 1** — Cloud SQL HA provisioned, new VM `mes-testing-pg` built, Auth Proxy + IAM + backups all working
-- ✅ **Phase 2** — `Base.metadata.create_all()` ran clean; 18 tables, schema parity with SQLite verified
-- ✅ **Phase 3** — bulk load via `sqlite_to_pg_migrate.py` (fixed to use topological order); 5,379 rows loaded clean
-- ✅ **Phase 4** — daemons wired and running. Transport: GCS-mediated SQLite snapshot (60s push cron on `mes-testing` writes `sqlite3 .backup` → `gs://msp-mes-backups/snapshots/`; 60s pull cron on `mes-testing-pg` downloads to `/tmp/mes_data_snapshot.db`). Daemons: `mes-pg-replicator.service` (60s interval, watermarks where columns exist, full-refresh elsewhere) + `mes-pg-verifier.service` (300s interval, `/health` on :5001). First green report 2026-05-25 00:05 UTC. Replicator config + verifier config schema-corrected (qc_records/qc_reports/work_orders/products/sale_orders have no `created_at`/`updated_at`).
-- ⏳ **Phase 5** (NEXT) — read parity validation, ≥7 consecutive days of `verifier: green`, then `render_compare.py --auto-mo-sample 50` against the two stacks
-- ⏳ Phase 6 (cutover) follows Phase 5
+- ✅ Phases 0-4 completed (audit, provision, schema, bulk load, replication wired + verifier green)
+- 🛑 **Phase 5 (parity soak) skipped** — Anthony validated by clicking around and called it good enough for dev/test purposes. Two stacks now disconnected; both run independently against the same staging Odoo.
+- 🛑 **Phase 6 (formal cutover) deferred indefinitely** — operators stay on SQLite stack until/unless Anthony explicitly decides to migrate them too. There's no rush; both work.
+- 🟢 **Active dev/test environment is now the Postgres stack** (https://34.57.35.195.nip.io). All bug-finding + feature development happens here.
 
-**Phase 4 ops surface:**
-- `mes-testing` cron (anthony): `* * * * * /usr/local/bin/snapshot_to_gcs.sh >> /var/log/mes-snapshot.log 2>&1`
-- `mes-testing-pg` cron (root): `* * * * * /usr/local/bin/pull_snapshot_from_gcs.sh >> /var/log/mes-snapshot-pull.log 2>&1`
-- Health: `curl http://127.0.0.1:5001/health` on `mes-testing-pg` (returns 200/green or 503/drift)
-- Logs: `sudo journalctl -u mes-pg-replicator -f` and `sudo journalctl -u mes-pg-verifier -f`
+**What was un-wired during disconnection:**
+- `mes-pg-replicator.service` + `mes-pg-verifier.service` stopped + disabled (unit files still exist if you want to re-enable)
+- snapshot push cron removed from `mes-testing` (anthony user)
+- snapshot pull cron removed from `mes-testing-pg` (root)
+- `READ_ONLY_MODE=1` removed from `/etc/mes-pg.env`; `mes.service` restarted; sync workers now run
+- `gs://msp-mes-backups/snapshots/` left in place (last snapshot is stale; can delete or ignore)
+
+**What's still active on the Postgres stack:**
+- `cloud-sql-proxy.service` — proxy on 127.0.0.1:5432
+- `mes.service` — gunicorn + full sync workers
+- `nginx.service` — TLS termination
+- `/etc/cron.d/` pg_dump backup → `gs://msp-mes-backups/postgres/` every 15 min
+- Cloud SQL HA + PITR + daily snapshots (all GCP-managed)
+
+**To re-enable replication later** (e.g. if you decide to do a formal parity soak):
+1. `systemctl enable --now mes-pg-replicator mes-pg-verifier` on `mes-testing-pg`
+2. Add the snapshot pull cron back (`/usr/local/bin/pull_snapshot_from_gcs.sh` is still installed)
+3. SSH to `mes-testing`, add snapshot push cron back
+4. Set `READ_ONLY_MODE=1` in `/etc/mes-pg.env`; restart `mes.service`
+5. After ≥7 days of `verifier: green`, declare cutover
 
 See [`project_resume_2026_05_24.md`](../../../.claude/projects/c--Users-Anthony-Desktop-mes-and-operator-ui/memory/project_resume_2026_05_24.md) memory for full state.
 
