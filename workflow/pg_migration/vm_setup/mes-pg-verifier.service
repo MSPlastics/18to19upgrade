@@ -1,0 +1,31 @@
+[Unit]
+Description=MES SQLite/Postgres parity verifier
+Documentation=https://github.com/MountainStatesPlastics/18to19upgrade/blob/main/POSTGRES_MIGRATION_RUNBOOK.md
+After=network-online.target cloud-sql-proxy.service
+Wants=network-online.target
+Requires=cloud-sql-proxy.service
+
+[Service]
+Type=simple
+User=root
+Group=root
+EnvironmentFile=/etc/mes-pg.env
+WorkingDirectory=/opt/mes
+ExecStart=/opt/mes/venv/bin/python /opt/18to19upgrade/workflow/pg_migration/sqlite_pg_verifier.py \
+    --sqlite /tmp/mes_data_snapshot.db \
+    --postgres ${DATABASE_URL} \
+    --interval 300 \
+    --serve-health 5001 \
+    --log-level INFO
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=mes-pg-verifier
+
+NoNewPrivileges=true
+PrivateTmp=false
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

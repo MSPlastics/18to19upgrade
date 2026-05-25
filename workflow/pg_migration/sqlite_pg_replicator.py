@@ -68,26 +68,30 @@ except ImportError:
 #   conflict:  what to do on PK collision; usually "update" (latest wins) or
 #              "skip" (append-only, never update existing rows)
 # -----------------------------------------------------------------------------
+# Schema-verified 2026-05-24 against live mes-pg-staging reflection — when
+# in doubt re-run the reflection script in vm_setup/ and update this dict.
+# Watermark=None means full-table refresh each cycle (small tables only).
 REPLICATION_CONFIG = {
-    "master_rolls":        {"pk": "roll_id",   "watermark": "created_at",  "conflict": "update"},
-    "pallets":             {"pk": "pallet_id", "watermark": "created_at",  "conflict": "update"},
-    "sync_queue":          {"pk": "id",        "watermark": "created_at",  "conflict": "update"},
-    "qc_records":          {"pk": "id",        "watermark": "created_at",  "conflict": "update"},
-    "qc_reports":          {"pk": "id",        "watermark": "created_at",  "conflict": "update"},
-    "scrap_records":       {"pk": "id",        "watermark": "created_at",  "conflict": "update"},
-    "compliance_events":   {"pk": "id",        "watermark": "created_at",  "conflict": "update"},
-    "line_inventory":      {"pk": "id",        "watermark": "updated_at",  "conflict": "update"},
-    # Master data (rebuilt on each Odoo inbound sync — full refresh
-    # semantics, but we replicate via watermark for incremental cost)
-    "work_orders":         {"pk": "id",        "watermark": "updated_at",  "conflict": "update"},
-    "products":            {"pk": "id",        "watermark": "updated_at",  "conflict": "update"},
-    "sale_orders":         {"pk": "id",        "watermark": "updated_at",  "conflict": "update"},
-    "work_centers":        {"pk": "id",        "watermark": None,          "conflict": "update"},
-    "employees":           {"pk": "id",        "watermark": None,          "conflict": "update"},
-    "silos":               {"pk": "id",        "watermark": None,          "conflict": "update"},
-    "boms":                {"pk": "id",        "watermark": None,          "conflict": "update"},
-    "label_templates":     {"pk": "id",        "watermark": None,          "conflict": "update"},
-    "settings":            {"pk": "key",       "watermark": None,          "conflict": "update"},
+    "master_rolls":        {"pk": "roll_id",   "watermark": "created_at",   "conflict": "update"},
+    "pallets":             {"pk": "pallet_id", "watermark": "created_at",   "conflict": "update"},
+    "sync_queue":          {"pk": "id",        "watermark": "updated_at",   "conflict": "update"},
+    "scrap_records":       {"pk": "id",        "watermark": "created_at",   "conflict": "update"},
+    "compliance_events":   {"pk": "id",        "watermark": "created_at",   "conflict": "update"},
+    "line_inventory":      {"pk": "id",        "watermark": "last_updated", "conflict": "update"},
+    "silos":               {"pk": "id",        "watermark": "last_updated", "conflict": "update"},
+    # No timestamp columns — full refresh each cycle (small tables).
+    # work_orders/products/sale_orders are truncate+reinserted by the Odoo
+    # periodic sync, so a full refresh here matches that pattern.
+    "qc_records":          {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "qc_reports":          {"pk": "report_id", "watermark": None,           "conflict": "update"},
+    "work_orders":         {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "products":            {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "sale_orders":         {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "work_centers":        {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "employees":           {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "boms":                {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "label_templates":     {"pk": "id",        "watermark": None,           "conflict": "update"},
+    "settings":            {"pk": "key",       "watermark": None,           "conflict": "update"},
     # Tables NOT replicated (intentional):
     #   wo_metadata: derived, rebuilt from work_orders
 }

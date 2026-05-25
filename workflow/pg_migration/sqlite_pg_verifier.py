@@ -55,22 +55,25 @@ except ImportError:
 # Mirrors REPLICATION_CONFIG in sqlite_pg_replicator.py. Kept as a
 # separate copy on purpose — if the replicator's config drifts from
 # reality, the verifier will surface it.
+# Schema-verified 2026-05-24. Mirrors REPLICATION_CONFIG in the replicator
+# but kept independent on purpose — if either drifts from the schema it
+# surfaces here.
 VERIFIED_TABLES = {
     "master_rolls":        "created_at",
     "pallets":             "created_at",
-    "sync_queue":          "created_at",
-    "qc_records":          "created_at",
-    "qc_reports":          "created_at",
+    "sync_queue":          "updated_at",
     "scrap_records":       "created_at",
     "compliance_events":   "created_at",
-    "line_inventory":      "updated_at",
-    "work_orders":         "updated_at",
-    "products":            "updated_at",
-    "sale_orders":         "updated_at",
+    "line_inventory":      "last_updated",
+    "silos":               "last_updated",
     # Tables without a watermark — we count only, can't checksum recents
+    "qc_records":          None,
+    "qc_reports":          None,
+    "work_orders":         None,
+    "products":            None,
+    "sale_orders":         None,
     "work_centers":        None,
     "employees":           None,
-    "silos":               None,
     "boms":                None,
     "label_templates":     None,
     "settings":            None,
