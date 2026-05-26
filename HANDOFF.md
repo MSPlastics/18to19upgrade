@@ -2,7 +2,15 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
-**Last updated:** 2026-05-25 (late evening) — Claude (Anthony's session) — full session focused on the Postgres stack, **SQLite VM (`mes-testing`) formally retired** (root has no GitHub creds; can't pull). Six MES + operatorUI fixes shipped end-to-end (commit → push → `sudo git pull` + `systemctl restart` on `mes-testing-pg`) — see [`../MESv1.0/HANDOFF.md`](../MESv1.0/HANDOFF.md) and [`../operatorUI/HANDOFF.md`](../operatorUI/HANDOFF.md) for per-repo detail. Highlights: MES winder calc (MO 01557) now prefers fewer-master asymmetric layouts; Postgres-strict FK violation on `master_rolls_pallet_id_fkey` fixed by reordering record_roll; `/api/work-orders` now hides done/cancelled WOs so partial-shipment originals (`WH/MO/00976` vs active `-002` backorder) stop appearing as selectable; operatorUI stitch tracker got Edit + type-DELETE-to-confirm + 4-layer gusset clickable + complementary blue/amber gusset palette. **Earlier (morning):** Postgres + SQLite stacks DISCONNECTED, Phase 5 soak cancelled; Anthony declared migration validated.
+**Last updated:** 2026-05-26 (early morning) — Claude (Anthony's session) — long Postgres-only session, **two new architectural features shipped** (see per-repo HANDOFFs for detail):
+
+**WO closure-approval workflow** — operators submit a WO for closure via a new green Request Close button on each tracker; MES `/action-items` admin tab lets a manager **Close (no backorder)** or **Create Back Order** (msppartialMO's `action_close_and_backorder`). New schema columns on `work_orders`, new sync_queue endpoints for `workorder/finish` + `workorder/close_and_backorder`. URLs key off integer WO id to disambiguate multi-step MOs. Variance shown as % of target everywhere.
+
+**Multi-lot FIFO silo tracking** — silos can hold multiple lots simultaneously; consumption pulls oldest non-depleted lot first. New `SiloLot` table, `/resin` rebuilt with a cross-section drawing of each silo (stacked colored bands per lot, deterministic color from lot hash), per-lot row controls (↑↓ ✏ 🗑), and an Add Lot modal using the existing Odoo material+lot dropdowns. Reorder requires confirm-modal friction (per Anthony's "if it is just allowed to be pressed too easy we will make mistakes"). Top pencil repurposed to Silo Settings.
+
+Migrations to run before deploy: `migrate_wo_closure_workflow.py`, then `migrate_silo_lots.py`. Both portable across SQLite + Postgres, idempotent, and backfill where appropriate.
+
+**Earlier in the session:** MES winder calc rebuilt (MO 01557 asymmetric layouts); Postgres-strict FK fix on `master_rolls_pallet_id_fkey` in record_roll; `/api/work-orders` excludes done/cancel; expire_all() on multi-worker session caches; operatorUI Edit/Delete on session history with type-DELETE-to-confirm; 4-layer gusset master roll clickable; complementary blue/amber gusset palette; End Run wired to MES line_control/end. SQLite VM (`mes-testing`) remains retired.
 
 ---
 
