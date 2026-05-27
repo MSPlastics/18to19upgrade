@@ -2,6 +2,12 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
+**Last updated:** 2026-05-27 (overnight) — Claude (Anthony's session) — focused shipping pick list cleanup pass, see [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md) "What shipped this overnight session" for the full detail.
+
+**TL;DR**: `/shipping/pick` collapsed from 36 noisy cards to 2 actionable ones via five commits on `lanes-per-master-fix` (`a606a26` → `365521e` → `f0bd266` → `742b1f0` → `ad1eb41`). Filters out: freight-only pickings (non-storable consumables, not just `type='service'`), pickings whose products lack lot tracking (no `lot_id` on move_lines), and **legacy MOs with no MES pallets** — the last one is a policy reversal: the manual-pallet entry workflow celebrated in yesterday's HANDOFF is now hidden per Anthony's "let's get rid of the old manual stuff so I don't keep getting confused". Badge labels renamed (`draft` → "New", `ready` → "Ready"; "Ready" used to live on draft). Shipping sync + orphan-sweep now runs every 5 min via `periodic_inbound_sync`, so pickings validated in Odoo auto-vanish from the tablet within one tick.
+
+---
+
 **Last updated:** 2026-05-26 (late evening) — Claude (Anthony's session) — long active day with **three** major features delivered. See per-repo HANDOFFs for full detail.
 
 **1. Tablet-based shipping pick + VICS BOL workflow** (MES `5e6d4cb` → `742b72d` → `c51071f`) — replaces the paper pick-sheet → fill-by-hand → office-types-BOL loop. Office still creates pickings in Odoo as today; warehouse picks on a tablet (scan each pallet, validate); office prints a pre-filled VICS-format BOL at `/shipping/bol/<id>`. New tables `Shipment`/`ShipmentPicking`/`ShipmentPallet`. Multi-MO trucks via shipment merge. Odoo writeback is manual — office presses `button_validate` only after the truck leaves. Lot-based matching (`pallet.wo_number == lot_id.name`) + manual-pallet entry for legacy pre-MES MOs. Unreserved-line warnings surface when Odoo can't reserve stock for some line items. Verified live against WH/OUT/01390 / S01134 Amerisource.
