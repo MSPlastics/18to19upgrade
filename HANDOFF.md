@@ -2,6 +2,35 @@
 
 > **Living document.** Umbrella tracker for the Odoo 18 → 19 cutover effort. Other repos have their own [HANDOFF.md](../MESv1.0/HANDOFF.md) files — this one captures cross-repo state + the audit pipeline + upgrade-specific runbooks.
 
+---
+
+**Last updated:** 2026-05-30 — Claude (Anthony's session) — cross-repo snapshot for picking up on a different machine.
+
+### Current branch + HEAD of every repo (all clean + pushed to origin)
+| Repo | Branch | HEAD | Notes |
+|------|--------|------|-------|
+| **MESv1.0** | `lanes-per-master-fix` | `982f742` (code `fba98f8`) | dev branch; `master` = PRODUCTION (untouched). Staging VM deployed at `fba98f8`. |
+| **operatorUI** | `main` | `e8cb174` | work directly on `main` (Heather pushes here too — fetch first). Station `C:\OperatorUI` refreshed + live. |
+| **18to19upgrade** | `main` | `6c073a8`+ | this umbrella repo. |
+| **odoo18** | `msp_production` | `b11176c` | `msp_packaging` addon. |
+| **msppartialMO** | `19_upgrade` | `d0583c8` | partial-MO addon v19.0.1.3.0. |
+
+⚠️ **The rich `.claude` memory notes live on THIS machine only** (`C:\Users\antho\.claude\projects\…\memory\`) and do NOT travel via git. On the other computer the **per-repo HANDOFF.md files are the source of truth** — start with [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md).
+
+### What shipped 2026-05-29 → 05-30 (all on STAGING; production untouched)
+- **Operator compliance + changeover-capture system** (MES + operatorUI): forced-close at 100% (server is authority via `produced_feet`; walk-away sweep + 30-min Office escalation), scrap silo-debit fix, `changeover_events` model + migration + `/api/changeover/*` + auto-capture + analytics tab, Start-Changeover button, scrap-reason picker. **System-wide E2E verified** (multi-agent), 3 defects found+fixed. Full plan: `MESv1.0/COMPLIANCE_CHANGEOVER_PLAN.md`.
+- **Department-routed action-items** inbox (QC / Shipping / Office / Production cascade).
+- **operatorUI Stop-chooser** (`31d1dd4`): merged confusing "Request Close" + "End Run" into one **Stop** button → "what's happening?" chooser (finish / changeover / stop-line). Station refreshed + live.
+- **Schedule fixes** (`b3fa9b1`+`fba98f8`): (1) play/pause now drives REAL line control (`/api/line/<wc>/start|pause`); (2) schedule "running" now polls the same `/api/plant-health/snapshot` plant-health uses (was state-based → broke when the 5-min Odoo sync reset `state`); (3) **new orders land in the per-WC HOLDING AREA** (`sort_index=999`, was 998). Audit confirmed the schedule is MES-owned — Odoo planned start dates do NOT position orders; only due-date/product/qty/run-rate reference data is consumed.
+
+### Open items
+1. **Deploy MES to PRODUCTION** — everything above is staging-only (`mes-testing-pg` @ https://34.57.35.195.nip.io). Needs Anthony's explicit per-session OK + the new migration (`migrate_changeover_events.py`).
+2. **operatorUI Phase 2c — hard-everywhere badge identity** — deliberately NOT shipped (rejects writes lacking a known badge → could block production).
+3. Optional: one-time sweep of existing `sort_index=998` orders into holding.
+4. Full MES test suite: **197 passed** (run in dev env; `pytest` is not installed on the staging VM).
+
+---
+
 **Last updated:** 2026-05-28 (late evening) — Claude (Anthony's session) — big day across login, tablet view, fresh-install path, full DB wipe + rebuild, and a 4-parallel-agent audit that caught + fixed 2 sev-1 bugs. See [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md) for the full per-feature breakdown and [../MESv1.0/docs/2026-05-28-audit.md](../MESv1.0/docs/2026-05-28-audit.md) for the bug list + fixes.
 
 **TL;DR**: MES on `lanes-per-master-fix` ended the day at `1bc39f2` with: badge-based employee login + role-gated /admin/users, tablet view mode for shipping/QC pages, single-button fresh-install script (`install_fresh.sh` + `INSTALL_POSTGRES.md` runbook), and **4 merged fix branches** that resolve 2 sev-1 + 5 sev-2 + several sev-3 bugs the audit pipeline surfaced. Sev-1 highlights: (1) silo inventory was never actually decremented by rolls — `consume_silo_fifo` was defined but never called, gauges purely decorative — now wired with idempotency + Postgres `with_for_update()` row lock; (2) multi-step MO closure was routing to wrong step because `get_work_order_by_id` used `.first()` with no ordering on `WorkOrder.work_order_number` — now disambiguated via optional `work_order_id` body param + deterministic ordering. Live test: 8/8 verification cases PASS on `mes-testing-pg`. Math validation on a fresh-synced staging DB: 17/17 PASS (master roll → finished roll → progress %).
