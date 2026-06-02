@@ -292,13 +292,44 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                             <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_total)"/>
                         </td>
                     </tr>
-                    <!-- Amount Due — only when partially paid (residual differs from total but isn't zero/full) -->
-                    <tr t-if="doc.amount_residual and doc.amount_residual != doc.amount_total">
-                        <td style="padding:10px 15px; text-align:right; color:#334155; font-size:10pt; font-weight:bold;">Amount Due:</td>
-                        <td style="padding:10px 15px; text-align:right; font-weight:bold; font-size:10pt; color:#0A182F;">
-                            <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_residual)"/>
-                        </td>
-                    </tr>
+                    <!-- Payments + balance. So a PAID (or partially-paid / reversed) invoice
+                         prints each reconciled entry, dated, plus the remaining balance — e.g.
+                         "$0.00" once settled — for the accountant. Driven off the SAME data the
+                         account form shows: invoice_payments_widget['content'] (Odoo 19; the old
+                         account.move._get_reconciled_info_JSON_values() helper was removed in v19).
+                         sudo() because the field is gated to the accounting groups, so it must
+                         compute regardless of who prints. Labels match the form: refunds /
+                         credit-note reversals -> "Reversed on", real payments -> "Paid on".
+                         Amounts formatted manually with cur_sym (the widget's
+                         amount_company_currency carries an NBSP that wkhtmltopdf corrupts); the
+                         'date' is a datetime.date in QWeb -> strftime to MM/DD/YYYY, same as the
+                         invoice_date / due fields in the meta panel above. -->
+                    <t t-if="doc.state == 'posted'">
+                        <t t-set="pay_widget" t-value="doc.sudo().invoice_payments_widget or {}"/>
+                        <t t-set="payments_vals" t-value="pay_widget.get('content') or []"/>
+                        <t t-foreach="payments_vals" t-as="pv">
+                            <t t-set="pdate" t-value="pv.get('date')"/>
+                            <t t-set="pdate_fmt" t-value="pdate.strftime('%m/%d/%Y') if pdate else ''"/>
+                            <tr>
+                                <td style="padding:7px 15px; text-align:right; color:#334155; font-size:9pt; font-style:italic;">
+                                    <t t-if="pv.get('is_exchange')">Exchange Difference:</t>
+                                    <t t-elif="pv.get('is_refund')">Reversed on <t t-out="pdate_fmt"/>:</t>
+                                    <t t-else="">Paid on <t t-out="pdate_fmt"/>:</t>
+                                </td>
+                                <td style="padding:7px 15px; text-align:right; font-weight:bold; font-size:9pt; color:#0A182F;">
+                                    <t t-out="cur_sym + ' ' + '{:,.2f}'.format(pv.get('amount') or 0.0)"/>
+                                </td>
+                            </tr>
+                        </t>
+                        <!-- Remaining balance: shown whenever there are payments (so a fully-paid
+                             invoice reads $0.00) OR whenever a residual remains on a posted move. -->
+                        <tr t-if="payments_vals or (doc.amount_residual and doc.amount_residual != doc.amount_total)" style="background-color:#e8eef5;">
+                            <td style="padding:10px 15px; text-align:right; color:#0A182F; font-size:11pt; font-weight:800; border-radius:0 0 0 4px;">Amount Due:</td>
+                            <td style="padding:10px 15px; text-align:right; font-weight:800; font-size:11pt; color:#0A182F; border-radius:0 0 4px 0;">
+                                <t t-out="cur_sym + ' ' + '{:,.2f}'.format(doc.amount_residual)"/>
+                            </td>
+                        </tr>
+                    </t>
                 </table>
             </div>
 
