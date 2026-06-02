@@ -310,11 +310,15 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <t t-foreach="payments_vals" t-as="pv">
                             <t t-set="pdate" t-value="pv.get('date')"/>
                             <t t-set="pdate_fmt" t-value="pdate.strftime('%m/%d/%Y') if pdate else ''"/>
+                            <!-- Customer Payment Reference (msp_payment_ref module): pulled from
+                                 the account.payment behind this reconciled entry; only real
+                                 customer payments carry one (refund/reversal entries don't). -->
+                            <t t-set="cust_ref" t-value="doc.env['account.payment'].sudo().browse(pv.get('account_payment_id')).customer_payment_ref if pv.get('account_payment_id') else False"/>
                             <tr>
                                 <td style="padding:7px 15px; text-align:right; color:#334155; font-size:9pt; font-style:italic;">
                                     <t t-if="pv.get('is_exchange')">Exchange Difference:</t>
                                     <t t-elif="pv.get('is_refund')">Reversed on <t t-out="pdate_fmt"/>:</t>
-                                    <t t-else="">Paid on <t t-out="pdate_fmt"/>:</t>
+                                    <t t-else="">Paid on <t t-out="pdate_fmt"/><t t-if="cust_ref">, ref <t t-out="cust_ref"/></t>:</t>
                                 </td>
                                 <td style="padding:7px 15px; text-align:right; font-weight:bold; font-size:9pt; color:#0A182F;">
                                     <t t-out="cur_sym + ' ' + '{:,.2f}'.format(pv.get('amount') or 0.0)"/>
