@@ -232,8 +232,9 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <!-- PRODUCT ROW -->
                         <tr t-else="" t-att-style="row_index % 2 == 1 and 'background-color:#f8fafc;' or ''">
                             <t t-set="row_index" t-value="row_index + 1"/>
-                            <!-- Lots: walk line.sale_line_ids -> move_ids -> move_line_ids -> lot_id; dedupe + sort + comma-join. ONE row per invoice line per accounting's request. -->
-                            <t t-set="lot_names" t-value="sorted({n for n in line.sale_line_ids.move_ids.move_line_ids.mapped('lot_id.name') if n})"/>
+                            <!-- Lots: walk line.sale_line_ids -> move_ids -> move_line_ids -> lot_id; dedupe + sort + comma-join. ONE row per invoice line per accounting's request.
+                                 BATCH lot only (owner 2026-06-10): per-roll serial lots ({wo}-R<n>) collapse to their MO-level lot — customers see the lot number, never roll serials. Roll detail stays in Odoo/MES traceability. -->
+                            <t t-set="lot_names" t-value="sorted({(n.rsplit('-R', 1)[0] if ('-R' in n and n.rsplit('-R', 1)[1].isdigit()) else n) for n in line.sale_line_ids.move_ids.move_line_ids.mapped('lot_id.name') if n})"/>
                             <td style="padding:14px 10px; vertical-align:top; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:10pt; font-weight:bold;">
                                 <t t-if="line.product_id"><t t-out="line.product_id.name"/></t>
                             </td>

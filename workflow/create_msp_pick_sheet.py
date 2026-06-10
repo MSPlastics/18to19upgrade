@@ -221,17 +221,33 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <t t-out="display_id"/>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; vertical-align:middle;">
-                                <t t-foreach="pkg_lines" t-as="ml">
-                                    <!-- Per-line: convert to packaging units (Roll/Case)
-                                         using move's packaging or product's default,
-                                         else fall back to stock UoM. -->
-                                    <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]"/>
-                                    <t t-set="line_qty" t-value="(ml.quantity / line_pkg.qty) if (line_pkg and line_pkg.qty) else ml.quantity"/>
-                                    <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
+                                <!-- Contents grouped by (product, BATCH lot) — per-roll
+                                     serial lots ({wo}-R<n>) collapse to their MO-level
+                                     lot (owner 2026-06-10), so a pure pallet reads ONE
+                                     line ('10962 x 2 Roll lot WH/MO/01220') instead of
+                                     one line per roll serial. -->
+                                <t t-set="content_keys" t-value="[]"/>
+                                <t t-foreach="pkg_lines" t-as="_cl">
+                                    <t t-set="_bn" t-value="(_cl.lot_id.name or '')"/>
+                                    <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                                    <t t-set="_ck" t-value="(_cl.product_id.id, _bn)"/>
+                                    <t t-if="_ck not in content_keys">
+                                        <t t-set="content_keys" t-value="content_keys + [_ck]"/>
+                                    </t>
+                                </t>
+                                <t t-foreach="content_keys" t-as="ck">
+                                    <t t-set="c_lines" t-value="pkg_lines.filtered(lambda ml: ml.product_id.id == ck[0] and ((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) == ck[1])"/>
+                                    <!-- Packaging conversion: group shares one product —
+                                         move's packaging first, product default second,
+                                         stock UoM last. -->
+                                    <t t-set="line_pkg" t-value="c_lines[0].move_id.product_packaging_id or c_lines[0].product_id.packaging_ids[:1]"/>
+                                    <t t-set="c_qty" t-value="sum(c_lines.mapped('quantity'))"/>
+                                    <t t-set="line_qty" t-value="(c_qty / line_pkg.qty) if (line_pkg and line_pkg.qty) else c_qty"/>
+                                    <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (c_lines[0].product_uom_id.name or '')"/>
                                     <div style="font-size:9pt; line-height:1.3;">
-                                        <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
+                                        <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="c_lines[0].product_id.name or '?'"/></span>
                                         <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/></span>
-                                        <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
+                                        <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ck[1] or '-'"/></span>
                                     </div>
                                 </t>
                             </td>
@@ -270,7 +286,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <div style="font-size:9pt; line-height:1.3;">
                                     <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
                                     <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/></span>
-                                    <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="ml.lot_id.name or '-'"/></span>
+                                    <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) or '-'"/></span>
                                 </div>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
@@ -323,17 +339,25 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                  sorted pallet) so summary row N matches the first pallet
                  of product N as the picker sees it. -->
             <t t-set="all_lines" t-value="doc.move_line_ids"/>
+            <!-- Summary keys on (product, BATCH lot name) — per-roll serial
+                 lots ({wo}-R<n>) collapse to their MO-level lot (owner
+                 2026-06-10) so the recap shows one row per product/lot, not
+                 one row per roll serial. -->
             <t t-set="summary_keys" t-value="[]"/>
             <t t-foreach="all_pkgs_sorted" t-as="_pkg">
                 <t t-foreach="palletized.filtered(lambda ml: ml.package_id.id == _pkg.id).sorted(key=lambda ml: -ml.quantity)" t-as="_ml">
-                    <t t-set="_k" t-value="(_ml.product_id.id, _ml.lot_id.id or 0)"/>
+                    <t t-set="_bn" t-value="(_ml.lot_id.name or '')"/>
+                    <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                    <t t-set="_k" t-value="(_ml.product_id.id, _bn)"/>
                     <t t-if="_k not in summary_keys">
                         <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
                     </t>
                 </t>
             </t>
             <t t-foreach="loose" t-as="_ml">
-                <t t-set="_k" t-value="(_ml.product_id.id, _ml.lot_id.id or 0)"/>
+                <t t-set="_bn" t-value="(_ml.lot_id.name or '')"/>
+                <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                <t t-set="_k" t-value="(_ml.product_id.id, _bn)"/>
                 <t t-if="_k not in summary_keys">
                     <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
                 </t>
@@ -355,10 +379,9 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <tbody>
                         <t t-set="s_idx" t-value="0"/>
                         <t t-foreach="summary_keys" t-as="sk">
-                            <t t-set="s_lines" t-value="all_lines.filtered(lambda ml: ml.product_id.id == sk[0] and (ml.lot_id.id or 0) == sk[1])"/>
+                            <t t-set="s_lines" t-value="all_lines.filtered(lambda ml: ml.product_id.id == sk[0] and ((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) == sk[1])"/>
                             <t t-set="s_first" t-value="s_lines[0]"/>
                             <t t-set="s_prod" t-value="s_first.product_id"/>
-                            <t t-set="s_lot" t-value="s_first.lot_id"/>
                             <t t-set="s_move" t-value="s_first.move_id"/>
                             <t t-set="s_desc_src" t-value="(s_move.sale_line_id.name if s_move.sale_line_id else False) or s_prod.display_name or ''"/>
                             <t t-set="s_desc_lines" t-value="s_desc_src.splitlines() or ['']"/>
@@ -391,7 +414,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                     </t>
                                 </td>
                                 <td style="padding:8px 10px; border-bottom:1px solid #e2e8f0; vertical-align:top; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
-                                    <t t-out="s_lot.name if s_lot else '-'"/>
+                                    <t t-out="sk[1] or '-'"/>
                                 </td>
                                 <td style="padding:8px 10px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:13pt; font-weight:bold; color:#0A182F;">
                                     <t t-out="'{:g}'.format(s_total_cases)"/> <span style="font-size:9pt; font-weight:normal; color:#334155;"><t t-out="s_uom"/></span>

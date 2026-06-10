@@ -179,71 +179,43 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <t t-set="order_uom_name" t-value="(move.sale_line_id.product_uom_id.name if move.sale_line_id else move.product_uom.name) or ''"/>
                         <t t-set="pkg" t-value="move.product_packaging_id"/>
 
-                        <t t-if="move.move_line_ids">
-                            <!-- One row per move_line so multi-lot moves split out per lot -->
-                            <t t-foreach="move.move_line_ids" t-as="ml">
-                                <t t-set="row_idx" t-value="row_idx + 1"/>
-                                <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
-                                <tr t-att-style="'background-color:' + bg + ';'">
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:11pt; font-weight:bold;">
-                                        <t t-out="move.product_id.name or ''"/>
-                                    </td>
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0;">
-                                        <div style="font-weight:bold; font-size:10.5pt; color:#0A182F;"><t t-out="desc_lines[0]"/></div>
-                                        <t t-if="len(desc_lines) > 1">
-                                            <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500; line-height:1.3;">
-                                                <t t-foreach="desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
-                                            </div>
-                                        </t>
-                                    </td>
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
-                                        <t t-out="(ml.lot_id.name if ml.lot_id else '') or ''"/>
-                                    </td>
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
-                                        <t t-out="'{:g}'.format(order_qty)"/> <t t-out="order_uom_name"/>
-                                    </td>
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt; font-weight:bold;">
-                                        <t t-out="'{:g}'.format(ml.quantity)"/> <t t-out="ml.product_uom_id.name or ''"/>
-                                    </td>
-                                    <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
-                                        <t t-if="pkg and pkg.qty">
-                                            <t t-out="'{:g}'.format(ml.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/>
-                                        </t>
-                                    </td>
-                                </tr>
-                            </t>
-                        </t>
-                        <t t-else="">
-                            <!-- No reservations (state pre-assigned, or untracked auto-pick): one row per move, blank lot -->
-                            <t t-set="row_idx" t-value="row_idx + 1"/>
-                            <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
-                            <tr t-att-style="'background-color:' + bg + ';'">
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:11pt; font-weight:bold;">
-                                    <t t-out="move.product_id.name or ''"/>
-                                </td>
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0;">
-                                    <div style="font-weight:bold; font-size:10.5pt; color:#0A182F;"><t t-out="desc_lines[0]"/></div>
-                                    <t t-if="len(desc_lines) > 1">
-                                        <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500; line-height:1.3;">
-                                            <t t-foreach="desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
-                                        </div>
-                                    </t>
-                                </td>
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center;"></td>
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
-                                    <t t-out="'{:g}'.format(order_qty)"/> <t t-out="order_uom_name"/>
-                                </td>
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt; font-weight:bold;">
-                                    <!-- Shipped = move.quantity (actual done qty, matches Odoo's Operations UI), NOT product_uom_qty (demand) -->
-                                    <t t-out="'{:g}'.format(move.quantity)"/> <t t-out="move.product_uom.name or ''"/>
-                                </td>
-                                <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
-                                    <t t-if="pkg and pkg.qty">
-                                        <t t-out="'{:g}'.format(move.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/>
-                                    </t>
-                                </td>
-                            </tr>
-                        </t>
+                        <!-- ONE row per move (owner 2026-06-10): the Lot Number
+                             column shows the BATCH lot — per-roll serial lots
+                             ({wo}-R<n>) collapse to their MO-level lot, deduped.
+                             Customers see the lot number, never roll serials;
+                             roll detail stays in Odoo/MES traceability.
+                             Shipped = move.quantity (actual done qty, matches
+                             Odoo's Operations UI), NOT product_uom_qty (demand). -->
+                        <t t-set="lot_names" t-value="sorted({(n.rsplit('-R', 1)[0] if ('-R' in n and n.rsplit('-R', 1)[1].isdigit()) else n) for n in move.move_line_ids.mapped('lot_id.name') if n})"/>
+                        <t t-set="row_idx" t-value="row_idx + 1"/>
+                        <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
+                        <tr t-att-style="'background-color:' + bg + ';'">
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; font-family:monospace; font-size:11pt; font-weight:bold;">
+                                <t t-out="move.product_id.name or ''"/>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0;">
+                                <div style="font-weight:bold; font-size:10.5pt; color:#0A182F;"><t t-out="desc_lines[0]"/></div>
+                                <t t-if="len(desc_lines) > 1">
+                                    <div style="color:#334155; font-size:8.5pt; margin-top:4px; font-weight:500; line-height:1.3;">
+                                        <t t-foreach="desc_lines[1:]" t-as="ln"><t t-out="ln"/><br/></t>
+                                    </div>
+                                </t>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:10pt; font-weight:bold; color:#0A182F;">
+                                <t t-out="', '.join(lot_names)"/>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
+                                <t t-out="'{:g}'.format(order_qty)"/> <t t-out="order_uom_name"/>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt; font-weight:bold;">
+                                <t t-out="'{:g}'.format(move.quantity)"/> <t t-out="move.product_uom.name or ''"/>
+                            </td>
+                            <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
+                                <t t-if="pkg and pkg.qty">
+                                    <t t-out="'{:g}'.format(move.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/>
+                                </t>
+                            </td>
+                        </tr>
                     </t>
                 </tbody>
             </table>
