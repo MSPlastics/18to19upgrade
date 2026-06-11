@@ -162,12 +162,16 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             <!-- UNIFIED PICK CHECKLIST — every pallet rendered with the
                  contents-breakdown style (product x cases | lot per move_line,
                  stacked when there are multiple). Pure pallets show one line
-                 in the contents cell, mixed pallets show several. Sorted by
-                 trailing pallet number ASC so the picker reads 1->N top-down.
+                 in the contents cell, mixed pallets show several.
+                 GROUPED BY MO (owner 2026-06-10): sorted by the pallet name's
+                 prefix (the MO) FIRST, then trailing pallet number ASC — a
+                 multi-MO truck reads 01516-PAL-1..4, then 01517-PAL-1, then
+                 01518-PAL-1..5, instead of interleaving all the PAL-1s. The
+                 Order Summary inherits the same grouping (first-appearance).
                  Per-product summary lives at the bottom of the report. -->
             <t t-set="palletized" t-value="doc.move_line_ids.filtered('package_id')"/>
             <t t-set="loose" t-value="doc.move_line_ids.filtered(lambda ml: not ml.package_id)"/>
-            <t t-set="all_pkgs_sorted" t-value="palletized.package_id.sorted(key=lambda p: int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999)"/>
+            <t t-set="all_pkgs_sorted" t-value="palletized.package_id.sorted(key=lambda p: ((p.name or '').rsplit('-PAL-', 1)[0], int(p.name.rsplit('-PAL-', 1)[-1]) if (p.name and '-PAL-' in p.name and p.name.rsplit('-PAL-', 1)[-1].isdigit()) else 99999))"/>
             <t t-set="total_pallets" t-value="len(all_pkgs_sorted) + len(loose)"/>
 
             <div style="font-size:10pt; font-weight:bold; color:#0A182F; text-transform:uppercase; letter-spacing:1px; margin:8px 0 6px 0;">
