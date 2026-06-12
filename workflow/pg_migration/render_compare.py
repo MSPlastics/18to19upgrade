@@ -12,7 +12,7 @@ for operators, which gates cutover.
 Usage:
   # Compare a fixed set of endpoints
   ./render_compare.py \\
-      --old https://34.67.173.228.nip.io \\
+      --old https://34.57.35.195.nip.io \\
       --new https://mes-testing-pg.us-central1-a.example.com \\
       --api-key msplastics-mes-2026-... \\
       --endpoint /api/work-orders \\

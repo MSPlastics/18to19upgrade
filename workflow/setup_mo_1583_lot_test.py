@@ -54,7 +54,7 @@ if not all([URL, DB, KEY]):
     sys.exit("Missing ODOO_STAGING_* env vars (set in 18to19upgrade/.env)")
 
 # MES connection (cloud test MES)
-MES_URL = os.environ.get("MES_TEST_URL", "https://34.67.173.228.nip.io")
+MES_URL = os.environ.get("MES_TEST_URL", "https://34.57.35.195.nip.io")
 MES_KEY = os.environ.get("MES_TEST_API_KEY")
 if not MES_KEY:
     sys.exit("Missing MES_TEST_API_KEY env var (set in 18to19upgrade/.env)")

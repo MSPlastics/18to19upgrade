@@ -5,7 +5,7 @@ Repeatable, scripted full-system audit covering: SO -> MO sync to MES -> product
 ## Scope rule
 
 - **Staging Odoo only**: `https://msplastics-odoo18-19-upgradetest2-31982255.dev.odoo.com`
-- **Cloud test MES only**: `https://34.67.173.228.nip.io` (the `mes-testing` GCP VM)
+- **Cloud test MES only**: `https://34.57.35.195.nip.io` (the `mes-testing-pg` GCP VM)
 - **Never touch production Odoo or production MES VM** unless the user gives explicit per-turn authorization.
 
 ## Layout

@@ -82,7 +82,7 @@ class _Staging:
 class _MES:
     """Thin HTTP client for the cloud test MES."""
     def __init__(self):
-        self.url = os.environ.get("MES_TEST_URL", "https://34.67.173.228.nip.io").rstrip("/")
+        self.url = os.environ.get("MES_TEST_URL", "https://34.57.35.195.nip.io").rstrip("/")
         self.key = os.environ.get("MES_TEST_API_KEY", "msplastics-mes-2026-61bf306c6d2e5ede")
         # Allow self-signed
         self._ctx = ssl.create_default_context()

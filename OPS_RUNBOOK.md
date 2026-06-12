@@ -27,9 +27,8 @@ For the *original migration* history + rationale, see [POSTGRES_MIGRATION_RUNBOO
 gcloud compute ssh anthony@mes-testing-pg --zone=us-central1-a --tunnel-through-iap --command="\
     curl -s http://127.0.0.1:5001/health | python3 -c 'import json,sys; d=json.load(sys.stdin); print(\"verifier:\", d[\"status\"])'"
 
-# 2. Both MES URLs return 200?
-curl -sk -o /dev/null -w "sqlite_stack=%{http_code}\n" https://34.67.173.228.nip.io/api/health
-curl -sk -o /dev/null -w "postgres_stack=%{http_code}\n" https://34.57.35.195.nip.io/api/health
+# 2. MES returns 200?
+curl -sk -o /dev/null -w "mes=%{http_code}\n" https://34.57.35.195.nip.io/api/health
 
 # 3. Backups still running?
 gsutil ls -l gs://msp-mes-backups/postgres/ | tail -3
@@ -323,9 +322,8 @@ gcloud compute ssh anthony@mes-testing-pg --zone=us-central1-a --tunnel-through-
 gcloud compute ssh anthony@mes-testing-pg --zone=us-central1-a --tunnel-through-iap --command="\
     sudo /usr/local/bin/pull_snapshot_from_gcs.sh"
 
-# Show all MES URL endpoints
-curl -sk https://34.67.173.228.nip.io/api/health     # SQLite stack (operators)
-curl -sk https://34.57.35.195.nip.io/api/health      # Postgres stack (validation)
+# MES health
+curl -sk https://34.57.35.195.nip.io/api/health      # MES (Postgres stack)
 ```
 
 ---

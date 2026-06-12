@@ -4,7 +4,7 @@ MES the same way operatorUI does, wait for the sync queue to push to Odoo,
 then verify every expected stock.move.line on the MO's raw moves matches
 the lots we seeded via setup_mo_1583_lot_test.py.
 
-Reads ODOO_STAGING_* and uses the cloud test MES at 34.67.173.228.
+Reads ODOO_STAGING_* and uses the cloud test MES at 34.57.35.195.
 
 Idempotent enough — each run uses a fresh roll_id so re-runs accumulate
 test data on staging (which is fine).
@@ -39,7 +39,7 @@ DB = os.environ["ODOO_STAGING_DB"]
 USER = os.environ.get("ODOO_STAGING_USER", "admin@mountainstatesplastics.com")
 KEY = os.environ["ODOO_STAGING_API_KEY"]
 
-MES_URL = os.environ.get("MES_TEST_URL", "https://34.67.173.228.nip.io")
+MES_URL = os.environ.get("MES_TEST_URL", "https://34.57.35.195.nip.io")
 MES_KEY = os.environ.get("MES_TEST_API_KEY")
 if not MES_KEY:
     sys.exit("Missing MES_TEST_API_KEY env var (set in 18to19upgrade/.env)")
