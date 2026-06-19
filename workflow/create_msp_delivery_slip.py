@@ -167,7 +167,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <th style="width:14%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Lot Number</th>
                         <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Ordered Qty</th>
                         <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Shipped Qty</th>
-                        <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Pack Qty</th>
+                        <th style="width:13%; background-color:#0A182F; color:white; text-align:center; padding:10px; font-size:8pt; text-transform:uppercase; letter-spacing:0.5px;">Total Pallets</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -186,7 +186,13 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                              roll detail stays in Odoo/MES traceability.
                              Shipped = move.quantity (actual done qty, matches
                              Odoo's Operations UI), NOT product_uom_qty (demand). -->
-                        <t t-set="lot_names" t-value="sorted({(n.rsplit('-R', 1)[0] if ('-R' in n and n.rsplit('-R', 1)[1].isdigit()) else n) for n in move.move_line_ids.mapped('lot_id.name') if n})"/>
+                        <!-- Collapse per-unit/roll serial lots to their MO-level batch.
+                             FG lot names are <MO>-<serial> where <MO> uses '/' not '-'
+                             (WH/MO/01547-U1270, WH/MO/01547-R3, MO/00592-001), so the
+                             single '-' splits MO from serial. rsplit handles -U (current
+                             per-unit naming), -R (roll serials) and -NNN (old batches)
+                             uniformly; customers see the MO, never per-unit serials. -->
+                        <t t-set="lot_names" t-value="sorted({(n.rsplit('-', 1)[0] if '-' in n else n) for n in move.move_line_ids.mapped('lot_id.name') if n})"/>
                         <t t-set="row_idx" t-value="row_idx + 1"/>
                         <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
                         <tr t-att-style="'background-color:' + bg + ';'">
@@ -211,9 +217,14 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <t t-out="'{:g}'.format(move.quantity)"/> <t t-out="move.product_uom.name or ''"/>
                             </td>
                             <td style="padding:14px 10px; vertical-align:middle; border-bottom:1px solid #e2e8f0; text-align:center; font-family:monospace; font-size:11pt;">
-                                <t t-if="pkg and pkg.qty">
-                                    <t t-out="'{:g}'.format(move.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/>
-                                </t>
+                                <!-- Total pallets = distinct packages this move ships on
+                                     (owner request 2026-06-18: show pallet count, not the
+                                     packaging-unit conversion). Falls back to the packaging
+                                     math when the move ships loose / unpalletized. -->
+                                <t t-set="dpkgs" t-value="move.move_line_ids.mapped('package_id')"/>
+                                <t t-if="dpkgs"><t t-out="str(len(dpkgs))"/> <t t-out="'pallets' if len(dpkgs) != 1 else 'pallet'"/></t>
+                                <t t-elif="pkg and pkg.qty"><t t-out="'{:g}'.format(move.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/></t>
+                                <t t-else=""><span style="color:#94a3b8;">&#8212;</span></t>
                             </td>
                         </tr>
                     </t>

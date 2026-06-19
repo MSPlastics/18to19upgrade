@@ -233,14 +233,14 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <t t-set="content_keys" t-value="[]"/>
                                 <t t-foreach="pkg_lines" t-as="_cl">
                                     <t t-set="_bn" t-value="(_cl.lot_id.name or '')"/>
-                                    <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                                    <t t-set="_bn" t-value="(_bn.rsplit('-', 1)[0] if '-' in _bn else _bn)"/>
                                     <t t-set="_ck" t-value="(_cl.product_id.id, _bn)"/>
                                     <t t-if="_ck not in content_keys">
                                         <t t-set="content_keys" t-value="content_keys + [_ck]"/>
                                     </t>
                                 </t>
                                 <t t-foreach="content_keys" t-as="ck">
-                                    <t t-set="c_lines" t-value="pkg_lines.filtered(lambda ml: ml.product_id.id == ck[0] and ((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) == ck[1])"/>
+                                    <t t-set="c_lines" t-value="pkg_lines.filtered(lambda ml: ml.product_id.id == ck[0] and ((ml.lot_id.name or '').rsplit('-', 1)[0] if '-' in (ml.lot_id.name or '') else (ml.lot_id.name or '')) == ck[1])"/>
                                     <!-- Packaging conversion: group shares one product —
                                          move's packaging first, product default second,
                                          stock UoM last. -->
@@ -290,7 +290,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <div style="font-size:9pt; line-height:1.3;">
                                     <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="ml.product_id.name or '?'"/></span>
                                     <span style="font-family:monospace; color:#0A182F;"> x <t t-out="'{:g}'.format(line_qty)"/> <t t-out="line_uom"/></span>
-                                    <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) or '-'"/></span>
+                                    <span style="font-family:monospace; font-size:8pt; color:#6d28d9; margin-left:6px;">lot <t t-out="((ml.lot_id.name or '').rsplit('-', 1)[0] if '-' in (ml.lot_id.name or '') else (ml.lot_id.name or '')) or '-'"/></span>
                                 </div>
                             </td>
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle; font-family:monospace; font-size:11pt; font-weight:bold; color:#0A182F;">
@@ -351,7 +351,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             <t t-foreach="all_pkgs_sorted" t-as="_pkg">
                 <t t-foreach="palletized.filtered(lambda ml: ml.package_id.id == _pkg.id).sorted(key=lambda ml: -ml.quantity)" t-as="_ml">
                     <t t-set="_bn" t-value="(_ml.lot_id.name or '')"/>
-                    <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                    <t t-set="_bn" t-value="(_bn.rsplit('-', 1)[0] if '-' in _bn else _bn)"/>
                     <t t-set="_k" t-value="(_ml.product_id.id, _bn)"/>
                     <t t-if="_k not in summary_keys">
                         <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
@@ -360,7 +360,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </t>
             <t t-foreach="loose" t-as="_ml">
                 <t t-set="_bn" t-value="(_ml.lot_id.name or '')"/>
-                <t t-set="_bn" t-value="(_bn.rsplit('-R', 1)[0] if ('-R' in _bn and _bn.rsplit('-R', 1)[1].isdigit()) else _bn)"/>
+                <t t-set="_bn" t-value="(_bn.rsplit('-', 1)[0] if '-' in _bn else _bn)"/>
                 <t t-set="_k" t-value="(_ml.product_id.id, _bn)"/>
                 <t t-if="_k not in summary_keys">
                     <t t-set="summary_keys" t-value="summary_keys + [_k]"/>
@@ -383,7 +383,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <tbody>
                         <t t-set="s_idx" t-value="0"/>
                         <t t-foreach="summary_keys" t-as="sk">
-                            <t t-set="s_lines" t-value="all_lines.filtered(lambda ml: ml.product_id.id == sk[0] and ((ml.lot_id.name or '').rsplit('-R', 1)[0] if ('-R' in (ml.lot_id.name or '') and (ml.lot_id.name or '').rsplit('-R', 1)[1].isdigit()) else (ml.lot_id.name or '')) == sk[1])"/>
+                            <t t-set="s_lines" t-value="all_lines.filtered(lambda ml: ml.product_id.id == sk[0] and ((ml.lot_id.name or '').rsplit('-', 1)[0] if '-' in (ml.lot_id.name or '') else (ml.lot_id.name or '')) == sk[1])"/>
                             <t t-set="s_first" t-value="s_lines[0]"/>
                             <t t-set="s_prod" t-value="s_first.product_id"/>
                             <t t-set="s_move" t-value="s_first.move_id"/>

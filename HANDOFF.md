@@ -4,6 +4,15 @@
 
 ---
 
+**Last updated:** 2026-06-18 — Claude (Anthony) — MSP reports fixed + deployed to **PROD**; ⚠️ create-scripts edited but **UNCOMMITTED**.
+
+- **Pick sheet + delivery slip deployed to PROD Odoo** (the active MES work is tracked in [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md) top entry + memory `msp-odoo-reports.md`). Prod was running the stale "one row per `move_line`" design → one line per finished unit (current MES makes one lot per unit `WH/MO/<mo>-U<n>`). Fixed in `workflow/create_msp_pick_sheet.py` (per-pallet) + `create_msp_delivery_slip.py` (per-product): generalized the lot→MO collapse from `-R<n>`-only to any trailing serial (`name.rsplit('-',1)[0] if '-' in name else name`), and delivery "Pack Qty" col → **"Total Pallets"**. Deployed via the canonical idempotent upsert (driven through the prod MES VM's `_get_odoo_connection()` since `.env` isn't on this machine).
+- **⚠️ TODO — commit + snapshot.** `workflow/create_msp_{pick_sheet,delivery_slip}.py` are MODIFIED in the working tree but NOT committed. Commit them, then `python workflow/snapshot_msp_reports.py --target prod` per `STAGING_TO_PROD_RUNBOOK.md` §Phase 4 (needs `.env` with `ODOO_PROD_*`, which lives only on Anthony's laptop — local python is the Store stub, so this runs there or via the VM).
+- **Render-with-API-key gotcha:** the API key is RPC-scope only — `render_pallet_sheet.py`'s "Odoo accepts API keys as the Basic password for HTTP routes" is **WRONG** for Odoo 19 (both Basic-auth on `/report/pdf` and `/web/session/authenticate` reject it). Render via a throwaway `ir.actions.server` calling `_render_qweb_pdf`; see memory `msp-odoo-reports.md`.
+- **Branch-table below is STALE** (2026-05-30): msppartialMO is now **19.0.1.5.0** on `odoo18/msp_production` (prod, MO-close `production_id` + `action_reconcile_close`); MESv1.0 `master` @ `722f48d` (prod). Treat the table as historical.
+
+---
+
 **Last updated:** 2026-05-30 — Claude (Anthony's session) — cross-repo snapshot for picking up on a different machine.
 
 ### Current branch + HEAD of every repo (all clean + pushed to origin)
