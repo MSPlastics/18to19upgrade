@@ -4,6 +4,24 @@
 
 ---
 
+**Last updated:** 2026-06-21 — Claude (Anthony) — cloud operatorUI multi-station + **RESUME-FROM-MES** root-cause fix shipped to prod.
+
+### Branch HEADs (all clean + pushed)
+| Repo | Branch | HEAD | Notes |
+|------|--------|------|-------|
+| **MESv1.0** | `master` | `3e69d60` | **canonical = PROD** (lanes-per-master-fix is STALE @ 06-17 — do not use). |
+| **operatorUI** | `main` | `1dfa4ea` | resume-from-MES + cloud config + PWA. |
+| **18to19upgrade** | `main` | `42f6f76` | (06-18 "create-scripts UNCOMMITTED" note below is RESOLVED — committed `af1c1c2`/`42f6f76`.) |
+| **odoo18** | `msp_production` | `fdbb92f` | unchanged today. |
+| **msppartialMO** | `19_upgrade` | `0ba9514` | unchanged today. |
+
+- **RESUME-FROM-MES (root-cause fix).** operatorUI seeded pallet/history/label state from the LOCAL tablet session, not MES → fresh/cloud/post-power-cycle sessions were blind to prior production (dup roll #s, "pallet shows only this session," wrong unit # on reprinted labels, post-outage confusion). MES now exposes current-pallet + produced-rolls (`3e69d60`); operatorUI rebuilds history/pallet/slip/label from MES (`1dfa4ea` et al, incl. the `[UI_UNIT]` reprint bug `fd117b6`). Per-repo HANDOFFs + memory `operatorui-resume-from-mes.md`.
+- **Cloud operatorUI:** 8 per-line instances on GCP VM `operatorui-debug` (proj `msp-mes-492315`) → prod MES, installable PWA, behind auth. Debug/bridge while stabilizing; floor LOCAL builds unchanged. memory `operatorui-cloud-debug-instance.md`.
+- **Also deployed to prod:** Heather's reprint pallet sheet (MES `78b6359`) + footer overlap fix (`99fdb01`).
+- **Spawned background task:** rotate the hardcoded Odoo API key in MES maintenance scripts (`update_open_mos.py`, `mass_update_boms.py`, etc.).
+
+---
+
 **Last updated:** 2026-06-18 — Claude (Anthony) — MSP reports fixed + deployed to **PROD**; ⚠️ create-scripts edited but **UNCOMMITTED**.
 
 - **Pick sheet + delivery slip deployed to PROD Odoo** (the active MES work is tracked in [../MESv1.0/HANDOFF.md](../MESv1.0/HANDOFF.md) top entry + memory `msp-odoo-reports.md`). Prod was running the stale "one row per `move_line`" design → one line per finished unit (current MES makes one lot per unit `WH/MO/<mo>-U<n>`). Fixed in `workflow/create_msp_pick_sheet.py` (per-pallet) + `create_msp_delivery_slip.py` (per-product): generalized the lot→MO collapse from `-R<n>`-only to any trailing serial (`name.rsplit('-',1)[0] if '-' in name else name`), and delivery "Pack Qty" col → **"Total Pallets"**. Deployed via the canonical idempotent upsert (driven through the prod MES VM's `_get_odoo_connection()` since `.env` isn't on this machine).
