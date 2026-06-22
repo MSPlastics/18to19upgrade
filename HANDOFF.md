@@ -4,19 +4,21 @@
 
 ---
 
-**Last updated:** 2026-06-21 — Claude (Anthony) — cloud operatorUI multi-station + **RESUME-FROM-MES** root-cause fix shipped to prod.
+**Last updated:** 2026-06-22 — Claude (Anthony) — shift-anchor fix (April 20), traceability pallet-mislink fix + 48-pallet repair, cloud operatorUI now the LIVE floor.
 
 ### Branch HEADs (all clean + pushed)
 | Repo | Branch | HEAD | Notes |
 |------|--------|------|-------|
-| **MESv1.0** | `master` | `3e69d60` | **canonical = PROD** (lanes-per-master-fix is STALE @ 06-17 — do not use). |
-| **operatorUI** | `main` | `1dfa4ea` | resume-from-MES + cloud config + PWA. |
-| **18to19upgrade** | `main` | `42f6f76` | (06-18 "create-scripts UNCOMMITTED" note below is RESOLVED — committed `af1c1c2`/`42f6f76`.) |
-| **odoo18** | `msp_production` | `fdbb92f` | unchanged today. |
-| **msppartialMO** | `19_upgrade` | `0ba9514` | unchanged today. |
+| **MESv1.0** | `master` | `8cef9b8` | **canonical = PROD** (lanes-per-master-fix is STALE — do not use). |
+| **operatorUI** | `main` | `ed08197` | resume-from-MES + cloud config + PWA + shift-clock fix (incl. Heather's unit-tracker gauge). |
+| **18to19upgrade** | `main` | `004cc23`→(this commit) | (06-18 "create-scripts UNCOMMITTED" note below is RESOLVED.) |
+| **odoo18** | `msp_production` | `fdbb92f` | unchanged. |
+| **msppartialMO** | `19_upgrade` | `0ba9514` | unchanged. |
 
-- **RESUME-FROM-MES (root-cause fix).** operatorUI seeded pallet/history/label state from the LOCAL tablet session, not MES → fresh/cloud/post-power-cycle sessions were blind to prior production (dup roll #s, "pallet shows only this session," wrong unit # on reprinted labels, post-outage confusion). MES now exposes current-pallet + produced-rolls (`3e69d60`); operatorUI rebuilds history/pallet/slip/label from MES (`1dfa4ea` et al, incl. the `[UI_UNIT]` reprint bug `fd117b6`). Per-repo HANDOFFs + memory `operatorui-resume-from-mes.md`.
-- **Cloud operatorUI:** 8 per-line instances on GCP VM `operatorui-debug` (proj `msp-mes-492315`) → prod MES, installable PWA, behind auth. Debug/bridge while stabilizing; floor LOCAL builds unchanged. memory `operatorui-cloud-debug-instance.md`.
+- **SHIFT 2-2-3 anchor fix (MES `9561b37` + operatorUI):** rotation was 5 days out of phase (April 15 → **April 20** anchor). Read-time-derived, so it re-credits all history + the per-employee KPI. Deployed to prod MES + all cloud station clocks. Per-repo HANDOFFs.
+- **TRACEABILITY pallet-mislink fix (MES `9bf59d7`) + data repair:** multi-step MO pallets were linking to the EXTRUSION WO, hiding them from `/traceability/job` (01664 showed 2 of 4 pallets; 48 pallets / 9 MOs affected). Fixed `record_pallet` (resolve to finishing step) + traceability (key on `wo_number`); **48 pallets repaired, 0 mislinked.** Memory `pallet-finishing-wo-link.md`.
+- **RESUME-FROM-MES (root-cause fix).** operatorUI seeded pallet/history/label state from the LOCAL tablet session, not MES → fresh/cloud/post-power-cycle sessions were blind to prior production. MES exposes current-pallet + produced-rolls; operatorUI rebuilds history/pallet/slip/label from MES. Memory `operatorui-resume-from-mes.md`.
+- **Cloud operatorUI — NOW THE LIVE FLOOR:** 8 per-line instances on GCP VM `operatorui-debug` (proj `msp-mes-492315`, IP `34.67.232.48`) → prod MES, installable PWA, basic-auth `msp`/`f58e4b3ca348`. **Per-line URLs + creds documented in [operatorUI/HANDOFF.md](../operatorUI/HANDOFF.md) top "CLOUD DEPLOYMENT" block.** Owner-accepted bridge; revert floor to local once stable. Memory `operatorui-cloud-debug-instance.md`.
 - **Also deployed to prod:** Heather's reprint pallet sheet (MES `78b6359`) + footer overlap fix (`99fdb01`).
 - **Spawned background task:** rotate the hardcoded Odoo API key in MES maintenance scripts (`update_open_mos.py`, `mass_update_boms.py`, etc.).
 
