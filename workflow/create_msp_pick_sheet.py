@@ -49,6 +49,21 @@ QWEB_ARCH = '''<t t-call="web.html_container">
         <t t-set="sold_partner" t-value="(so.partner_id if so else doc.partner_id) or doc.partner_id"/>
         <t t-set="sold_addr" t-value="sold_partner if sold_partner.street else sold_partner.commercial_partner_id"/>
         <t t-set="ship_instr" t-value="doc.partner_id.x_studio_shipping_instructions or doc.partner_id.commercial_partner_id.x_studio_shipping_instructions or ''"/>
+        <!-- Piece count per move line. quantity is in the LINE's UoM, so raw
+             sum(quantity) over-counts lb lots by their weight (4a25f52) and a
+             hardcoded 1 under-counts multi-unit lines (batch lots, merged
+             quants, rewire-aggregated package lines). Rule:
+               weight/length -> 1 piece per lot-line (each lb/ft lot IS one
+                                roll; counting qty would print its weight or
+                                LENGTH as the piece count). Tested by uom-name
+                                substring too, because category display names
+                                translate per-user-language.
+               aggregate    -> qty * divisor / product count_per_unit when the
+               (Thousands/     product resolves it, else 1 (can't convert)
+                Million)
+               discrete     -> round(qty)  (Roll/Case/Units: 1 unit per UoM)
+             Never below 1: a printed line always means at least one pick. -->
+        <t t-set="pieces_of" t-value="lambda ml: 1 if ((ml.product_uom_id.category_id.name or '') in ('Weight', 'Length / Distance') or any(w in (ml.product_uom_id.name or '').lower() for w in ('lb', 'kg', 'pound', 'ft', 'foot', 'feet'))) else ((max(1, round((ml.quantity or 0.0) * (1000000.0 if 'million' in (ml.product_uom_id.name or '').lower() else 1000.0) / float(ml.product_id.x_studio_count_per_unit))) if ('x_studio_count_per_unit' in ml.product_id._fields and ml.product_id.x_studio_count_per_unit) else 1) if ('thousand' in (ml.product_uom_id.name or '').lower() or 'million' in (ml.product_uom_id.name or '').lower()) else max(1, round(ml.quantity or 0.0)))"/>
 
         <div class="page" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif; color:#111; font-size:9pt;">
 
@@ -195,16 +210,17 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                     <!-- one row per pallet -->
                     <t t-foreach="all_pkgs_sorted" t-as="pkg">
                         <t t-set="pkg_lines" t-value="palletized.filtered(lambda ml: ml.package_id.id == pkg.id).sorted(key=lambda ml: -ml.quantity)"/>
-                        <!-- Per-pallet Units total = COUNT of physical pieces (one
-                             move-line per roll/unit). NOT lbs/packaging.qty — roll
-                             weights vary, so that division gave fractional counts the
-                             floor can't pick (fixed 2026-06-27). The packaging only
-                             supplies the UoM label; mixed pallets get one sub-line
-                             per UoM, pure pallets get one. -->
+                        <!-- Per-pallet Units total = pieces_of per line, summed by
+                             UoM label. NOT lbs/packaging.qty — roll weights vary,
+                             so that division gave fractional counts the floor
+                             can't pick (fixed 2026-06-27); NOT hardcoded 1 — a
+                             single line can cover many units (fixed 2026-07-01).
+                             The packaging only supplies the UoM label; mixed
+                             pallets get one sub-line per UoM, pure pallets one. -->
                         <t t-set="pkg_pairs" t-value="[]"/>
                         <t t-foreach="pkg_lines" t-as="_ml">
                             <t t-set="_p" t-value="_ml.move_id.product_packaging_id or _ml.product_id.packaging_ids[:1]"/>
-                            <t t-set="_q" t-value="1"/>
+                            <t t-set="_q" t-value="pieces_of(_ml)"/>
                             <t t-set="_u" t-value="_p.name if _p else (_ml.product_uom_id.name or '')"/>
                             <t t-set="pkg_pairs" t-value="pkg_pairs + [(_u, _q)]"/>
                         </t>
@@ -247,8 +263,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                          move's packaging first, product default second,
                                          stock UoM last. -->
                                     <t t-set="line_pkg" t-value="c_lines[0].move_id.product_packaging_id or c_lines[0].product_id.packaging_ids[:1]"/>
-                                    <t t-set="c_qty" t-value="sum(c_lines.mapped('quantity'))"/>
-                                    <t t-set="line_qty" t-value="len(c_lines)"/>
+                                    <t t-set="line_qty" t-value="sum(pieces_of(_gl) for _gl in c_lines)"/>
                                     <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (c_lines[0].product_uom_id.name or '')"/>
                                     <div style="font-size:9pt; line-height:1.3;">
                                         <span style="font-family:monospace; font-weight:bold; color:#0A182F;"><t t-out="c_lines[0].product_id.name or '?'"/></span>
@@ -279,7 +294,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                         <t t-set="row_idx" t-value="row_idx + 1"/>
                         <t t-set="bg" t-value="brand_zebra if (row_idx % 2 == 0) else '#ffffff'"/>
                         <t t-set="line_pkg" t-value="ml.move_id.product_packaging_id or ml.product_id.packaging_ids[:1]"/>
-                        <t t-set="line_qty" t-value="1"/>
+                        <t t-set="line_qty" t-value="pieces_of(ml)"/>
                         <t t-set="line_uom" t-value="line_pkg.name if line_pkg else (ml.product_uom_id.name or '')"/>
                         <tr t-att-style="'background-color:' + bg + ';'">
                             <td style="padding:6px 8px; border-bottom:1px solid #e2e8f0; text-align:center; vertical-align:middle;">
@@ -306,13 +321,13 @@ QWEB_ARCH = '''<t t-call="web.html_container">
             </table>
 
             <!-- GRAND TOTAL — pallet count uses distinct packages so mixed
-                 pallets aren't double-counted. Units = COUNT of physical pieces
-                 (one move-line per roll/unit), aggregated by UoM label so e.g.
-                 '312 Roll | 768 Case'. Weight is per-pallet summed once. -->
+                 pallets aren't double-counted. Units = pieces_of per line,
+                 aggregated by UoM label so e.g. '312 Roll | 768 Case'.
+                 Weight is per-pallet summed once. -->
             <t t-set="grand_pairs" t-value="[]"/>
             <t t-foreach="doc.move_line_ids" t-as="_ml">
                 <t t-set="_p" t-value="_ml.move_id.product_packaging_id or _ml.product_id.packaging_ids[:1]"/>
-                <t t-set="_q" t-value="1"/>
+                <t t-set="_q" t-value="pieces_of(_ml)"/>
                 <t t-set="_u" t-value="_p.name if _p else (_ml.product_uom_id.name or '')"/>
                 <t t-set="grand_pairs" t-value="grand_pairs + [(_u, _q)]"/>
             </t>
@@ -395,12 +410,11 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                  fall back to product's default packaging so we
                                  always show Roll/Case rather than the raw lb/Thousands. -->
                             <t t-set="s_pkg_pkg" t-value="s_first.move_id.product_packaging_id or s_prod.packaging_ids[:1]"/>
+                            <t t-set="s_total_cases" t-value="sum(pieces_of(_sl) for _sl in s_lines)"/>
                             <t t-if="s_pkg_pkg and s_pkg_pkg.qty">
-                                <t t-set="s_total_cases" t-value="len(s_lines)"/>
                                 <t t-set="s_uom" t-value="s_pkg_pkg.name or ''"/>
                             </t>
                             <t t-else="">
-                                <t t-set="s_total_cases" t-value="len(s_lines)"/>
                                 <t t-set="s_uom" t-value="s_first.product_uom_id.name or ''"/>
                             </t>
                             <t t-set="s_pallet_count" t-value="len(s_lines.filtered('package_id').package_id)"/>
