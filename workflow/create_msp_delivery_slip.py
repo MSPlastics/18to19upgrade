@@ -224,7 +224,7 @@ QWEB_ARCH = '''<t t-call="web.html_container">
                                 <t t-set="dpkgs" t-value="move.move_line_ids.mapped('package_id')"/>
                                 <t t-if="dpkgs"><t t-out="str(len(dpkgs))"/> <t t-out="'pallets' if len(dpkgs) != 1 else 'pallet'"/></t>
                                 <t t-elif="pkg and pkg.qty"><t t-out="'{:g}'.format(move.quantity / pkg.qty)"/> <t t-out="pkg.name or ''"/></t>
-                                <t t-else=""><span style="color:#94a3b8;">&#8212;</span></t>
+                                <t t-else=""><span style="color:#94a3b8;">-</span></t>
                             </td>
                         </tr>
                     </t>

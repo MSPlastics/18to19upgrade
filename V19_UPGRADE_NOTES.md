@@ -390,6 +390,30 @@ The pick sheet and delivery slip both use `move.quantity` for the per-row qty, *
 
 The pick sheet iterates `move.move_line_ids` instead of `move_ids` so multi-lot moves naturally split into one row per lot. The floor team needed this — they pull from physical pallets keyed on lot numbers, and a 100-piece move spread across 3 lots needs 3 separate pick lines, not one combined line.
 
+### 2026-07-02: pick sheet crashed on print — TWO v19 breakers stacked in one lambda
+
+The pick sheet (`msp.report_pick_sheet_v1`, live view **3039**) threw `RPC_ERROR` on every print. Two independent Odoo-18→19 incompatibilities in the `pieces_of` lambda, both hidden by lazy QWeb compile/render until someone printed. (First presented as a stale-session **"invalid CSRF token"** — a red herring from the ~17:00Z deploy; a hard-refresh cleared *that* and exposed the real errors below.)
+
+**Breaker 1 — closure opcodes forbidden in QWeb expressions (COMPILE error → breaks every render).**
+v19 `ir_qweb._compile_expr` runs `assert_valid_codeobj(_SAFE_QWEB_OPCODES, compile(expr,'<>','eval'))` on every `t-set`/`t-value` and forbids `LOAD_CLOSURE`, `LOAD_DEREF`, `MAKE_CELL`. So **no lambda/genexpr/comprehension may close over an enclosing lambda's local**. Ours:
+```python
+lambda ml: ... any(w in (ml.product_uom_id.name or '').lower() for w in ('lb','kg',...)) ...
+```
+The genexpr closes over the lambda param `ml` → cell → `ValueError: forbidden opcode(s) in 'lambda': LOAD_CLOSURE, LOAD_DEREF, MAKE_CELL`. **Fix:** rewrite the `any(...)` as an `or`-chain (`'lb' in name or 'kg' in name or ...`) — no nested scope, no cell. Plain lambdas (`filtered(lambda x:...)`, `sorted(key=lambda x:...)`) are fine; only *closures* are rejected. ⚠️ `ast.parse` does NOT catch this (valid syntax) — you must `compile()` and inspect `co_cellvars`/`co_freevars` recursively.
+
+**Breaker 2 — `uom.uom.category_id` removed (RENDER error).**
+`ml.product_uom_id.category_id.name` → `AttributeError: 'uom.uom' object has no attribute 'category_id'`. The whole category concept is gone in v19 (see the corrected glossary row above). **Fix:** drop the category branch; detect weight/length by UoM name (MSP's are `lb`/`lbs`/`ft`).
+
+**Diagnosis + deploy tooling (in the MES repo `_reports/`, run on the prod MES VM):**
+- `_diag_pick_compile.py` — pulls the LIVE arch, ast-checks it, and reproduces Odoo's real traceback via a throwaway `ir.actions.server`. ⚠️ v19 server-action `safe_eval` forbids `import` (`forbidden opcode IMPORT_NAME`) — don't `import traceback`; let the render raise and read the traceback out of the XML-RPC `Fault.faultString`.
+- `_probe_uom.py` — dumps `uom.uom` schema + records (confirmed no `category_id`).
+- `_apply_pick_fix.py` — pushes the corrected canonical arch: temp-view render PROOF → backup (`/tmp/pick_sheet_arch.bak-<ts>.xml`) → write view 3039 → live re-render → AUTO-ROLLBACK on failure.
+- `_verify_pick_ids.py` — renders live across pallet/loose/recent pickings (all clean post-fix).
+
+Scanned all 7 `create_msp_*.py` QWEB_ARCH: **only the pick sheet had either breaker.** Canonical `workflow/create_msp_pick_sheet.py` (`QWEB_ARCH`) edited with both fixes — **not yet git-committed** (same pattern as the other post-cutover report edits).
+
+**Same day, separate class — delivery slip `â€"` mojibake (view 3040).** The no-pallet placeholder in the delivery slip's Total-Pallets column was a literal em-dash `—` (U+2014); wkhtmltopdf mis-decodes its UTF-8 bytes as Latin-1 → `â€"` (same class as the NBSP `Â ` gotcha under "Custom MSP sale order report"). ⚠️ Numeric entities give **no** protection — Odoo resolves `&#8212;` → literal `—` in `arch_db` on save, so it still mojibakes. Fixed to plain ASCII `-` (canonical `create_msp_delivery_slip.py` + live view 3040 via `_reports/_apply_del_fix.py`). Rule: **use plain ASCII in rendered placeholders**; entities in comments / the action name don't render and are harmless.
+
 ---
 
 ## Studio repair patchers (post-cutover, 2026-05-04)
@@ -564,7 +588,7 @@ Odoo.sh keeps automatic backups. Restore from a pre-upgrade snapshot via the Odo
 |---|---|---|
 | `product.packaging` model | **Removed** | Replaced by `uom.uom` with `factor`, `relative_factor`, `package_type_id`. We re-added via `msp_packaging`. |
 | `product_uom` field on `product.supplierinfo` | **Renamed** to `product_uom_id` | Cascading rename to `product.customerinfo` (which inherits) |
-| `product_uom_category_id` on `mrp.bom.line` | **Removed** | UoM category is now reached via `product_uom_id.category_id` directly |
+| `product_uom_category_id` on `mrp.bom.line` | **Removed** | ⚠️ **CORRECTION (2026-07-02):** `uom.uom.category_id` is **also gone** in v19 — the entire UoM *category* concept was removed (units now relate via `relative_uom_id`; `uom.uom` has no `category_id` and no `measure_type`). `product_uom_id.category_id` raises `AttributeError` at render. Detect weight/length UoMs by **name substring** instead. See "2026-07-02: pick sheet crashed on print" below. |
 | `finished_lot_id` (Many2one) on `mrp.workorder` | **Renamed** to `finished_lot_ids` (Many2many) | Multiple lots per workorder now supported |
 | `lot_producing_id` (Many2one) on `mrp.production` | **Renamed** to `lot_producing_ids` (Many2many) | Same change at the MO level |
 | `procurement_group_id` on `mrp.production` | **Removed** | Replaced by `reference_ids` |
